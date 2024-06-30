@@ -22,7 +22,6 @@ git clone --recurse-submodules https://github.com/tudny/MASTER-L-Systems.git
 
 2. Install dependencies
 
-
 ```bash
 sudo apt install xorg-dev libglu1-mesa-dev libglfw3 libglfw3-dev libxkbcommon-dev
 ```
@@ -31,4 +30,20 @@ For building the documentation you need to install Doxygen
 
 ```bash
 sudo apt install doxygen graphviz
+```
+
+3. Build the project
+
+```bash
+mkdir build
+cd build
+cmake ..
+make -j
+```
+
+4. Build the documentation
+
+```bash
+# In the build directory
+make doc
 ```
