@@ -11,7 +11,9 @@
 #define LSYSTEMS_DRAWABLE_HPP
 
 
+#include <memory>
 #include "Viewport.hpp"
+#include "shader.hpp"
 
 /// Drawable class abstracts the drawable object
 class Drawable {
@@ -38,6 +40,15 @@ public:
      * Draw the object on the screen.
      */
     virtual void draw() = 0;
+
+    /**
+     * @brief Initialize the object
+     *
+     * Initialize the object.
+     * This method is called once before the main loop.
+     * It can be used to initialize the objects and resources in OpenGL.
+     */
+    virtual void init() {}
 
     /**
      * @brief Update the viewport
@@ -92,6 +103,9 @@ public:
 protected:
     /// Viewport
     Viewport viewport;
+
+    /// Shader program
+    std::shared_ptr<ShaderProgram> shader_program;
 };
 
 

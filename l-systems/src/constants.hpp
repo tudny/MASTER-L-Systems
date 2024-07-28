@@ -19,7 +19,7 @@ constexpr int DEFAULT_WINDOW_HEIGHT = 600;
 /// Default window title
 constexpr std::string_view DEFAULT_WINDOW_TITLE = "L-Systems";
 /// Default clear color is black
-constexpr glm::vec3 DEFAULT_CLEAR_COLOR = glm::vec3(0.0f, 0.0f, 0.0f);
+constexpr glm::vec3 DEFAULT_CLEAR_COLOR = glm::vec3(1.0f, 1.0f, 1.0f);
 
 /// OpenGL version major
 constexpr int OPENGL_MAJOR_VERSION = 3;

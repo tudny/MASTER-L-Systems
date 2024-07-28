@@ -1,0 +1,4 @@
+namespace asset {
+#define SHADER_DIR "@CMAKE_CURRENT_SOURCE_DIR@/shaders"
+#define SHADER_PATH(X) (SHADER_DIR "/" X)
+}

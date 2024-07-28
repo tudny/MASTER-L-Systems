@@ -46,12 +46,43 @@ public:
      */
     void run();
 
+    /**
+     * @brief Add component to the application
+     *
+     * Add a component to the application.
+     *
+     * @param drawable Drawable object
+     * @param viewport_function Viewport function
+     */
+    void add_component(std::shared_ptr<Drawable> drawable, std::function<Viewport(Application &)> viewport_function);
+
+    /**
+     * @brief Get window
+     *
+     * Get the window object.
+     *
+     * @return Window object
+     */
+    GLFWWindowWrapper &get_window() {
+        return window;
+    }
+
 private:
+
+    /// Setup components
+    void setup_components();
+
     /// Window object
     GLFWWindowWrapper window;
 
+    /// Is the application running
+    bool running = false;
+
     /// Component type
-    using component_t = std::pair<std::shared_ptr<Drawable>, std::function<Viewport()>>;
+    using component_t = std::pair<std::shared_ptr<Drawable>, std::function<Viewport(Application &)>>;
+
+    /// Components
+    std::vector<component_t> components;
 };
 
 

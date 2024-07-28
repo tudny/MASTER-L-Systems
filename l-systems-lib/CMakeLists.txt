@@ -19,6 +19,8 @@ set(
         src/Drawable.hpp
         src/Viewport.cpp
         src/Viewport.hpp
+        src/shader.cpp
+        src/shader.hpp
 )
 
 add_library(
