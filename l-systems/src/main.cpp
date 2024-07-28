@@ -27,23 +27,31 @@ public:
 
         glGenBuffers(1, &vbo_point);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_point);
-        shader_program->setAttribute("position", 3, sizeof(glm::vec3), 0);
+        shader_program->setAttribute("position", 3, 0, 0);
 
         float vertices[] = {
                 -0.5f, -0.5f, 0.0f,
                 0.5f, -0.5f, 0.0f,
-                0.0f, 0.5f, 0.0f
+                0.0f, 0.5f, 0.0f,
+
+                0.0f, -0.5f, 0.0f,
+                -0.5f, 0.5f, 0.0f,
+                0.5f, 0.5f, 0.0f,
         };
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
         glGenBuffers(1, &vbo_color);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
-        shader_program->setAttribute("color", 3, sizeof(glm::vec3), 0);
+        shader_program->setAttribute("color", 3, 0, 0);
 
         float colors[] = {
                 1.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 1.0f
+                1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f,
+
+                1.0f, 1.0f, 1.0f,
+                0.0f, 1.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
         };
         glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 
@@ -56,7 +64,7 @@ public:
         this->shader_program->use();
         this->shader_program->setUniform("view_matrix", view_matrix);
         glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
         this->shader_program->unuse();
     }
 
@@ -76,8 +84,8 @@ void add_simple_component(Application &application) {
         return Viewport{
                 .left = 0,
                 .top = 0,
-                .width = application.get_window().get_width() / 2,
-                .height = application.get_window().get_height() / 2,
+                .width = application.get_window().get_width(),
+                .height = application.get_window().get_height(),
                 .window_width = application.get_window().get_width(),
                 .window_height = application.get_window().get_height()
         };
