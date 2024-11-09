@@ -6,3 +6,6 @@ cmake-build-release/
 # IDE project files
 .idea/
 .vscode/
+
+# Static libraries
+/static

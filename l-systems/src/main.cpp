@@ -5,6 +5,7 @@
 #include "GL/glew.h"
 #include "shader.hpp"
 #include "assets.hpp"
+#include "cube.hpp"
 
 class SimpleDrawable : public Drawable {
 public:
@@ -109,7 +110,8 @@ int main() {
                 OPENGL_MAJOR_VERSION,
                 OPENGL_MINOR_VERSION
         };
-        add_simple_component(application);
+//        add_simple_component(application);
+        register_cube(application);
         application.run();
     } catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;

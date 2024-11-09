@@ -9,6 +9,8 @@ set(
         EXECUTABLE_SOURCES
         src/main.cpp
         src/constants.hpp
+        src/cube.cpp
+        src/cube.hpp
 )
 
 add_executable(
