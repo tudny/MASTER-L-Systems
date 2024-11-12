@@ -4,7 +4,7 @@
 #include "constants.hpp"
 #include "GL/glew.h"
 #include "shader.hpp"
-#include "assets.hpp"
+#include "properties.hpp"
 #include "cube.hpp"
 
 class SimpleDrawable : public Drawable {

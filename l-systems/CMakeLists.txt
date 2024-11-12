@@ -28,8 +28,8 @@ target_link_libraries(
 )
 
 configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/assets.hpp.in
-        ${CMAKE_CURRENT_BINARY_DIR}/src/assets.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/properties.hpp.in
+        ${CMAKE_CURRENT_BINARY_DIR}/src/properties.hpp
 )
 include_directories(${PROJECT_NAME}
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src

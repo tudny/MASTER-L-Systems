@@ -1,5 +1,5 @@
 #include "cube.hpp"
-#include "assets.hpp"
+#include "properties.hpp"
 #include "errors.hpp"
 
 class CubeDrawable : public Drawable {
