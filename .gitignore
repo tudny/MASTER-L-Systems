@@ -11,3 +11,6 @@ build-ninja/
 
 # Static libraries
 /static
+
+# Debug tools
+debug-tools/

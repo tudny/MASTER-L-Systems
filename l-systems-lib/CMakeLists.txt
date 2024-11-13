@@ -21,6 +21,8 @@ set(
         src/Viewport.hpp
         src/shader.cpp
         src/shader.hpp
+        src/debug.cpp
+        src/debug.hpp
 )
 
 add_library(

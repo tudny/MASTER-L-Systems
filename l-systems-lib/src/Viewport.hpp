@@ -74,6 +74,10 @@ public:
      * @return glm::vec2
      */
     [[nodiscard]] glm::mat3 local_stretch_to_standard_square() const;
+
+    [[nodiscard]] float get_aspect_ratio() const;
+
+    [[nodiscard]] glm::mat4 make_3d_projection() const;
 };
 
 

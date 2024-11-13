@@ -1,5 +1,8 @@
 #include "Viewport.hpp"
+#include "glm/ext/matrix_clip_space.hpp"
+
 #define GLM_ENABLE_EXPERIMENTAL
+
 #include <glm/gtx/matrix_transform_2d.hpp>
 
 #define CAST(x) static_cast<float>(x)
@@ -41,5 +44,17 @@ glm::mat3 Viewport::local_stretch_to_standard_square() const {
     return glm::scale(
             glm::translate(glm::mat3(1.f), glm::vec2(mid_x, mid_y)),
             glm::vec2(CAST(width) / ww, CAST(height) / wh)
+    );
+}
+
+float Viewport::get_aspect_ratio() const {
+    return static_cast<float>(width) / static_cast<float>(height);
+}
+
+glm::mat4 Viewport::make_3d_projection() const {
+    return glm::perspective(
+            static_cast<float>(2.0 * std::atan(static_cast<float>(this->height) / 1920.f)),
+            this->get_aspect_ratio(),
+            0.1f, 100.f
     );
 }

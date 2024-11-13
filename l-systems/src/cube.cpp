@@ -1,6 +1,18 @@
+#include <iostream>
 #include "cube.hpp"
 #include "properties.hpp"
 #include "errors.hpp"
+#include "GLFW/glfw3.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+
+constexpr float ROTATION_SPEED = 0.5f;
+constexpr float ROTATION_DISTANCE = 5.0f;
+constexpr float ROTATION_HEIGHT = 1.0f;
+constexpr glm::vec3 ROTATION_CENTER = glm::vec3(0.0f, 0.0f, 0.0f);
+constexpr glm::vec3 ROTATION_UP = glm::vec3(0.0f, 0.0f, 1.0f);
+
 
 class CubeDrawable : public Drawable {
 public:
@@ -15,10 +27,6 @@ public:
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
-        glGenBuffers(1, &vbo_point);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_point);
-        shader_program->setAttribute("position", 3, 0, 0);
-
         float vertices[] = {
                 -0.5f, -0.5f, 0.5f,
                 0.5f, -0.5f, 0.5f,
@@ -30,11 +38,10 @@ public:
                 -0.5f, 0.5f, -0.5f,
         };
 
+        glGenBuffers(1, &vbo_point);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_point);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-        glGenBuffers(1, &vbo_color);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
-        shader_program->setAttribute("color", 3, 0, 0);
+        shader_program->setAttribute("position", 3, 0, 0);
 
         float colors[] = {
                 1.0f, 0.0f, 0.0f,
@@ -47,20 +54,61 @@ public:
                 0.0f, 0.0f, 0.0f,
         };
 
+        glGenBuffers(1, &vbo_color);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
         glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+        shader_program->setAttribute("color", 3, 0, 0);
+
+        GLuint indices[] = {
+                0, 1, 2,
+                2, 0, 3,
+                3, 2, 6,
+                6, 3, 7,
+                7, 6, 5,
+                5, 7, 4,
+                4, 5, 1,
+                1, 0, 4,
+                4, 7, 3,
+                3, 0, 4,
+                1, 5, 6,
+                6, 2, 1,
+        };
+
+        glGenBuffers(1, &ibo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
     }
 
     void draw() override {
-        auto view_matrix = viewport.local_fixed_ratio_to_standard_square();
-        auto vpm = glm::mat4(view_matrix);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+
+        double time = glfwGetTime() * ROTATION_SPEED;
+        glm::vec4 eye_pos = glm::vec4(
+                ROTATION_DISTANCE * sin(time),
+                ROTATION_DISTANCE * cos(time),
+                ROTATION_HEIGHT, 1.0
+        );
+        glm::mat4 projection = viewport.make_3d_projection();
+        glm::mat4 view = glm::lookAt(
+                glm::vec3(eye_pos),
+                ROTATION_CENTER,
+                ROTATION_UP
+        );
+        // move up and down as sin(time)
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, sin(time * 10)));
+
+        auto pvm = projection * view * model;
 
         this->shader_program->use();
-        shader_program->setUniform("vpm", vpm);
+
+        shader_program->setUniform("pvm", pvm);
 
         glBindVertexArray(vao);
-        glDrawArrays(GL_POINTS, 0, 8);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
 
         this->shader_program->unuse();
     }
@@ -81,6 +129,7 @@ private:
     GLuint vao;
     GLuint vbo_point;
     GLuint vbo_color;
+    GLuint ibo;
 
     static std::shared_ptr<ShaderProgram> cube_shader_program;
 };
