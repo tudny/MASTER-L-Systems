@@ -8,7 +8,7 @@
 
 
 constexpr float ROTATION_SPEED = 0.5f;
-constexpr float ROTATION_DISTANCE = 5.0f;
+constexpr float ROTATION_DISTANCE = 15.0f;
 constexpr float ROTATION_HEIGHT = 1.0f;
 constexpr glm::vec3 ROTATION_CENTER = glm::vec3(0.0f, 0.0f, 0.0f);
 constexpr glm::vec3 ROTATION_UP = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -78,6 +78,22 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+        float instances_translations[] = {
+                0.0f, 0.0f, 0.0f,
+                3.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 4.0f,
+        };
+        size_t instances_translations_size = sizeof(instances_translations) / sizeof(float);
+        assert(instances_translations_size % 3 == 0);
+        instances_translations_size /= 3;
+        assert(instances_translations_size == instance_translations_count);
+
+        glGenBuffers(1, &vbo_instance_translations);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_instance_translations);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * instances_translations_size, instances_translations, GL_STATIC_DRAW);
+        shader_program->setAttribute("translation", 3, 0, 0);
+        glVertexAttribDivisor(2, 1);
+
         glEnableVertexAttribArray(0);
     }
 
@@ -108,7 +124,7 @@ public:
         shader_program->setUniform("pvm", pvm);
 
         glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+        glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr, instance_translations_count);
 
         this->shader_program->unuse();
     }
@@ -130,6 +146,8 @@ private:
     GLuint vbo_point{};
     GLuint vbo_color{};
     GLuint ibo{};
+    GLuint vbo_instance_translations{};
+    constexpr static size_t instance_translations_count = 3;
 
     static std::shared_ptr<ShaderProgram> cube_shader_program;
 };
