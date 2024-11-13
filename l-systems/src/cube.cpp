@@ -126,10 +126,10 @@ private:
         this->shader_program = cube_shader_program;
     }
 
-    GLuint vao;
-    GLuint vbo_point;
-    GLuint vbo_color;
-    GLuint ibo;
+    GLuint vao{};
+    GLuint vbo_point{};
+    GLuint vbo_color{};
+    GLuint ibo{};
 
     static std::shared_ptr<ShaderProgram> cube_shader_program;
 };
