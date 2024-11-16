@@ -56,6 +56,6 @@ vec3 LambertLighting() {
 #define AGamma(colour) pow(colour, vec3(256.0 / 563.0))
 
 void main() {
-    out_color = vec4(In.color, 1.0);
-//    out_color = vec4(AGamma(LambertLighting()), 1.0);
+//    out_color = vec4(In.color, 1.0);
+    out_color = vec4(AGamma(LambertLighting()), 1.0);
 }

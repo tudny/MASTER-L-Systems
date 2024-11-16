@@ -122,6 +122,11 @@ public:
         this->shader_program->use();
 
         shader_program->setUniform("pvm", pvm);
+        shader_program->setUniform("eyepos", eye_pos);
+        shader_program->setUniform("ls_ambient", glm::vec3(1.0, 0.1, 0.1));
+        shader_program->setUniform("ls_position", glm::vec4(0, 2, 0, 1.0));
+        shader_program->setUniform("ls_attenuation", glm::vec3(0.2f, 0.2f, 0.2f));
+        shader_program->setUniform("ls_direct", glm::vec3(0.0, 1.0, 0.0));
 
         glBindVertexArray(vao);
         glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr, instance_translations_count);
