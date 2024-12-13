@@ -14,6 +14,7 @@
 #include <memory>
 #include "Viewport.hpp"
 #include "shader.hpp"
+#include "View.h"
 
 /// Drawable class abstracts the drawable object
 class Drawable {
@@ -21,11 +22,23 @@ public:
     /**
      * @brief Drawable constructor
      *
-     * Drawable constructor creates a drawable object with given viewport.
+     * Drawable constructor creates a drawable object with given viewport and view.
      *
      * @param viewport Viewport
+     * @param view View
      */
-    explicit Drawable(Viewport viewport) : viewport(viewport) {}
+    explicit Drawable(Viewport viewport, std::shared_ptr<View> view)
+            : viewport(viewport), view(std::move(view)) {}
+
+    /**
+     * @brief Drawable constructor
+     *
+     * Drawable constructor creates a drawable object with given viewport.
+     * View is set to nullptr.
+     *
+     * @param viewport
+     */
+    explicit Drawable(Viewport viewport) : viewport(viewport), view(nullptr) {}
 
     /**
      * @brief Drawable destructor
@@ -69,6 +82,24 @@ public:
     [[nodiscard]] Viewport get_viewport() const;
 
     /**
+     * @brief Update the view
+     *
+     * Update the view of the object.
+     *
+     * @param _view New view
+     */
+    virtual void update_view(std::shared_ptr<View> _view);
+
+    /**
+     * @brief Get the view
+     *
+     * Get the view of the object.
+     *
+     * @return View
+     */
+    [[nodiscard]] std::shared_ptr<View> get_view() const;
+
+    /**
      * @brief On mouse button callback
      *
      * Callback for mouse button event.
@@ -103,6 +134,9 @@ public:
 protected:
     /// Viewport
     Viewport viewport;
+
+    /// View
+    std::shared_ptr<View> view;
 
     /// Shader program
     std::shared_ptr<ShaderProgram> shader_program;

@@ -23,6 +23,8 @@ set(
         src/shader.hpp
         src/debug.cpp
         src/debug.hpp
+        src/View.cpp
+        src/View.h
 )
 
 add_library(

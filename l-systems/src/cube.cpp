@@ -10,14 +10,12 @@
 constexpr float ROTATION_SPEED = 0.5f;
 constexpr float ROTATION_DISTANCE = 15.0f;
 constexpr float ROTATION_HEIGHT = 1.0f;
-constexpr glm::vec3 ROTATION_CENTER = glm::vec3(0.0f, 0.0f, 0.0f);
-constexpr glm::vec3 ROTATION_UP = glm::vec3(0.0f, 0.0f, 1.0f);
 
 
 class CubeDrawable : public Drawable {
 public:
 
-    explicit CubeDrawable(const Viewport &viewport) : Drawable(viewport) {}
+    explicit CubeDrawable(const Viewport &viewport, const std::shared_ptr<View> &view) : Drawable(viewport, view) {}
 
     ~CubeDrawable() override = default;
 
@@ -90,7 +88,8 @@ public:
 
         glGenBuffers(1, &vbo_instance_translations);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_instance_translations);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * instances_translations_size, instances_translations, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * instances_translations_size, instances_translations,
+                     GL_STATIC_DRAW);
         shader_program->setAttribute("translation", 3, 0, 0);
         glVertexAttribDivisor(2, 1);
 
@@ -102,18 +101,10 @@ public:
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
 
-        double time = glfwGetTime() * ROTATION_SPEED;
-        glm::vec4 eye_pos = glm::vec4(
-                ROTATION_DISTANCE * sin(time),
-                ROTATION_DISTANCE * cos(time),
-                ROTATION_HEIGHT, 1.0
-        );
+        double time = glfwGetTime();
+        glm::vec4 eye_pos = this->get_view()->get_eye_pos();
         glm::mat4 projection = viewport.make_3d_projection();
-        glm::mat4 view = glm::lookAt(
-                glm::vec3(eye_pos),
-                ROTATION_CENTER,
-                ROTATION_UP
-        );
+        glm::mat4 view = this->get_view()->get_view_matrix();
         // move up and down as sin(time)
         glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, sin(time * 10)));
 
@@ -171,8 +162,27 @@ void register_cube(Application &application) {
         };
     };
 
+    auto rotation_view = std::make_shared<RotateView>(
+            RotateView::Direction::COUNTER_CLOCKWISE,
+            ROTATION_SPEED,
+            ROTATION_DISTANCE,
+            ROTATION_HEIGHT
+    );
+
+    auto the_cube = std::make_shared<CubeDrawable>(viewport_function(application), rotation_view);
+
     application.add_component(
-            std::make_shared<CubeDrawable>(viewport_function(application)),
+            the_cube,
             viewport_function
     );
+
+    application.get_window().set_key_callback([&application, rotation_view](int key, int, int action, int) {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+            glfwSetWindowShouldClose(application.get_window().get_window(), GLFW_TRUE);
+        }
+
+        if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+            rotation_view->switch_on_off();
+        }
+    });
 }

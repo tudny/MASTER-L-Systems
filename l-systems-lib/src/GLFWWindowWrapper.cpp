@@ -44,6 +44,7 @@ GLFWWindowWrapper::GLFWWindowWrapper(
 
     glfwSetCursorPosCallback(window, glfw_cursor_position_callback);
     glfwSetMouseButtonCallback(window, glfw_mouse_button_callback);
+    glfwSetKeyCallback(window, glfw_key_callback);
 }
 
 GLFWWindowWrapper::~GLFWWindowWrapper() {
@@ -77,6 +78,10 @@ void GLFWWindowWrapper::set_window_resize_callback(const std::function<void(int,
 
 void GLFWWindowWrapper::set_cursor_position_callback(const std::function<void(double, double)> &callback) {
     cursor_position_callback = callback;
+}
+
+void GLFWWindowWrapper::set_key_callback(const std::function<void(int, int, int, int)> &callback) {
+    key_callback = callback;
 }
 
 void GLFWWindowWrapper::set_mouse_button_callback(const std::function<void(int, int, int, double, double)> &callback) {
@@ -121,4 +126,9 @@ void GLFWWindowWrapper::glfw_mouse_button_callback(GLFWwindow *window, int butto
     }
 }
 
-
+void GLFWWindowWrapper::glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    auto it = window_wrapper_map.find(window);
+    if (it != window_wrapper_map.end() && it->second->key_callback) {
+        it->second->key_callback(key, scancode, action, mods);
+    }
+}

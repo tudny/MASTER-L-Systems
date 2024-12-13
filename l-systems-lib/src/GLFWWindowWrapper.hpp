@@ -94,6 +94,15 @@ public:
     void set_mouse_button_callback(std::function<void(int, int, int, double, double)> const &callback);
 
     /**
+     * @brief Set the key callback
+     *
+     * Set the key callback.
+     *
+     * @param callback Callback
+     */
+    void set_key_callback(std::function<void(int, int, int, int)> const &callback);
+
+    /**
      * @brief Get the width
      *
      * Get the width of the window.
@@ -124,6 +133,7 @@ private:
     std::function<void(int, int)> window_resize_callback;
     std::function<void(double, double)> cursor_position_callback;
     std::function<void(int, int, int, double, double)> mouse_button_callback;
+    std::function<void(int, int, int, int)> key_callback;
 
     /**
      * @brief Detect window resize
@@ -159,6 +169,19 @@ private:
      * @param mods Mods
      */
     static void glfw_mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
+
+    /**
+     * @brief GLFW key callback
+     *
+     * This function is called when the key is pressed in GLFW.
+     *
+     * @param window Window
+     * @param key Key
+     * @param scancode Scancode
+     * @param action Action
+     * @param mods Mods
+     */
+    static void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 };
 
 #endif //LSYSTEMS_LIB_GLFWWINDOWWRAPPER_HPP
