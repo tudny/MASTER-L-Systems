@@ -103,6 +103,15 @@ public:
     void set_key_callback(std::function<void(int, int, int, int)> const &callback);
 
     /**
+     * @brief Set the scroll callback
+     *
+     * Set the scroll callback.
+     *
+     * @param callback Callback
+     */
+    void set_scroll_callback(std::function<void(double, double)> const &callback);
+
+    /**
      * @brief Get the width
      *
      * Get the width of the window.
@@ -134,6 +143,7 @@ private:
     std::function<void(double, double)> cursor_position_callback;
     std::function<void(int, int, int, double, double)> mouse_button_callback;
     std::function<void(int, int, int, int)> key_callback;
+    std::function<void(double, double)> scroll_callback;
 
     /**
      * @brief Detect window resize
@@ -182,6 +192,17 @@ private:
      * @param mods Mods
      */
     static void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+
+    /**
+     * @brief GLFW scroll callback
+     *
+     * This function is called when the scroll is used in GLFW.
+     *
+     * @param window Window
+     * @param xoffset X offset
+     * @param yoffset Y offset
+     */
+    static void glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 };
 
 #endif //LSYSTEMS_LIB_GLFWWINDOWWRAPPER_HPP

@@ -3,6 +3,7 @@
 #include "properties.hpp"
 #include "errors.hpp"
 #include "GLFW/glfw3.h"
+#include "baseline.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -76,11 +77,13 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-        std::vector<glm::mat4> instances = {
+//        std::vector<glm::mat4> instances = {
 //                glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 10.0f)), glm::vec3(5.0f)),
-//                glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -10.0f)),
-            glm::mat4(1.0f),
-        };
+//                glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 5.0f, -10.0f)),
+//            glm::mat4(1.0f),
+//        };
+
+        std::vector<glm::mat4> instances = TempSpace::sample_instances();
 
         instance_translations_count = instances.size();
 
@@ -181,5 +184,9 @@ void register_cube(Application &application) {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
             rotation_view->switch_on_off();
         }
+    });
+
+    application.get_window().set_scroll_callback([rotation_view](double, double y) {
+        rotation_view->zoom(static_cast<float>(-y));
     });
 }

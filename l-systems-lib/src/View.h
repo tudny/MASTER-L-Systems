@@ -1,6 +1,7 @@
 #ifndef LSYSTEMS_VIEW_H
 #define LSYSTEMS_VIEW_H
 
+#include <functional>
 #include "glm/fwd.hpp"
 
 class View {
@@ -21,6 +22,8 @@ public:
  */
 class RotateView : public View {
 public:
+    static constexpr float ZOOM_FACTOR = 0.1f;
+
     enum Direction {
         CLOCKWISE = -1,
         COUNTER_CLOCKWISE = 1,
@@ -39,6 +42,8 @@ public:
     void switch_on_off();
 
     ~RotateView() override = default;
+
+    void zoom(float);
 
 private:
     Direction direction;

@@ -11,6 +11,8 @@ set(
         src/constants.hpp
         src/cube.cpp
         src/cube.hpp
+        src/baseline.cpp
+        src/baseline.h
 )
 
 add_executable(

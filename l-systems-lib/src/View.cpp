@@ -35,3 +35,7 @@ void RotateView::disable() {
 void RotateView::switch_on_off() {
     this->enabled = !this->enabled;
 }
+
+void RotateView::zoom(float offset) {
+    this->distance += offset * ZOOM_FACTOR;
+}
