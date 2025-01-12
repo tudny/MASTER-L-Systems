@@ -1,4 +1,4 @@
-#version 420
+#version 430
 
 in FVertex {
     vec3 color;

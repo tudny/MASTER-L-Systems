@@ -59,39 +59,36 @@ public:
 
         GLuint indices[] = {
                 0, 1, 2,
-                2, 0, 3,
-                3, 2, 6,
-                6, 3, 7,
-                7, 6, 5,
-                5, 7, 4,
-                4, 5, 1,
-                1, 0, 4,
-                4, 7, 3,
-                3, 0, 4,
-                1, 5, 6,
-                6, 2, 1,
+//                2, 0, 3,
+//                3, 2, 6,
+//                6, 3, 7,
+//                7, 6, 5,
+//                5, 7, 4,
+//                4, 5, 1,
+//                1, 0, 4,
+//                4, 7, 3,
+//                3, 0, 4,
+//                1, 5, 6,
+//                6, 2, 1,
         };
 
         glGenBuffers(1, &ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-        float instances_translations[] = {
-                0.0f, 0.0f, 0.0f,
-                3.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 4.0f,
+        std::vector<glm::mat4> instances = {
+//                glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 10.0f)), glm::vec3(5.0f)),
+//                glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -10.0f)),
+            glm::mat4(1.0f),
         };
-        size_t instances_translations_size = sizeof(instances_translations) / sizeof(float);
-        assert(instances_translations_size % 3 == 0);
-        instances_translations_size /= 3;
-        assert(instances_translations_size == instance_translations_count);
 
-        glGenBuffers(1, &vbo_instance_translations);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_instance_translations);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * instances_translations_size, instances_translations,
-                     GL_STATIC_DRAW);
-        shader_program->setAttribute("translation", 3, 0, 0);
-        glVertexAttribDivisor(2, 1);
+        instance_translations_count = instances.size();
+
+        glGenBuffers(1, &ssbo_translations);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, instances.size() * sizeof(decltype(instances)::value_type), instances.data(), GL_STATIC_DRAW);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_translations);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glEnableVertexAttribArray(0);
     }
@@ -107,7 +104,7 @@ public:
         glm::mat4 view = this->get_view()->get_view_matrix();
         // move up and down as sin(time)
         glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, sin(time * 10)));
-
+        model = glm::mat4(1.0f);
         auto pvm = projection * view * model;
 
         this->shader_program->use();
@@ -142,8 +139,8 @@ private:
     GLuint vbo_point{};
     GLuint vbo_color{};
     GLuint ibo{};
-    GLuint vbo_instance_translations{};
-    constexpr static size_t instance_translations_count = 3;
+    GLuint ssbo_translations{};
+    GLuint instance_translations_count = -1;
 
     static std::shared_ptr<ShaderProgram> cube_shader_program;
 };

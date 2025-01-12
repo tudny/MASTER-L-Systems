@@ -1,8 +1,11 @@
-#version 420
+#version 430
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 color;
-layout(location = 2) in vec3 translation;
+
+layout(std430, binding = 0) buffer Translations {
+    mat4 translations[];
+};
 
 uniform mat4 pvm;
 
@@ -12,7 +15,8 @@ out Vertex {
 } Out;
 
 void main() {
-    vec4 pos = vec4(position + translation, 1.0);
+    mat4 model = translations[gl_InstanceID];
+    vec4 pos = model * vec4(position, 1.0);
 
     gl_Position = pvm * pos;
     Out.color = color;
