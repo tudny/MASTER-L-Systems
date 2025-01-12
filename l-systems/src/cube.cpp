@@ -59,17 +59,17 @@ public:
 
         GLuint indices[] = {
                 0, 1, 2,
-//                2, 0, 3,
-//                3, 2, 6,
-//                6, 3, 7,
-//                7, 6, 5,
-//                5, 7, 4,
-//                4, 5, 1,
-//                1, 0, 4,
-//                4, 7, 3,
-//                3, 0, 4,
-//                1, 5, 6,
-//                6, 2, 1,
+                0, 2, 3,
+                3, 2, 6,
+                3, 6, 7,
+                5, 7, 6,
+                4, 7, 5,
+                1, 4, 5,
+                0, 4, 1,
+                3, 7, 4,
+                0, 3, 4,
+                1, 5, 6,
+                1, 6, 2,
         };
 
         glGenBuffers(1, &ibo);
@@ -111,10 +111,10 @@ public:
 
         shader_program->setUniform("pvm", pvm);
         shader_program->setUniform("eyepos", eye_pos);
-        shader_program->setUniform("ls_ambient", glm::vec3(1.0, 0.1, 0.1));
-        shader_program->setUniform("ls_position", glm::vec4(0, 2, 0, 1.0));
+        shader_program->setUniform("ls_ambient", glm::vec3(0.1, 0.1, 0.1));
+        shader_program->setUniform("ls_position", glm::vec4(2, 2, 2, 1.0));
         shader_program->setUniform("ls_attenuation", glm::vec3(0.2f, 0.2f, 0.2f));
-        shader_program->setUniform("ls_direct", glm::vec3(0.0, 1.0, 0.0));
+        shader_program->setUniform("ls_direct", glm::vec3(0.0, 3.0, 0.0));
 
         glBindVertexArray(vao);
         glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr, instance_translations_count);
