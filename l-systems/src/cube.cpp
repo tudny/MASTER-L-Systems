@@ -106,7 +106,7 @@ public:
         glm::mat4 projection = viewport.make_3d_projection();
         glm::mat4 view = this->get_view()->get_view_matrix();
         // move up and down as sin(time)
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, sin(time * 10)));
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, sin(time * 10), 0.0f));
         model = glm::mat4(1.0f);
         auto pvm = projection * view * model;
 
