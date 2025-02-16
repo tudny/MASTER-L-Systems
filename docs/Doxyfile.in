@@ -856,6 +856,7 @@ WARN_LOGFILE           =
 
 INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/l-systems
 INPUT                 += @CMAKE_CURRENT_SOURCE_DIR@/l-systems-lib
+INPUT                 += @CMAKE_CURRENT_SOURCE_DIR@/l-systems-grammar
 INPUT                 += @CMAKE_CURRENT_SOURCE_DIR@/README.md
 
 # This tag can be used to specify the character encoding of the source files

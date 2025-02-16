@@ -6,6 +6,7 @@
 #include "shader.hpp"
 #include "properties.hpp"
 #include "cube.hpp"
+#include "grammar.h"
 
 class SimpleDrawable : public Drawable {
 public:
@@ -101,22 +102,8 @@ void add_simple_component(Application &application) {
 int main() {
     std::cout << greeter() << std::endl;
 
-    glm::mat4 random = glm::mat4({
-        1., 0., 0., 10.,
-        0., 1., 0., 0.,
-        0., 0., 1., 0.,
-        0., 0., 0., 1.
-    });
-    glm::vec4 v = glm::vec4(0., 0., 0., 1.);
-    v = random * v;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            std::cout << random[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << v.x << " " << v.y << " " << v.z << std::endl;
-    // 0 0 0
+    auto grammar = load_grammar("/home/tudny/Documents/UW/MIMUW-master/MASTERS/MASTER-L-Systems/sample/demo-grammar.ls");
+    grammar->print();
 
     try {
         Application application{

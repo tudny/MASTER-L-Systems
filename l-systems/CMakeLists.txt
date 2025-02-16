@@ -24,6 +24,7 @@ target_link_libraries(
         ${TARGET_NAME}
         PRIVATE
         L-Systems-lib
+        L-Systems-grammar
         PRIVATE glfw
         PRIVATE libglew_static
         PRIVATE glm

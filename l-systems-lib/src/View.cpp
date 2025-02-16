@@ -4,6 +4,13 @@
 #include "glm/detail/type_vec4.hpp"
 #include "glm/ext/matrix_transform.hpp"
 
+// Taken from https://stackoverflow.com/a/11421471/7095554
+template<typename E>
+auto as_integer(E const value)
+-> typename std::underlying_type<E>::type {
+    return static_cast<typename std::underlying_type<E>::type>(value);
+}
+
 glm::mat4 RotateView::get_view_matrix() const {
     return glm::lookAt(
             glm::vec3(this->get_eye_pos()),
@@ -13,7 +20,7 @@ glm::mat4 RotateView::get_view_matrix() const {
 }
 
 glm::vec4 RotateView::get_eye_pos() const {
-    double time = glfwGetTime() * this->speed * this->direction * this->enabled;
+    double time = glfwGetTime() * this->speed * as_integer(this->direction) * this->enabled;
     return {
             this->distance * sin(time),
             this->height,

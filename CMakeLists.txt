@@ -8,7 +8,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 
 # Compilation setup
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
@@ -26,38 +26,39 @@ find_package(Doxygen)
 if (DOXYGEN_FOUND)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile @ONLY)
     add_custom_target(doc
-        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMENT "Generating API documentation with Doxygen"
+            ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generating API documentation with Doxygen"
     )
 endif (DOXYGEN_FOUND)
 
 # Add local submodules
 SET(
-    LOCAL_SUBMODULES
-    "l-systems-lib"
-    "l-systems"
+        LOCAL_SUBMODULES
+        "l-systems-grammar-lib"
+        "l-systems-lib"
+        "l-systems"
 )
 SET(
-    ALL_SOURCES
-    ""
+        ALL_SOURCES
+        ""
 )
-FOREACH(submodule ${LOCAL_SUBMODULES})
+FOREACH (submodule ${LOCAL_SUBMODULES})
     message(STATUS "Adding submodule: ${submodule}")
     add_subdirectory(${submodule})
     list(APPEND ALL_SOURCES ${submodule}/src)
     # If ends with _lib, add to include directories
     STRING(REGEX MATCH ".*lib$" is_lib ${submodule})
-    IF(is_lib)
+    IF (is_lib)
         message(STATUS "  Detected library: ${submodule}")
         include_directories(${PROJECT_SOURCE_DIR}/${submodule}/src)
-    ENDIF()
-ENDFOREACH()
+    ENDIF ()
+ENDFOREACH ()
 
 # Add GTest
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
     cmake_policy(SET CMP0135 NEW)
-endif()
+endif ()
 
 include(FetchContent)
 FetchContent_Declare(
@@ -85,6 +86,7 @@ target_link_libraries(
         GTest::gtest_main
         GTest::gmock_main
         L-Systems-lib
+        L-Systems-grammar
 )
 
 include(GoogleTest)
