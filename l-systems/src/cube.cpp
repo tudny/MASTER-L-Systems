@@ -2,14 +2,15 @@
 #include "properties.hpp"
 #include "grammar.h"
 #include "GLFW/glfw3.h"
-#include "baseline.h"
+#include "baseline.hpp"
+#include "args.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <utility>
 
 
 constexpr float ROTATION_SPEED = 0.5f;
-constexpr float ROTATION_DISTANCE = 15.0f;
+constexpr float ROTATION_DISTANCE = 50.0f;
 constexpr float ROTATION_HEIGHT = 1.0f;
 
 
@@ -57,6 +58,13 @@ public:
                 0.0f, 0.0f, 0.0f,
         };
 
+//        // set color to brown
+//        for (int i = 0; i < 8; i++) {
+//            colors[i * 3] = 0.5f;
+//            colors[i * 3 + 1] = 0.35f;
+//            colors[i * 3 + 2] = 0.05f;
+//        }
+
         glGenBuffers(1, &vbo_color);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
         glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
@@ -87,7 +95,8 @@ public:
 //            glm::mat4(1.0f),
 //        };
 
-        std::vector<glm::mat4> instances = TempSpace::sample_instances();
+//        std::vector<glm::mat4> instances = TempSpace::sample_instances();
+        std::vector<glm::mat4> instances = TempSpace::grammar_instances(grammar);
 
         instance_translations_count = instances.size();
 
@@ -157,7 +166,7 @@ private:
 
 std::shared_ptr<ShaderProgram> CubeDrawable::cube_shader_program = nullptr;
 
-void register_cube(Application &application) {
+void register_cube(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {
         return Viewport{
                 .left = 0,
@@ -179,8 +188,7 @@ void register_cube(Application &application) {
     auto the_cube = std::make_shared<CubeDrawable>(
             viewport_function(application),
             rotation_view,
-            // TODO: pass grammar path as argument
-            "/home/tudny/Documents/UW/MIMUW-master/MASTERS/MASTER-L-Systems/sample/demo-grammar.ls"
+            context->grammar_path
     );
 
     application.add_component(

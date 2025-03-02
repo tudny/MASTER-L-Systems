@@ -12,7 +12,9 @@ set(
         src/cube.cpp
         src/cube.hpp
         src/baseline.cpp
-        src/baseline.h
+        src/baseline.hpp
+        src/args.cpp
+        src/args.hpp
 )
 
 add_executable(
@@ -27,6 +29,7 @@ target_link_libraries(
         PRIVATE glfw
         PRIVATE libglew_static
         PRIVATE glm
+        PRIVATE args
 )
 
 configure_file(

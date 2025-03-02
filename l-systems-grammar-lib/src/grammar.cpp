@@ -9,7 +9,7 @@
 #include "str_utils.h"
 #include "memory_utils.h"
 
-constexpr const char *ALLOWED_OPERATORS = "+-&^/\\|Ff[]";
+const char *ALLOWED_OPERATORS = "+-&^/\\|Ff[]";
 constexpr const char *REQUIRED_PROPS[] = {"delta", "step", "depth"};
 
 constexpr const char *PROPERTY_SEPARATOR = ":=";

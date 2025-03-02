@@ -55,6 +55,6 @@ glm::mat4 Viewport::make_3d_projection() const {
     return glm::perspective(
             static_cast<float>(2.0 * std::atan(static_cast<float>(this->height) / 1920.f)),
             this->get_aspect_ratio(),
-            0.1f, 100.f
+            0.1f, 1000.f
     );
 }

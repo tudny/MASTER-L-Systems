@@ -5,6 +5,9 @@
 #include <vector>
 #include <unordered_map>
 #include <optional>
+#include <memory>
+
+extern const char *ALLOWED_OPERATORS;
 
 class Property {
 public:

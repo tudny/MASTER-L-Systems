@@ -1,10 +1,11 @@
-#ifndef LSYSTEMS_BASELINE_H
-#define LSYSTEMS_BASELINE_H
+#ifndef LSYSTEMS_BASELINE_HPP
+#define LSYSTEMS_BASELINE_HPP
 
 #include <vector>
 #include <stdexcept>
 #include <iostream>
 #include "glm/glm.hpp"
+#include "grammar.h"
 
 namespace MatrixTree {
     class TransformationMatrix {
@@ -168,6 +169,7 @@ namespace Turtle {
 
 namespace TempSpace {
     std::vector<glm::mat4> sample_instances();
+    std::vector<glm::mat4> grammar_instances(const GrammarPtr& grammar);
 }
 
-#endif //LSYSTEMS_BASELINE_H
+#endif //LSYSTEMS_BASELINE_HPP

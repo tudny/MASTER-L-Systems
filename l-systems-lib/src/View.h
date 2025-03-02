@@ -22,7 +22,7 @@ public:
  */
 class RotateView : public View {
 public:
-    static constexpr float ZOOM_FACTOR = 0.1f;
+    static constexpr float ZOOM_FACTOR = 0.5f;
 
     enum Direction {
         CLOCKWISE = -1,
