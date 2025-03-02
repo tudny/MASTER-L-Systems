@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <stack>
 
 void static multiply_node_inplace(MatrixTree::Node<MatrixTree::TransformationMatrix> &node) {
     if (node.parent != nullptr) {
@@ -144,19 +145,84 @@ std::vector<glm::mat4> TempSpace::sample_instances() {
     return instances_as_mat4;
 }
 
-static inline bool is_instance(char c) {
-    return c == 'F';
+static inline bool is_instance(char c, bool is_filling) {
+    return c == 'F' or (is_filling and c == 'f');
 }
 
 static size_t count_instances(const std::string &instances_str) {
     size_t instances = 0;
+    bool is_filling = false;
     for (auto c: instances_str) {
-        if (is_instance(c)) {
+        if (c == '{') {
+            is_filling = true;
+        } else if (c == '}') {
+            is_filling = false;
+        }
+        if (is_instance(c, is_filling)) {
             instances++;
         }
     }
     return instances;
 }
+
+//std::vector<glm::mat4> TempSpace::grammar_instances(const GrammarPtr& grammar) {
+//    auto production_str = grammar->cpu_produce();
+//    auto instances_count = count_instances(production_str);
+//
+//    float delta = glm::radians(grammar->get_property_float("delta"));
+//    float step = grammar->get_property_float("step");
+//
+//    auto init = Turtle::State{
+//            glm::vec3(0, 1, 0),
+//            glm::vec3(-1, 0, 0),
+//            glm::vec3(0, 0, 1),
+//            glm::vec3(0, 0.0, 0)
+//    };
+//
+//    auto movement_mappings = std::unordered_map<char, MatrixTree::TransformationMatrix>{
+//            {'F', Turtle::move_forward(step)},
+//            {'f', Turtle::move_forward(step)},
+//            {'+', Turtle::rotate_over_up(delta)},
+//            {'-', Turtle::rotate_over_up(-delta)},
+//            {'&', Turtle::rotate_over_left(delta)},
+//            {'^', Turtle::rotate_over_left(-delta)},
+//            {'/', Turtle::rotate_over_heading(delta)},
+//            {'\\', Turtle::rotate_over_heading(-delta)},
+//            {'|', Turtle::rotate_over_up(glm::radians(180.0f))}
+//    };
+//
+//    MatrixTree::TransformationMatrix last_operation = init.state;
+//    std::vector<glm::mat4> instances;
+//    instances.reserve(instances_count);
+//
+//    auto move_down = glm::translate(glm::mat4(1.0), glm::vec3(-0.5f, 0.0, 0.0f));
+//    auto scale_y_by_step = glm::scale(glm::mat4(1.0), glm::vec3(-step, 1.0f, 1.0f));
+//    auto move_back_up = glm::translate(glm::mat4(1.0), glm::vec3(0.5f, 0.0f, 0.0f));
+//    auto translation = move_down * scale_y_by_step * move_back_up;
+//
+//    std::cout << "translation:" << std::endl;
+//    std::cout << "move_down" << std::endl;
+//    print_mat4(move_down);
+//    std::cout << "scale_y_by_step" << std::endl;
+//    print_mat4(scale_y_by_step);
+//    std::cout << "move_back_up" << std::endl;
+//    print_mat4(move_back_up);
+//    std::cout << "translation" << std::endl;
+//    print_mat4(translation);
+//
+//    for (char move : production_str) {
+//        auto it = movement_mappings.find(move);
+//        if (it != movement_mappings.end()) {
+//            last_operation = it->second * last_operation;
+//            if (is_instance(move)) {
+//                instances.push_back(last_operation.to_glm_mat4() * translation);
+//            }
+//        }
+//    }
+//
+//    return instances;
+//}
+
 
 std::vector<glm::mat4> TempSpace::grammar_instances(const GrammarPtr& grammar) {
     auto production_str = grammar->cpu_produce();
@@ -169,7 +235,7 @@ std::vector<glm::mat4> TempSpace::grammar_instances(const GrammarPtr& grammar) {
             glm::vec3(0, 1, 0),
             glm::vec3(-1, 0, 0),
             glm::vec3(0, 0, 1),
-            glm::vec3(0, 0.0, 0)
+            glm::vec3(0, -50.0, 0)
     };
 
     auto movement_mappings = std::unordered_map<char, MatrixTree::TransformationMatrix>{
@@ -203,17 +269,35 @@ std::vector<glm::mat4> TempSpace::grammar_instances(const GrammarPtr& grammar) {
     std::cout << "translation" << std::endl;
     print_mat4(translation);
 
+    std::stack<MatrixTree::TransformationMatrix> instances_stack;
+    bool is_filling = false;
+
     for (char move : production_str) {
+        if (move == '[') {
+            instances_stack.push(last_operation);
+            continue;
+        } else if (move == ']') {
+            last_operation = instances_stack.top();
+            instances_stack.pop();
+            continue;
+        }
+
+        if (move == '{') {
+            is_filling = true;
+            continue;
+        } else if (move == '}') {
+            is_filling = false;
+            continue;
+        }
+
         auto it = movement_mappings.find(move);
         if (it != movement_mappings.end()) {
             last_operation = it->second * last_operation;
-            if (is_instance(move)) {
+            if (is_instance(move, is_filling)) {
                 instances.push_back(last_operation.to_glm_mat4() * translation);
             }
         }
     }
-
-
 
     return instances;
 }
