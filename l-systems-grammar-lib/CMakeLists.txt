@@ -1,8 +1,8 @@
-project(L-Systems-grammar)
+project(L-Systems-grammar-lib)
 
 set(
         LIB_NAME
-        L-Systems-grammar
+        L-Systems-grammar-lib
 )
 
 set(
@@ -19,4 +19,5 @@ add_library(
 
 target_link_libraries(
         ${LIB_NAME}
+        PRIVATE L-Systems-lib
 )

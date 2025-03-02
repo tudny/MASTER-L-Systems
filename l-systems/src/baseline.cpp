@@ -97,10 +97,10 @@ std::vector<glm::mat4> TempSpace::sample_instances() {
     auto d = 5.0f;
 
     auto root = MatrixTree::Node<MatrixTree::TransformationMatrix>{init_state.state};
-    print_node_matrix(root, "root");
+//    print_node_matrix(root, "root");
 
     auto root_up = MatrixTree::Node<MatrixTree::TransformationMatrix>{Turtle::move_forward(d)};
-    print_node_matrix(root_up, "root_up");
+//    print_node_matrix(root_up, "root_up");
     root_up.parent = &root;
     root.children.push_back(&root_up);
 
@@ -132,9 +132,9 @@ std::vector<glm::mat4> TempSpace::sample_instances() {
 
     std::cout << "instances.size() = " << instances.size() << std::endl;
 
-    for (auto &instance: instances) {
-        print_mat4_row(instance);
-    }
+//    for (auto &instance: instances) {
+//        print_mat4_row(instance);
+//    }
 
     std::vector<glm::mat4> instances_as_mat4;
     instances_as_mat4.reserve(instances.size());

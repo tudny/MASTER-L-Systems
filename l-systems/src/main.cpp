@@ -7,6 +7,7 @@
 #include "properties.hpp"
 #include "cube.hpp"
 #include "grammar.h"
+#include "memory_utils.h"
 
 class SimpleDrawable : public Drawable {
 public:
@@ -102,8 +103,8 @@ void add_simple_component(Application &application) {
 int main() {
     std::cout << greeter() << std::endl;
 
-    auto grammar = load_grammar("/home/tudny/Documents/UW/MIMUW-master/MASTERS/MASTER-L-Systems/sample/demo-grammar.ls");
-    grammar->print();
+    void *ptr = safe_calloc(10, sizeof(int));
+    safe_free(&ptr);
 
     try {
         Application application{

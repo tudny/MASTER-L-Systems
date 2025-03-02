@@ -25,6 +25,8 @@ set(
         src/debug.hpp
         src/View.cpp
         src/View.h
+        src/memory_utils.cpp
+        src/memory_utils.h
 )
 
 add_library(
@@ -38,4 +40,10 @@ target_link_libraries(
         PRIVATE glfw
         PRIVATE libglew_static
         PRIVATE glm
+)
+
+target_include_directories(
+        ${LIB_NAME}
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )

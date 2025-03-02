@@ -86,7 +86,7 @@ target_link_libraries(
         GTest::gtest_main
         GTest::gmock_main
         L-Systems-lib
-        L-Systems-grammar
+        L-Systems-grammar-lib
 )
 
 include(GoogleTest)

@@ -1,4 +1,3 @@
-
 #include <stdexcept>
 #include <algorithm>
 #include <fstream>
@@ -8,6 +7,7 @@
 #include <utility>
 #include "grammar.h"
 #include "str_utils.h"
+#include "memory_utils.h"
 
 constexpr const char *ALLOWED_OPERATORS = "+-&^/\\|Ff[]";
 constexpr const char *REQUIRED_PROPS[] = {"delta", "step", "depth"};
@@ -193,3 +193,68 @@ Grammar::Grammar(
         Axiom axiom,
         const std::vector<Production> &productions
 ) : properties(properties), axiom(std::move(axiom)), productions(productions) {}
+
+static size_t collect_size(Grammar &grammar, char *previous_result, size_t previous_size) {
+    size_t result_size = 0;
+
+    for (size_t i = 0; i < previous_size; i++) {
+        auto production = grammar.get_production(previous_result[i]);
+        if (!production.has_value()) {
+            result_size++;
+            continue;
+        }
+        result_size += production->size();
+    }
+
+    return result_size;
+}
+
+static void collect_result(Grammar &grammar, char *previous_result, size_t previous_size, char *result) {
+    size_t result_size = 0;
+
+    for (size_t i = 0; i < previous_size; i++) {
+        auto production = grammar.get_production(previous_result[i]);
+        if (!production.has_value()) {
+            result[result_size++] = previous_result[i];
+            continue;
+        }
+        std::memcpy(result + result_size, production->c_str(), production->size());
+        result_size += production->size();
+    }
+}
+
+std::string Grammar::cpu_produce() {
+    size_t result_size = axiom.axiom.size();
+    char *result = (char*) safe_calloc(result_size, sizeof(char));
+    std::memcpy(result, axiom.axiom.c_str(), axiom.axiom.size());
+
+    size_t steps = get_property_size_t("depth");
+    for (size_t i = 0; i < steps; i++) {
+        size_t new_size = collect_size(*this, result, result_size);
+        char *new_result = (char*) safe_calloc(new_size, sizeof(char));
+        collect_result(*this, result, result_size, new_result);
+        safe_free(reinterpret_cast<void **>(&result));
+        result = new_result;
+        result_size = new_size;
+    }
+
+    std::string result_str(result, result_size);
+    safe_free(reinterpret_cast<void **>(&result));
+    return result_str;
+}
+
+float Grammar::get_property_float(const std::string &name) {
+    return get_properties()->at(name);
+}
+
+size_t Grammar::get_property_size_t(const std::string &name) {
+    return static_cast<size_t>(get_property_float(name));
+}
+
+std::optional<std::string> Grammar::get_production(char predecessor) {
+    auto it = get_productions()->find(predecessor);
+    if (it == get_productions()->end()) {
+        return {};
+    }
+    return it->second;
+}

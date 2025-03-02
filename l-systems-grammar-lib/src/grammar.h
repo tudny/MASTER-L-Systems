@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <optional>
 
 class Property {
 public:
@@ -35,7 +36,15 @@ public:
     PropertiesPtr get_properties();
     AxiomPtr get_axiom();
     ProductionsPtr get_productions();
+
+    float get_property_float(const std::string &name);
+    size_t get_property_size_t(const std::string &name);
+
+    std::optional<std::string> get_production(char predecessor);
+
     void print();
+
+    std::string cpu_produce();
 
     Grammar(const std::vector<Property> &properties, Axiom axiom, const std::vector<Production> &productions);
 

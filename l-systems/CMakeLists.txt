@@ -22,9 +22,8 @@ add_executable(
 
 target_link_libraries(
         ${TARGET_NAME}
-        PRIVATE
-        L-Systems-lib
-        L-Systems-grammar
+        PRIVATE L-Systems-lib
+        PRIVATE L-Systems-grammar-lib
         PRIVATE glfw
         PRIVATE libglew_static
         PRIVATE glm
@@ -34,7 +33,8 @@ configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/properties.hpp.in
         ${CMAKE_CURRENT_BINARY_DIR}/src/properties.hpp
 )
+
 include_directories(${PROJECT_NAME}
-        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
-        PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_BINARY_DIR}/src
 )

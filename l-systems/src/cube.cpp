@@ -1,11 +1,11 @@
-#include <iostream>
 #include "cube.hpp"
 #include "properties.hpp"
-#include "errors.hpp"
+#include "grammar.h"
 #include "GLFW/glfw3.h"
 #include "baseline.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <utility>
 
 
 constexpr float ROTATION_SPEED = 0.5f;
@@ -16,12 +16,16 @@ constexpr float ROTATION_HEIGHT = 1.0f;
 class CubeDrawable : public Drawable {
 public:
 
-    explicit CubeDrawable(const Viewport &viewport, const std::shared_ptr<View> &view) : Drawable(viewport, view) {}
+    explicit CubeDrawable(const Viewport &viewport, const std::shared_ptr<View> &view, const std::string &grammarPath)
+            : Drawable(viewport, view), grammar(load_grammar(grammarPath)) {}
 
     ~CubeDrawable() override = default;
 
     void init() override {
         preload_shader_program();
+
+        std::string result = grammar->cpu_produce();
+        std::cout << "Result: " << result << std::endl;
 
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
@@ -89,7 +93,8 @@ public:
 
         glGenBuffers(1, &ssbo_translations);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, instances.size() * sizeof(decltype(instances)::value_type), instances.data(), GL_STATIC_DRAW);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, instances.size() * sizeof(decltype(instances)::value_type),
+                     instances.data(), GL_STATIC_DRAW);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_translations);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -138,6 +143,8 @@ private:
         this->shader_program = cube_shader_program;
     }
 
+    GrammarPtr grammar;
+
     GLuint vao{};
     GLuint vbo_point{};
     GLuint vbo_color{};
@@ -169,7 +176,12 @@ void register_cube(Application &application) {
             ROTATION_HEIGHT
     );
 
-    auto the_cube = std::make_shared<CubeDrawable>(viewport_function(application), rotation_view);
+    auto the_cube = std::make_shared<CubeDrawable>(
+            viewport_function(application),
+            rotation_view,
+            // TODO: pass grammar path as argument
+            "/home/tudny/Documents/UW/MIMUW-master/MASTERS/MASTER-L-Systems/sample/demo-grammar.ls"
+    );
 
     application.add_component(
             the_cube,
