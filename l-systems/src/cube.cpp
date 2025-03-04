@@ -59,11 +59,11 @@ public:
         };
 
 //        // set color to brown
-//        for (int i = 0; i < 8; i++) {
-//            colors[i * 3] = 0.5f;
-//            colors[i * 3 + 1] = 0.35f;
-//            colors[i * 3 + 2] = 0.05f;
-//        }
+        for (int i = 0; i < 8; i++) {
+            colors[i * 3] = 0.5f;
+            colors[i * 3 + 1] = 0.35f;
+            colors[i * 3 + 2] = 0.05f;
+        }
 
         glGenBuffers(1, &vbo_color);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_color);

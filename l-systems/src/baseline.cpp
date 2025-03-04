@@ -165,65 +165,6 @@ static size_t count_instances(const std::string &instances_str) {
     return instances;
 }
 
-//std::vector<glm::mat4> TempSpace::grammar_instances(const GrammarPtr& grammar) {
-//    auto production_str = grammar->cpu_produce();
-//    auto instances_count = count_instances(production_str);
-//
-//    float delta = glm::radians(grammar->get_property_float("delta"));
-//    float step = grammar->get_property_float("step");
-//
-//    auto init = Turtle::State{
-//            glm::vec3(0, 1, 0),
-//            glm::vec3(-1, 0, 0),
-//            glm::vec3(0, 0, 1),
-//            glm::vec3(0, 0.0, 0)
-//    };
-//
-//    auto movement_mappings = std::unordered_map<char, MatrixTree::TransformationMatrix>{
-//            {'F', Turtle::move_forward(step)},
-//            {'f', Turtle::move_forward(step)},
-//            {'+', Turtle::rotate_over_up(delta)},
-//            {'-', Turtle::rotate_over_up(-delta)},
-//            {'&', Turtle::rotate_over_left(delta)},
-//            {'^', Turtle::rotate_over_left(-delta)},
-//            {'/', Turtle::rotate_over_heading(delta)},
-//            {'\\', Turtle::rotate_over_heading(-delta)},
-//            {'|', Turtle::rotate_over_up(glm::radians(180.0f))}
-//    };
-//
-//    MatrixTree::TransformationMatrix last_operation = init.state;
-//    std::vector<glm::mat4> instances;
-//    instances.reserve(instances_count);
-//
-//    auto move_down = glm::translate(glm::mat4(1.0), glm::vec3(-0.5f, 0.0, 0.0f));
-//    auto scale_y_by_step = glm::scale(glm::mat4(1.0), glm::vec3(-step, 1.0f, 1.0f));
-//    auto move_back_up = glm::translate(glm::mat4(1.0), glm::vec3(0.5f, 0.0f, 0.0f));
-//    auto translation = move_down * scale_y_by_step * move_back_up;
-//
-//    std::cout << "translation:" << std::endl;
-//    std::cout << "move_down" << std::endl;
-//    print_mat4(move_down);
-//    std::cout << "scale_y_by_step" << std::endl;
-//    print_mat4(scale_y_by_step);
-//    std::cout << "move_back_up" << std::endl;
-//    print_mat4(move_back_up);
-//    std::cout << "translation" << std::endl;
-//    print_mat4(translation);
-//
-//    for (char move : production_str) {
-//        auto it = movement_mappings.find(move);
-//        if (it != movement_mappings.end()) {
-//            last_operation = it->second * last_operation;
-//            if (is_instance(move)) {
-//                instances.push_back(last_operation.to_glm_mat4() * translation);
-//            }
-//        }
-//    }
-//
-//    return instances;
-//}
-
-
 std::vector<glm::mat4> TempSpace::grammar_instances(const GrammarPtr& grammar) {
     auto production_str = grammar->cpu_produce();
     auto instances_count = count_instances(production_str);
@@ -235,7 +176,7 @@ std::vector<glm::mat4> TempSpace::grammar_instances(const GrammarPtr& grammar) {
             glm::vec3(0, 1, 0),
             glm::vec3(-1, 0, 0),
             glm::vec3(0, 0, 1),
-            glm::vec3(0, -50.0, 0)
+            glm::vec3(0, -300.0, 0)
     };
 
     auto movement_mappings = std::unordered_map<char, MatrixTree::TransformationMatrix>{
