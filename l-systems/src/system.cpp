@@ -251,23 +251,23 @@ private:
         size_t epoch_num = grammar->get_property_size_t("depth");
 
         for (size_t epoch = 0; epoch < epoch_num; ++epoch) {
-            std::cout << "===========================================================" << std::endl;
-            std::cout << "Epoch: " << epoch << std::endl;
+//            std::cout << "===========================================================" << std::endl;
+//            std::cout << "Epoch: " << epoch << std::endl;
 
             // print contents of ssbo_previous_result_buffer
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
-            auto *data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-            for (size_t i = 0; i < result_buffer_size; i++) {
-                std::cout << "prev[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
-            }
-            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
+//            auto *data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//            for (size_t i = 0; i < result_buffer_size; i++) {
+//                std::cout << "prev[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
+//            }
+//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
             // make a copy of ssbo_previous_result_buffer into ssbo_offset_buffer
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_offset_buffer);
             glBufferData(GL_SHADER_STORAGE_BUFFER, result_buffer_size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
             glCopyNamedBufferSubData(ssbo_previous_result_buffer, ssbo_offset_buffer, 0, 0,
                                      result_buffer_size * sizeof(uint32_t));
-            std::cout << "New size of offset buffer: " << result_buffer_size << std::endl;
+//            std::cout << "New size of offset buffer: " << result_buffer_size << std::endl;
 
             // map letters into production sizes in the copy
             this_size_shader_program->use();
@@ -280,22 +280,22 @@ private:
             this_size_shader_program->unuse();
 
             // print mapped sizes
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_offset_buffer);
-            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-            for (size_t i = 0; i < result_buffer_size; i++) {
-                std::cout << "size[" << i << "] = " << data[i] << std::endl;
-            }
-            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_offset_buffer);
+//            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//            for (size_t i = 0; i < result_buffer_size; i++) {
+//                std::cout << "size[" << i << "] = " << data[i] << std::endl;
+//            }
+//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
             // run prefix sum on the copy
             run_prefix_sum(ssbo_offset_buffer, result_buffer_size);
 
             // print prefix sum
-            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-            for (size_t i = 0; i < result_buffer_size; i++) {
-                std::cout << "prefix_sum[" << i << "] = " << data[i] << std::endl;
-            }
-            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+//            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//            for (size_t i = 0; i < result_buffer_size; i++) {
+//                std::cout << "prefix_sum[" << i << "] = " << data[i] << std::endl;
+//            }
+//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
             // get buffer element at the end that will be the size of the result buffer
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_offset_buffer);
@@ -303,7 +303,7 @@ private:
             glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, (result_buffer_size - 1) * sizeof(uint32_t), sizeof(uint32_t),
                                &result_buffer_size);
 
-            std::cout << "Result buffer size: " << result_buffer_size << std::endl;
+//            std::cout << "Result buffer size: " << result_buffer_size << std::endl;
 
             // generate productions for each letter into next result buffer
             this_production_shader_program->use();
@@ -324,12 +324,12 @@ private:
             this_production_shader_program->unuse();
 
             // print new result
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_result_buffer);
-            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-            for (size_t i = 0; i < result_buffer_size; i++) {
-                std::cout << "next[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
-            }
-            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_result_buffer);
+//            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//            for (size_t i = 0; i < result_buffer_size; i++) {
+//                std::cout << "next[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
+//            }
+//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
             // copy data from next result buffer to previous result buffer
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
@@ -337,36 +337,48 @@ private:
             glCopyNamedBufferSubData(ssbo_next_result_buffer, ssbo_previous_result_buffer, 0, 0,
                                      result_buffer_size * sizeof(uint32_t));
 
-            // print ssbo_previous_result_buffer
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
-            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-            for (size_t i = 0; i < result_buffer_size; i++) {
-                std::cout << "prev[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
-            }
-            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+//            // print ssbo_previous_result_buffer
+//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
+//            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//            for (size_t i = 0; i < result_buffer_size; i++) {
+//                std::cout << "prev[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
+//            }
+//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
         }
 
         // check data
 
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
-        auto *data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-        for (size_t i = 0; i < result_buffer_size; i++) {
-            std::cout << "data[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
-        }
-
-        std::exit(1);
+//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
+//        auto *data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//        for (size_t i = 0; i < result_buffer_size; i++) {
+//            std::cout << "data[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
+//        }
     }
 
     void run_prefix_sum(GLuint ssbo, size_t size) {
         this_prefix_sum_shader_program->use();
 
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+        GLuint ssbo_output;
+        glGenBuffers(1, &ssbo_output);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_output);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
 
-        for (size_t step = 1; step <= (size_t) ceil(log2((double) size)); ++step) {
-            std::cout << "Step: " << step << std::endl;
+        auto steps = (size_t) ceil(log2((double) size));
+//        std::cout << "Running prefix sum with " << steps << " steps" << std::endl;
+
+        for (size_t step = 1; step <= steps; ++step) {
+
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_output);
+
+//            std::cout << "Step: " << step << std::endl;
             this_prefix_sum_shader_program->setUniform("step", (int) step);
             glDispatchCompute(size, 1, 1);
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+            // put output back into input
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+            glCopyNamedBufferSubData(ssbo_output, ssbo, 0, 0, size * sizeof(uint32_t));
         }
 
         this_prefix_sum_shader_program->unuse();
