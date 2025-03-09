@@ -1,4 +1,4 @@
-#include "cube.hpp"
+#include "system.hpp"
 #include "properties.hpp"
 #include "grammar.h"
 #include "GLFW/glfw3.h"
@@ -14,15 +14,15 @@ constexpr float ROTATION_DISTANCE = 50.0f;
 constexpr float ROTATION_HEIGHT = 1.0f;
 
 
-class CubeDrawable : public Drawable {
+class SystemDrawable : public Drawable {
 public:
 
-    explicit CubeDrawable(const Viewport &viewport, const std::shared_ptr<View> &view, const std::string &grammarPath)
+    explicit SystemDrawable(const Viewport &viewport, const std::shared_ptr<View> &view, const std::string &grammarPath)
             : Drawable(viewport, view), grammar(load_grammar(grammarPath)) {
         grammar->print();
     }
 
-    ~CubeDrawable() override = default;
+    ~SystemDrawable() override = default;
 
     void init() override {
         preload_shader_program();
@@ -144,14 +144,14 @@ public:
 private:
 
     void preload_shader_program() {
-        if (!cube_shader_program) {
-            cube_shader_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
-                    Shader{SHADER_PATH("cube.vert"), GL_VERTEX_SHADER},
-                    Shader{SHADER_PATH("cube.geom"), GL_GEOMETRY_SHADER},
-                    Shader{SHADER_PATH("cube.frag"), GL_FRAGMENT_SHADER}
+        if (!system_shader_program) {
+            system_shader_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("system.vert"), GL_VERTEX_SHADER},
+                    Shader{SHADER_PATH("system.geom"), GL_GEOMETRY_SHADER},
+                    Shader{SHADER_PATH("system.frag"), GL_FRAGMENT_SHADER}
             });
         }
-        this->shader_program = cube_shader_program;
+        this->shader_program = system_shader_program;
     }
 
     GrammarPtr grammar;
@@ -163,12 +163,12 @@ private:
     GLuint ssbo_translations{};
     GLuint instance_translations_count = -1;
 
-    static std::shared_ptr<ShaderProgram> cube_shader_program;
+    static std::shared_ptr<ShaderProgram> system_shader_program;
 };
 
-std::shared_ptr<ShaderProgram> CubeDrawable::cube_shader_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::system_shader_program = nullptr;
 
-void register_cube(Application &application, ContextPtr &context) {
+void register_system(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {
         return Viewport{
                 .left = 0,
@@ -187,14 +187,14 @@ void register_cube(Application &application, ContextPtr &context) {
             ROTATION_HEIGHT
     );
 
-    auto the_cube = std::make_shared<CubeDrawable>(
+    auto the_system = std::make_shared<SystemDrawable>(
             viewport_function(application),
             rotation_view,
             context->grammar_path
     );
 
     application.add_component(
-            the_cube,
+            the_system,
             viewport_function
     );
 

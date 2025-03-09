@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "constants.hpp"
 #include "properties.hpp"
-#include "cube.hpp"
+#include "system.hpp"
 #include "args.hpp"
 
 int main(int argc, char *argv[]) {
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
                 OPENGL_MAJOR_VERSION,
                 OPENGL_MINOR_VERSION
         };
-        register_cube(application, context);
+        register_system(application, context);
         application.run();
     } catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;

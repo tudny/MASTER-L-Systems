@@ -9,8 +9,8 @@ set(
         EXECUTABLE_SOURCES
         src/main.cpp
         src/constants.hpp
-        src/cube.cpp
-        src/cube.hpp
+        src/system.cpp
+        src/system.hpp
         src/baseline.cpp
         src/baseline.hpp
         src/args.cpp
