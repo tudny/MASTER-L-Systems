@@ -1,0 +1,55 @@
+#version 430
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+layout(std430, binding = 0) buffer ProductionOffsets {
+    int offsets[];
+};
+
+layout(std430, binding = 1) buffer ProductionSizes {
+    int sizes[];
+};
+
+layout(std430, binding = 2) buffer Productions {
+    int productions[];
+};
+
+layout(std430, binding = 3) buffer InputBuffer {
+    int inputBuffer[];
+};
+
+layout(std430, binding = 4) buffer InputOffsetBuffer {
+    int inputOffsetBuffer[];
+};
+
+layout(std430, binding = 5) buffer OutputBuffer {
+    int outputBuffer[];
+};
+
+void main() {
+    // my invocation id
+    uint index = gl_GlobalInvocationID.x;
+    // letter to transform
+    int letter = inputBuffer[index];
+
+    // size of the production
+    int productionSize = sizes[letter];
+    // where to look to a production in productions
+    int productionOffset = offsets[letter];
+
+    if (productionSize < 0 || productionOffset < 0) {
+        // if the production size is negative, it means that the letter transforms to itself
+        // inputOffsetBuffer[index] - 1 because inputOffsetBuffer[index] points to the end of our result space
+        outputBuffer[inputOffsetBuffer[index] - 1] = letter;
+    }
+
+    // where to start my result
+    int resultIdx = inputOffsetBuffer[index] - productionSize;
+
+    // walk through the production
+    for (int produtionIt = productionOffset; produtionIt < productionOffset + productionSize; produtionIt++) {
+        // place the production in the output buffer
+        outputBuffer[resultIdx] = productions[produtionIt];
+        resultIdx++;
+    }
+}

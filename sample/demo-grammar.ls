@@ -2,12 +2,9 @@ step:=10
 depth:=5
 delta:=18.0
 --
-P
+abcd
 --
-P -> i+[P+L]--//[--l]i[++l]-[PL]++PL
-i -> Fs[//&&l][//^^l]Fs
-s -> sFs
-l -> ['{+f-ff-f+|+f-ff-f}]
-L -> [&&&p'/w////w////w////w////w]
-p -> FF
-w -> ['^F][{&&&&-f+f|-f+f}]
+a -> abcd
+b -> abc
+c -> ab
+d -> a

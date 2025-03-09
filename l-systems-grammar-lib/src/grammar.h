@@ -21,6 +21,8 @@ using PropertiesPtr = std::shared_ptr<Properties>;
 class Axiom {
 public:
     std::string axiom;
+
+    std::vector<int32_t> get_as_opengl_data() const;
 };
 
 using AxiomPtr = std::shared_ptr<Axiom>;

@@ -275,3 +275,11 @@ std::optional<std::string> Grammar::get_production(char predecessor) {
     }
     return it->second;
 }
+
+std::vector<int32_t> Axiom::get_as_opengl_data() const {
+    std::vector<int32_t> data(axiom.size());
+    for (size_t i = 0; i < axiom.size(); i++) {
+        data[i] = (int) axiom[i];
+    }
+    return data;
+}
