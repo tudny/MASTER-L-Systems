@@ -45,7 +45,7 @@ public:
 
     std::optional<std::string> get_production(char predecessor);
 
-    void print();
+    void print(std::ostream &os = std::cout);
 
     std::string cpu_produce();
 

@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <cstring>
 #include <utility>
+#include <iomanip>
+#include <cmath>
 #include "grammar.h"
 #include "str_utils.h"
 #include "memory_utils.h"
@@ -144,18 +146,33 @@ GrammarPtr load_grammar(const std::string &path) {
     return builder.build();
 }
 
-void Grammar::print() {
-    std::cout << "Properties:" << std::endl;
+void Grammar::print(std::ostream &os) {
+    auto sep = [](size_t n) { return std::string(n, ' '); };
+    os << "Grammar{" << std::endl;
+    os << sep(1) << "Properties{" << std::endl;
     for (const auto &prop: this->properties) {
-        std::cout << prop.name << " := " << prop.value << std::endl;
+        os << sep(2) << prop.name << " := " << prop.value;
+        // if prop.name in REQUIRED_PROPS print (REQUIRED)
+        if (std::find(std::begin(REQUIRED_PROPS), std::end(REQUIRED_PROPS), prop.name) != std::end(REQUIRED_PROPS)) {
+            os << " (required)";
+        } else {
+            os << " (optional)";
+        }
+        os << std::endl;
     }
+    os << sep(1) << "}" << std::endl;
 
-    std::cout << "Axiom: " << this->axiom.axiom << std::endl;
+    os << sep(1) << "Axiom{" << std::endl;
+    os << sep(2) << "length := " << this->axiom.axiom.size() << std::endl;
+    os << sep(2) << "axiom := " << this->axiom.axiom << std::endl;
+    os << sep(1) << "}" << std::endl;
 
-    std::cout << "Productions:" << std::endl;
+    os << sep(1) << "Productions{" << std::endl;
     for (const auto &prod: this->productions) {
-        std::cout << prod.predecessor << " -> " << prod.successor << std::endl;
+        os << sep(2) << prod.predecessor << " -> " << prod.successor << std::endl;
     }
+    os << sep(1) << "}" << std::endl;
+    os << "}" << std::endl;
 }
 
 PropertiesPtr Grammar::get_properties() {
@@ -225,13 +242,13 @@ static void collect_result(Grammar &grammar, char *previous_result, size_t previ
 
 std::string Grammar::cpu_produce() {
     size_t result_size = axiom.axiom.size();
-    char *result = (char*) safe_calloc(result_size, sizeof(char));
+    char *result = (char *) safe_calloc(result_size, sizeof(char));
     std::memcpy(result, axiom.axiom.c_str(), axiom.axiom.size());
 
     size_t steps = get_property_size_t("depth");
     for (size_t i = 0; i < steps; i++) {
         size_t new_size = collect_size(*this, result, result_size);
-        char *new_result = (char*) safe_calloc(new_size, sizeof(char));
+        char *new_result = (char *) safe_calloc(new_size, sizeof(char));
         collect_result(*this, result, result_size, new_result);
         safe_free(reinterpret_cast<void **>(&result));
         result = new_result;

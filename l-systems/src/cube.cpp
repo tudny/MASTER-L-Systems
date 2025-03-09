@@ -18,7 +18,9 @@ class CubeDrawable : public Drawable {
 public:
 
     explicit CubeDrawable(const Viewport &viewport, const std::shared_ptr<View> &view, const std::string &grammarPath)
-            : Drawable(viewport, view), grammar(load_grammar(grammarPath)) {}
+            : Drawable(viewport, view), grammar(load_grammar(grammarPath)) {
+        grammar->print();
+    }
 
     ~CubeDrawable() override = default;
 

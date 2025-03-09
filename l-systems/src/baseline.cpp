@@ -200,16 +200,6 @@ std::vector<glm::mat4> TempSpace::grammar_instances(const GrammarPtr& grammar) {
     auto move_back_up = glm::translate(glm::mat4(1.0), glm::vec3(0.5f, 0.0f, 0.0f));
     auto translation = move_down * scale_y_by_step * move_back_up;
 
-    std::cout << "translation:" << std::endl;
-    std::cout << "move_down" << std::endl;
-    print_mat4(move_down);
-    std::cout << "scale_y_by_step" << std::endl;
-    print_mat4(scale_y_by_step);
-    std::cout << "move_back_up" << std::endl;
-    print_mat4(move_back_up);
-    std::cout << "translation" << std::endl;
-    print_mat4(translation);
-
     std::stack<MatrixTree::TransformationMatrix> instances_stack;
     bool is_filling = false;
 
