@@ -21,8 +21,9 @@ using PropertiesPtr = std::shared_ptr<Properties>;
 class Axiom {
 public:
     std::string axiom;
+    std::vector<size_t> look_back;
 
-    std::vector<int32_t> get_as_opengl_data() const;
+    [[nodiscard]] std::vector<int32_t> get_as_opengl_data() const;
 };
 
 using AxiomPtr = std::shared_ptr<Axiom>;
@@ -31,9 +32,10 @@ class Production {
 public:
     char predecessor;
     std::string successor;
+    std::vector<size_t> look_back;
 };
 
-using Productions = std::unordered_map<decltype(Production::predecessor), decltype(Production::successor)>;
+using Productions = std::unordered_map<decltype(Production::predecessor), std::tuple<decltype(Production::successor), decltype(Production::look_back)>>;
 using ProductionsPtr = std::shared_ptr<Productions>;
 
 class Grammar {
@@ -45,7 +47,8 @@ public:
     float get_property_float(const std::string &name);
     size_t get_property_size_t(const std::string &name);
 
-    std::optional<std::string> get_production(char predecessor);
+    std::optional<std::tuple<std::string, std::vector<size_t>>> get_production(char predecessor);
+    std::optional<std::string> get_production_successor(char predecessor);
 
     void print(std::ostream &os = std::cout);
 

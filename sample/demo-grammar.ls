@@ -1,13 +1,10 @@
-step:=10
-depth:=5
-delta:=18.0
+step:=20
+depth:=2
+delta:=45
+downset:=100
 --
 P
 --
-P -> i+[P+L]--//[--l]i[++l]-[PL]++PL
-i -> Fs[//&&l][//^^l]Fs
-s -> sFs
-l ->['{+f-ff-f+|+f-ff-f}]
-L -> [&&&p'/w////w////w////w////w]
-p -> FF
-w -> ['^F][{&&&&-f+f|-f+f}]
+P -> F[+P]F[-P]F
+F -> FF
+A -> F[A[F[A[F]A]F]F]F[A[F]A[A]F]F

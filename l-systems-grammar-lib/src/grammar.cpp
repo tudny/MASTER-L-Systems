@@ -7,6 +7,7 @@
 #include <utility>
 #include <iomanip>
 #include <cmath>
+#include <stack>
 #include "grammar.h"
 #include "str_utils.h"
 #include "memory_utils.h"
@@ -25,12 +26,12 @@ public:
         properties.push_back({name, value});
     }
 
-    void set_axiom(const std::string &_axiom) {
-        this->axiom = {_axiom};
+    void set_axiom(const std::string &_axiom, const std::vector<size_t> &look_back) {
+        this->axiom = {_axiom, look_back};
     }
 
-    void add_production(char predecessor, const std::string &successor) {
-        productions.push_back({predecessor, successor});
+    void add_production(char predecessor, const std::string &successor, std::vector<size_t> look_back) {
+        productions.push_back({predecessor, successor, look_back});
     }
 
     GrammarPtr build() {
@@ -78,6 +79,25 @@ enum ParseState {
 //L -> +RF−LFL−FR+
 //R -> −LF+RFR+FL−
 GrammarPtr load_grammar(const std::string &path) {
+    auto compute_lookback = [](std::string &successor) {
+        std::vector<size_t> look_back(successor.size(), 0);
+        std::stack<size_t> stack;
+
+        for (size_t i = 0; i < successor.size(); i++) {
+            if (successor[i] == '[') {
+                stack.push(i);
+            } else if (successor[i] == ']') {
+                if (stack.empty()) {
+                    throw std::runtime_error("Unbalanced brackets in successor: " + successor);
+                }
+                look_back[i] = i - stack.top();
+                stack.pop();
+            }
+        }
+
+        return look_back;
+    };
+
     GrammarBuilder builder{};
 
     std::string line;
@@ -124,7 +144,7 @@ GrammarPtr load_grammar(const std::string &path) {
                 break;
             }
             case AXIOM:
-                builder.set_axiom(line);
+                builder.set_axiom(line, compute_lookback(line));
                 break;
             case PRODUCTION: {
                 auto pos = line.find(PRODUCTION_SEPARATOR);
@@ -137,7 +157,8 @@ GrammarPtr load_grammar(const std::string &path) {
                     throw std::runtime_error("Predecessor must be a single char, but got: " + predecessor);
                 }
                 std::string successor = trim(line.substr(pos + strlen(PRODUCTION_SEPARATOR)));
-                builder.add_production(predecessor[0], successor);
+                auto look_back = compute_lookback(successor);
+                builder.add_production(predecessor[0], successor, look_back);
                 break;
             }
         }
@@ -148,6 +169,17 @@ GrammarPtr load_grammar(const std::string &path) {
 
 void Grammar::print(std::ostream &os) {
     auto sep = [](size_t n) { return std::string(n, ' '); };
+    auto print_lookback = [&](auto &look_back) {
+        os << sep(3) << "look_back := [";
+        for (size_t i = 0; i < look_back.size(); i++) {
+            os << look_back[i];
+            if (i != look_back.size() - 1) {
+                os << ", ";
+            }
+        }
+        os << "]" << std::endl;
+    };
+
     os << "Grammar{" << std::endl;
     os << sep(1) << "Properties{" << std::endl;
     for (const auto &prop: this->properties) {
@@ -165,11 +197,13 @@ void Grammar::print(std::ostream &os) {
     os << sep(1) << "Axiom{" << std::endl;
     os << sep(2) << "length := " << this->axiom.axiom.size() << std::endl;
     os << sep(2) << "axiom := " << this->axiom.axiom << std::endl;
+    print_lookback(this->axiom.look_back);
     os << sep(1) << "}" << std::endl;
 
     os << sep(1) << "Productions{" << std::endl;
     for (const auto &prod: this->productions) {
         os << sep(2) << prod.predecessor << " -> " << prod.successor << std::endl;
+        print_lookback(prod.look_back);
     }
     os << sep(1) << "}" << std::endl;
     os << "}" << std::endl;
@@ -199,7 +233,7 @@ ProductionsPtr Grammar::get_productions() {
     if (!_prods) {
         _prods = std::make_shared<Productions>();
         for (const auto &prod: this->productions) {
-            _prods->insert({prod.predecessor, prod.successor});
+            _prods->insert({prod.predecessor, {prod.successor, prod.look_back}});
         }
     }
     return _prods;
@@ -215,7 +249,7 @@ static size_t collect_size(Grammar &grammar, char *previous_result, size_t previ
     size_t result_size = 0;
 
     for (size_t i = 0; i < previous_size; i++) {
-        auto production = grammar.get_production(previous_result[i]);
+        auto production = grammar.get_production_successor(previous_result[i]);
         if (!production.has_value()) {
             result_size++;
             continue;
@@ -230,7 +264,7 @@ static void collect_result(Grammar &grammar, char *previous_result, size_t previ
     size_t result_size = 0;
 
     for (size_t i = 0; i < previous_size; i++) {
-        auto production = grammar.get_production(previous_result[i]);
+        auto production = grammar.get_production_successor(previous_result[i]);
         if (!production.has_value()) {
             result[result_size++] = previous_result[i];
             continue;
@@ -268,12 +302,20 @@ size_t Grammar::get_property_size_t(const std::string &name) {
     return static_cast<size_t>(get_property_float(name));
 }
 
-std::optional<std::string> Grammar::get_production(char predecessor) {
+std::optional<std::tuple<std::string, std::vector<size_t>>> Grammar::get_production(char predecessor) {
     auto it = get_productions()->find(predecessor);
     if (it == get_productions()->end()) {
         return {};
     }
     return it->second;
+}
+
+std::optional<std::string> Grammar::get_production_successor(char predecessor) {
+    auto production = get_production(predecessor);
+    if (!production.has_value()) {
+        return {};
+    }
+    return std::get<0>(*production);
 }
 
 std::vector<int32_t> Axiom::get_as_opengl_data() const {

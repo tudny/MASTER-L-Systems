@@ -172,11 +172,13 @@ std::vector<glm::mat4> TempSpace::grammar_instances(const GrammarPtr& grammar) {
     float delta = glm::radians(grammar->get_property_float("delta"));
     float step = grammar->get_property_float("step");
 
+    float downset = grammar->get_property_float("downset");
+
     auto init = Turtle::State{
             glm::vec3(0, 1, 0),
             glm::vec3(-1, 0, 0),
             glm::vec3(0, 0, 1),
-            glm::vec3(0, -300.0, 0)
+            glm::vec3(0, -downset, 0)
     };
 
     auto movement_mappings = std::unordered_map<char, MatrixTree::TransformationMatrix>{

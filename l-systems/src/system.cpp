@@ -194,14 +194,16 @@ private:
         std::vector<SIZE> productions_sizes(required_ascii_size, -1);
 
         SIZE length_so_far = 0;
-        for (const auto &[from, to]: *grammar->get_productions()) {
+        for (const auto &[from, to_and_lookback]: *grammar->get_productions()) {
+            auto &[to, _] = to_and_lookback;
             productions_offsets[from] = length_so_far;
             productions_sizes[from] = to.size();
             length_so_far += to.size();
         }
 
         std::vector<SIZE> productions(length_so_far);
-        for (const auto &[from, to]: *grammar->get_productions()) {
+        for (const auto &[from, to_and_lookback]: *grammar->get_productions()) {
+            auto &[to, _] = to_and_lookback;
             std::copy(to.begin(), to.end(), productions.begin() + productions_offsets[from]);
         }
 
@@ -230,6 +232,11 @@ private:
     }
 
     void run_compute() {
+        run_str_compute();
+        run_instance_compute();
+    }
+
+    void run_str_compute() {
 
         GLuint ssbo_previous_result_buffer;
         glGenBuffers(1, &ssbo_previous_result_buffer);
@@ -353,6 +360,10 @@ private:
 //        for (size_t i = 0; i < result_buffer_size; i++) {
 //            std::cout << "data[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
 //        }
+    }
+
+    void run_instance_compute() {
+
     }
 
     void run_prefix_sum(GLuint ssbo, size_t size) {
