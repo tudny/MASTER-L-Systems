@@ -1,5 +1,5 @@
 step:=20
-depth:=3
+depth:=2
 delta:=45
 downset:=100
 --

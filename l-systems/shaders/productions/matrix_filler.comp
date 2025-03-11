@@ -1,0 +1,91 @@
+#version 430
+
+#define M_PI 3.1415926535897932384626433832795
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+uniform float delta;
+uniform float step;
+
+layout(std430, binding = 0) readonly buffer InputBuffer {
+    int inputBuffer[];
+};
+
+layout(std430, binding = 1) buffer Output {
+    mat4 result[];
+};
+
+mat4 move_forward() {
+    return mat4(
+    vec4(1.0, 0.0, 0.0, 0.0),
+    vec4(0.0, 1.0, 0.0, 0.0),
+    vec4(0.0, 0.0, 1.0, step),
+    vec4(0.0, 0.0, 0.0, 1.0)
+    );
+}
+
+mat4 rotate_over_heading(float angle) {
+    return mat4(
+    vec4(1.0, 0.0, 0.0, 0.0),
+    vec4(0.0, cos(angle), -sin(angle), 0.0),
+    vec4(0.0, sin(angle), cos(angle), 0.0),
+    vec4(0.0, 0.0, 0.0, 1.0)
+    );
+}
+
+mat4 rotate_over_left(float angle) {
+    return mat4(
+    vec4(cos(angle), 0.0, -sin(angle), 0.0),
+    vec4(0.0, 1.0, 0.0, 0.0),
+    vec4(sin(angle), 0.0, cos(angle), 0.0),
+    vec4(0.0, 0.0, 0.0, 1.0)
+    );
+}
+
+mat4 rotate_over_up(float angle) {
+    return mat4(
+    vec4(cos(angle), sin(angle), 0.0, 0.0),
+    vec4(-sin(angle), cos(angle), 0.0, 0.0),
+    vec4(0.0, 0.0, 1.0, 0.0),
+    vec4(0.0, 0.0, 0.0, 1.0)
+    );
+}
+
+mat4 identity() {
+    return mat4(
+    vec4(1.0, 0.0, 0.0, 0.0),
+    vec4(0.0, 1.0, 0.0, 0.0),
+    vec4(0.0, 0.0, 1.0, 0.0),
+    vec4(0.0, 0.0, 0.0, 1.0)
+    );
+}
+
+mat4 giveTransformationMatrix(int letter) {
+    switch (letter) {
+        case 70:// F
+        case 102:// f
+        return move_forward();
+        case 43:// +
+        return rotate_over_up(delta);
+        case 45:// -
+        return rotate_over_up(-delta);
+        case 38:// &
+        return rotate_over_left(delta);
+        case 94:// ^
+        return rotate_over_left(-delta);
+        case 47:// /
+        return rotate_over_heading(delta);
+        case 92:// \
+        return rotate_over_heading(-delta);
+        case 124:// |
+        return rotate_over_up(M_PI);
+    }
+
+    return identity();
+}
+
+void main() {
+    int index = int(gl_GlobalInvocationID.x);
+    int letter = inputBuffer[index];
+    result[index] = giveTransformationMatrix(letter);
+}

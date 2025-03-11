@@ -183,8 +183,21 @@ private:
                     Shader{SHADER_PATH("productions/size.comp"), GL_COMPUTE_SHADER}
             });
         }
-
         this_size_shader_program = size_shader_program;
+
+        if (!instance_detector_program) {
+            instance_detector_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("productions/instance_detector.comp"), GL_COMPUTE_SHADER}
+            });
+        }
+        this_instance_detector_program = instance_detector_program;
+
+        if (!matrix_filler_program) {
+            matrix_filler_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("productions/matrix_filler.comp"), GL_COMPUTE_SHADER}
+            });
+        }
+        this_matrix_filler_program = matrix_filler_program;
     }
 
     void prepare_productions_ssbo() {
@@ -465,7 +478,57 @@ private:
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_result_buffer);
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
 
+        this_instance_detector_program->use();
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_next_result_buffer);
 
+        glDispatchCompute(size, 1, 1);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        this_instance_detector_program->unuse();
+
+        run_prefix_sum(ssbo_next_result_buffer, size);
+
+        // get the count of instances
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_result_buffer);
+        int32_t drawable_instances_count;
+        glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, (size - 1) * sizeof(uint32_t), sizeof(uint32_t), &drawable_instances_count);
+
+        std::cout << "Drawable instances count: " << drawable_instances_count << std::endl;
+
+
+        this_matrix_filler_program->use();
+        auto step = grammar->get_property_float("step");
+        auto delta_in_angles = grammar->get_property_float("delta");
+        auto delta = glm::radians(delta_in_angles);
+        this_matrix_filler_program->setUniform("step", step);
+        this_matrix_filler_program->setUniform("delta", delta);
+
+        GLuint result_ssbo;
+        glGenBuffers(1, &result_ssbo);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, result_ssbo);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, result_ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+
+        glDispatchCompute(size, 1, 1);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+        // check matrices in result_ssbo
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, result_ssbo);
+        auto matrices = (glm::mat4 *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+        for (size_t i = 0; i < size; i++) {
+            std::cout << "Matrix[" << i << "]: " << std::endl;
+            for (size_t j = 0; j < 4; j++) {
+                for (size_t k = 0; k < 4; k++) {
+                    std::cout << matrices[i][j][k] << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
+
+        std::exit(1);
+
+        // END test
     }
 
     GrammarPtr grammar;
@@ -488,21 +551,28 @@ private:
     GLuint ssbo_next_result_buffer{};
     GLuint ssbo_previous_look_back_buffer{};
     GLuint ssbo_next_look_back_buffer{};
+//    GLuint ssbo_instances_matrices{};
 
     std::shared_ptr<ShaderProgram> this_production_shader_program;
     std::shared_ptr<ShaderProgram> this_prefix_sum_shader_program;
     std::shared_ptr<ShaderProgram> this_size_shader_program;
+    std::shared_ptr<ShaderProgram> this_instance_detector_program;
+    std::shared_ptr<ShaderProgram> this_matrix_filler_program;
 
     static std::shared_ptr<ShaderProgram> system_shader_program;
     static std::shared_ptr<ShaderProgram> production_shader_program;
     static std::shared_ptr<ShaderProgram> prefix_sum_shader_program;
     static std::shared_ptr<ShaderProgram> size_shader_program;
+    static std::shared_ptr<ShaderProgram> instance_detector_program;
+    static std::shared_ptr<ShaderProgram> matrix_filler_program;
 };
 
 std::shared_ptr<ShaderProgram> SystemDrawable::system_shader_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::production_shader_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::prefix_sum_shader_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::size_shader_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::instance_detector_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::matrix_filler_program = nullptr;
 
 void register_system(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {
