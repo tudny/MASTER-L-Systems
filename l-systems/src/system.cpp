@@ -253,6 +253,9 @@ private:
         glGenBuffers(1, &ssbo_offset_buffer);
         GLuint ssbo_next_result_buffer;
         glGenBuffers(1, &ssbo_next_result_buffer);
+        GLuint ssbo_previous_look_back_buffer, ssbo_next_look_back_buffer;
+        glGenBuffers(1, &ssbo_previous_look_back_buffer);
+        glGenBuffers(1, &ssbo_next_look_back_buffer);
 
         // BEGIN init data - put axiom into previous result buffer
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
@@ -260,6 +263,12 @@ private:
         auto axiom_size = axiom_data.size();
         glBufferData(GL_SHADER_STORAGE_BUFFER, axiom_data.size() * sizeof(decltype(axiom_data)::value_type),
                      axiom_data.data(), GL_STATIC_DRAW);
+
+        // put axiom look_back into previous look_back buffer
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_look_back_buffer);
+        auto axiom_look_back_data = grammar->get_axiom()->look_back;
+        glBufferData(GL_SHADER_STORAGE_BUFFER, axiom_look_back_data.size() * sizeof(decltype(axiom_look_back_data)::value_type),
+                     axiom_look_back_data.data(), GL_STATIC_DRAW);
 
         size_t result_buffer_size = axiom_size;
         // END init data
@@ -275,6 +284,14 @@ private:
 //            auto *data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
 //            for (size_t i = 0; i < result_buffer_size; i++) {
 //                std::cout << "prev[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
+//            }
+//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+            // print prev lookback
+//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_look_back_buffer);
+//            auto prev_look_back_data = (int32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//            for (size_t i = 0; i < result_buffer_size; i++) {
+//                std::cout << "prev_lb[" << i << "] = " << prev_look_back_data[i] << std::endl;
 //            }
 //            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
@@ -307,9 +324,9 @@ private:
             run_prefix_sum(ssbo_offset_buffer, result_buffer_size);
 
             // print prefix sum
-//            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//            auto ps_data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
 //            for (size_t i = 0; i < result_buffer_size; i++) {
-//                std::cout << "prefix_sum[" << i << "] = " << data[i] << std::endl;
+//                std::cout << "prefix_sum[" << i << "] = " << ps_data[i] << std::endl;
 //            }
 //            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
@@ -324,7 +341,10 @@ private:
             // generate productions for each letter into next result buffer
             this_production_shader_program->use();
 
+            // make space for next result buffer
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_result_buffer);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, result_buffer_size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_look_back_buffer);
             glBufferData(GL_SHADER_STORAGE_BUFFER, result_buffer_size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
 
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_productions_offsets);
@@ -334,6 +354,8 @@ private:
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_offset_buffer);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo_next_result_buffer);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, ssbo_productions_look_backs);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, ssbo_previous_look_back_buffer);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, ssbo_next_look_back_buffer);
 
             glDispatchCompute(result_buffer_size, 1, 1);
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -342,16 +364,31 @@ private:
 
             // print new result
 //            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_result_buffer);
-//            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//            auto next_data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
 //            for (size_t i = 0; i < result_buffer_size; i++) {
-//                std::cout << "next[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
+//                std::cout << "next[" << i << "] = " << next_data[i] << "(" << (char) next_data[i] << ")" << std::endl;
 //            }
 //            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+            // print new lookback
+//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_look_back_buffer);
+//            auto look_back_data = (int32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//            for (size_t i = 0; i < result_buffer_size; i++) {
+//                std::cout << "look_back[" << i << "] = " << look_back_data[i] << std::endl;
+//            }
+//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
 
             // copy data from next result buffer to previous result buffer
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
             glBufferData(GL_SHADER_STORAGE_BUFFER, result_buffer_size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
             glCopyNamedBufferSubData(ssbo_next_result_buffer, ssbo_previous_result_buffer, 0, 0,
+                                     result_buffer_size * sizeof(uint32_t));
+
+            // copy look_backs from next look_back buffer to previous look_back buffer
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_look_back_buffer);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, result_buffer_size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
+            glCopyNamedBufferSubData(ssbo_next_look_back_buffer, ssbo_previous_look_back_buffer, 0, 0,
                                      result_buffer_size * sizeof(uint32_t));
 
 //            // print ssbo_previous_result_buffer
@@ -365,11 +402,28 @@ private:
 
         // check data
 
-//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
-//        auto *data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//        for (size_t i = 0; i < result_buffer_size; i++) {
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
+        auto *data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+        std::cout << "\"";
+        for (size_t i = 0; i < result_buffer_size; i++) {
+            std::cout << (char) data[i];
 //            std::cout << "data[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
-//        }
+        }
+        std::cout << "\"" << std::endl;
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_look_back_buffer);
+        auto *look_back_data = (int32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+        std::cout << "[";
+        for (size_t i = 0; i < result_buffer_size; i++) {
+            std::cout << look_back_data[i] << ", ";
+//            std::cout << "lb[" << i << "] = " << look_back_data[i] << std::endl;
+        }
+        std::cout << "]" << std::endl;
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+        std::exit(1);
+
     }
 
     void run_instance_compute() {

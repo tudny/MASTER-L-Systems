@@ -14,10 +14,6 @@ layout(std430, binding = 2) buffer Productions {
     int productions[];
 };
 
-layout(std430, binding = 6) buffer ProductionLookBacks {
-    int lookBacks[];
-};
-
 layout(std430, binding = 3) buffer InputBuffer {
     int inputBuffer[];
 };
@@ -30,9 +26,21 @@ layout(std430, binding = 5) buffer OutputBuffer {
     int outputBuffer[];
 };
 
+layout(std430, binding = 6) buffer ProductionLookBacks {
+    int lookBacks[];
+};
+
+layout(std430, binding = 7) buffer InputLookBackBuffer {
+    int inputLookBackBuffer[];
+};
+
+layout(std430, binding = 8) buffer OutputLookBackBuffer {
+    int outputLookBackBuffer[];
+};
+
 void main() {
     // my invocation id
-    uint index = gl_GlobalInvocationID.x;
+    int index = int(gl_GlobalInvocationID.x);
     // letter to transform
     int letter = inputBuffer[index];
 
@@ -44,7 +52,18 @@ void main() {
     if (productionSize < 0 || productionOffset < 0) {
         // if the production size is negative, it means that the letter transforms to itself
         // inputOffsetBuffer[index] - 1 because inputOffsetBuffer[index] points to the end of our result space
-        outputBuffer[inputOffsetBuffer[index] - 1] = letter;
+        int resultIdx = inputOffsetBuffer[index] - 1;
+        outputBuffer[resultIdx] = letter;
+        // We account the calculations for both brackets
+        if (letter == 93 /* ] */ || letter == 91 /* [ */) {
+            // LB_{p+1}(x) = SP_{p}[x] - SP_{p}[LB_{p}(x)]
+            int my_PS = inputOffsetBuffer[index] - 1;
+            int lookBackIndex = index + inputLookBackBuffer[index];
+            int my_lookBack_PS = inputOffsetBuffer[lookBackIndex] - 1;
+            int lookBackValue = my_lookBack_PS - my_PS;
+            outputLookBackBuffer[resultIdx] = lookBackValue;
+        }
+        return;
     }
 
     // where to start my result
@@ -54,6 +73,8 @@ void main() {
     for (int produtionIt = productionOffset; produtionIt < productionOffset + productionSize; produtionIt++) {
         // place the production in the output buffer
         outputBuffer[resultIdx] = productions[produtionIt];
+        // place the look back in the output look back buffer
+        outputLookBackBuffer[resultIdx] = lookBacks[produtionIt];
         resultIdx++;
     }
 }
