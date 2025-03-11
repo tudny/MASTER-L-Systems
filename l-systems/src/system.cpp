@@ -396,6 +396,8 @@ private:
 //            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
         }
 
+        ssbo_word_length = result_buffer_size;
+
         // check data
 //
 //        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
@@ -420,7 +422,10 @@ private:
     }
 
     void run_instance_compute() {
+        // ssbo_previous_result_buffer, ssbo_previous_look_back_buffer
+        // produced word, and produced look_back
 
+        count_drawable_instances(ssbo_previous_result_buffer, ssbo_word_length);
     }
 
     void run_prefix_sum(GLuint ssbo, size_t size) {
@@ -454,6 +459,15 @@ private:
         this_prefix_sum_shader_program->unuse();
     }
 
+    void count_drawable_instances(GLuint ssbo, size_t size) {
+        // reuse ssbo_next_result_buffer for counting
+        // resize buffer to the size of the word
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_result_buffer);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
+
+
+    }
+
     GrammarPtr grammar;
 
     GLuint vao{};
@@ -462,6 +476,8 @@ private:
     GLuint ibo{};
     GLuint ssbo_translations{};
     GLuint instance_translations_count = -1;
+
+    size_t ssbo_word_length{};
 
     GLuint ssbo_productions_offsets{};
     GLuint ssbo_productions_sizes{};
