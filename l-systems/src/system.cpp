@@ -238,6 +238,12 @@ private:
                      look_backs.data(), GL_STATIC_DRAW);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_productions_look_backs);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        glGenBuffers(1, &ssbo_previous_result_buffer);
+        glGenBuffers(1, &ssbo_offset_buffer);
+        glGenBuffers(1, &ssbo_next_result_buffer);
+        glGenBuffers(1, &ssbo_previous_look_back_buffer);
+        glGenBuffers(1, &ssbo_next_look_back_buffer);
     }
 
     void run_compute() {
@@ -246,16 +252,6 @@ private:
     }
 
     void run_str_compute() {
-
-        GLuint ssbo_previous_result_buffer;
-        glGenBuffers(1, &ssbo_previous_result_buffer);
-        GLuint ssbo_offset_buffer;
-        glGenBuffers(1, &ssbo_offset_buffer);
-        GLuint ssbo_next_result_buffer;
-        glGenBuffers(1, &ssbo_next_result_buffer);
-        GLuint ssbo_previous_look_back_buffer, ssbo_next_look_back_buffer;
-        glGenBuffers(1, &ssbo_previous_look_back_buffer);
-        glGenBuffers(1, &ssbo_next_look_back_buffer);
 
         // BEGIN init data - put axiom into previous result buffer
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
@@ -421,9 +417,6 @@ private:
         }
         std::cout << "]" << std::endl;
         glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
-        std::exit(1);
-
     }
 
     void run_instance_compute() {
@@ -456,6 +449,8 @@ private:
             glCopyNamedBufferSubData(ssbo_output, ssbo, 0, 0, size * sizeof(uint32_t));
         }
 
+        glDeleteBuffers(1, &ssbo_output);
+
         this_prefix_sum_shader_program->unuse();
     }
 
@@ -472,6 +467,11 @@ private:
     GLuint ssbo_productions_sizes{};
     GLuint ssbo_productions_look_backs{};
     GLuint ssbo_productions{};
+    GLuint ssbo_previous_result_buffer{};
+    GLuint ssbo_offset_buffer{};
+    GLuint ssbo_next_result_buffer{};
+    GLuint ssbo_previous_look_back_buffer{};
+    GLuint ssbo_next_look_back_buffer{};
 
     std::shared_ptr<ShaderProgram> this_production_shader_program;
     std::shared_ptr<ShaderProgram> this_prefix_sum_shader_program;
