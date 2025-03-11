@@ -5,18 +5,46 @@
 #include <filesystem>
 #include <cstring>
 #include <utility>
-#include <iomanip>
-#include <cmath>
 #include <stack>
 #include "grammar.h"
 #include "str_utils.h"
 #include "memory_utils.h"
+
+const char STACK_OPENING_BRACKET = '[';
+const char STACK_CLOSING_BRACKET = ']';
 
 const char *ALLOWED_OPERATORS = "+-&^/\\|Ff[]";
 constexpr const char *REQUIRED_PROPS[] = {"delta", "step", "depth"};
 
 constexpr const char *PROPERTY_SEPARATOR = ":=";
 constexpr const char *PRODUCTION_SEPARATOR = "->";
+
+/*
+ * We define look_back table as the look-up for the tree nodes in the generated L-system word
+ * For now we limit the size of the produced words to 2^31 - 1
+ * Negative look_back indicates that the opening bracket is n steps before us
+ * Positive look_back indicates that the closing bracket is n steps ahead of us
+ * */
+static std::vector<int32_t> compute_look_back(std::string &successor) {
+    std::vector<int32_t> look_back(successor.size(), 0);
+    std::stack<int32_t> stack;
+
+    for (int32_t i = 0; i < static_cast<int32_t>(successor.size()); i++) {
+        if (successor[i] == STACK_OPENING_BRACKET) {
+            stack.push(i);
+        } else if (successor[i] == STACK_CLOSING_BRACKET) {
+            if (stack.empty()) {
+                throw std::runtime_error("Unbalanced brackets in successor: " + successor);
+            }
+            auto matching_open_bracket = stack.top();
+            stack.pop();
+            look_back[i] = matching_open_bracket - i;
+            look_back[matching_open_bracket] = i - matching_open_bracket;
+        }
+    }
+
+    return look_back;
+}
 
 class GrammarBuilder {
 public:
@@ -26,12 +54,12 @@ public:
         properties.push_back({name, value});
     }
 
-    void set_axiom(const std::string &_axiom, const std::vector<size_t> &look_back) {
+    void set_axiom(const std::string &_axiom, const LookBackTable &look_back) {
         this->axiom = {_axiom, look_back};
     }
 
-    void add_production(char predecessor, const std::string &successor, std::vector<size_t> look_back) {
-        productions.push_back({predecessor, successor, look_back});
+    void add_production(char predecessor, const std::string &successor, LookBackTable look_back) {
+        productions.push_back({predecessor, successor, std::move(look_back)});
     }
 
     GrammarPtr build() {
@@ -79,25 +107,6 @@ enum ParseState {
 //L -> +RF−LFL−FR+
 //R -> −LF+RFR+FL−
 GrammarPtr load_grammar(const std::string &path) {
-    auto compute_lookback = [](std::string &successor) {
-        std::vector<size_t> look_back(successor.size(), 0);
-        std::stack<size_t> stack;
-
-        for (size_t i = 0; i < successor.size(); i++) {
-            if (successor[i] == '[') {
-                stack.push(i);
-            } else if (successor[i] == ']') {
-                if (stack.empty()) {
-                    throw std::runtime_error("Unbalanced brackets in successor: " + successor);
-                }
-                look_back[i] = i - stack.top();
-                stack.pop();
-            }
-        }
-
-        return look_back;
-    };
-
     GrammarBuilder builder{};
 
     std::string line;
@@ -144,7 +153,7 @@ GrammarPtr load_grammar(const std::string &path) {
                 break;
             }
             case AXIOM:
-                builder.set_axiom(line, compute_lookback(line));
+                builder.set_axiom(line, compute_look_back(line));
                 break;
             case PRODUCTION: {
                 auto pos = line.find(PRODUCTION_SEPARATOR);
@@ -157,7 +166,7 @@ GrammarPtr load_grammar(const std::string &path) {
                     throw std::runtime_error("Predecessor must be a single char, but got: " + predecessor);
                 }
                 std::string successor = trim(line.substr(pos + strlen(PRODUCTION_SEPARATOR)));
-                auto look_back = compute_lookback(successor);
+                auto look_back = compute_look_back(successor);
                 builder.add_production(predecessor[0], successor, look_back);
                 break;
             }
@@ -302,7 +311,7 @@ size_t Grammar::get_property_size_t(const std::string &name) {
     return static_cast<size_t>(get_property_float(name));
 }
 
-std::optional<std::tuple<std::string, std::vector<size_t>>> Grammar::get_production(char predecessor) {
+std::optional<std::tuple<std::string, LookBackTable>> Grammar::get_production(char predecessor) {
     auto it = get_productions()->find(predecessor);
     if (it == get_productions()->end()) {
         return {};
