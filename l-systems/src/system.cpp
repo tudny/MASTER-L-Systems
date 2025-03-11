@@ -188,7 +188,7 @@ private:
     }
 
     void prepare_productions_ssbo() {
-        using SIZE = uint32_t;
+        using SIZE = int32_t;
         SIZE required_ascii_size = 128;
         std::vector<SIZE> productions_offsets(required_ascii_size, -1);
         std::vector<SIZE> productions_sizes(required_ascii_size, -1);
@@ -202,9 +202,11 @@ private:
         }
 
         std::vector<SIZE> productions(length_so_far);
+        std::vector<SIZE> look_backs(length_so_far);
         for (const auto &[from, to_and_lookback]: *grammar->get_productions()) {
-            auto &[to, _] = to_and_lookback;
+            auto &[to, lookback] = to_and_lookback;
             std::copy(to.begin(), to.end(), productions.begin() + productions_offsets[from]);
+            std::copy(lookback.begin(), lookback.end(), look_backs.begin() + productions_offsets[from]);
         }
 
         glGenBuffers(1, &ssbo_productions_offsets);
@@ -228,6 +230,13 @@ private:
         glBufferData(GL_SHADER_STORAGE_BUFFER, productions.size() * sizeof(decltype(productions)::value_type),
                      productions.data(), GL_STATIC_DRAW);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_productions);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        glGenBuffers(1, &ssbo_productions_look_backs);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_productions_look_backs);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, look_backs.size() * sizeof(decltype(look_backs)::value_type),
+                     look_backs.data(), GL_STATIC_DRAW);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_productions_look_backs);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
@@ -324,6 +333,7 @@ private:
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_previous_result_buffer);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_offset_buffer);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo_next_result_buffer);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, ssbo_productions_look_backs);
 
             glDispatchCompute(result_buffer_size, 1, 1);
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -406,6 +416,7 @@ private:
 
     GLuint ssbo_productions_offsets{};
     GLuint ssbo_productions_sizes{};
+    GLuint ssbo_productions_look_backs{};
     GLuint ssbo_productions{};
 
     std::shared_ptr<ShaderProgram> this_production_shader_program;
