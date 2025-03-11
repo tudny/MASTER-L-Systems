@@ -397,26 +397,26 @@ private:
         }
 
         // check data
-
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
-        auto *data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-        std::cout << "\"";
-        for (size_t i = 0; i < result_buffer_size; i++) {
-            std::cout << (char) data[i];
-//            std::cout << "data[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
-        }
-        std::cout << "\"" << std::endl;
-        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_look_back_buffer);
-        auto *look_back_data = (int32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-        std::cout << "[";
-        for (size_t i = 0; i < result_buffer_size; i++) {
-            std::cout << look_back_data[i] << ", ";
-//            std::cout << "lb[" << i << "] = " << look_back_data[i] << std::endl;
-        }
-        std::cout << "]" << std::endl;
-        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+//
+//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
+//        auto *data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//        std::cout << "\"";
+//        for (size_t i = 0; i < result_buffer_size; i++) {
+//            std::cout << (char) data[i];
+////            std::cout << "data[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
+//        }
+//        std::cout << "\"" << std::endl;
+//        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+//
+//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_look_back_buffer);
+//        auto *look_back_data = (int32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//        std::cout << "[";
+//        for (size_t i = 0; i < result_buffer_size; i++) {
+//            std::cout << look_back_data[i] << ", ";
+////            std::cout << "lb[" << i << "] = " << look_back_data[i] << std::endl;
+//        }
+//        std::cout << "]" << std::endl;
+//        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     }
 
     void run_instance_compute() {

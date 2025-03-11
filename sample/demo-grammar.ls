@@ -5,5 +5,5 @@ downset:=100
 --
 P
 --
-P -> F[+P[&F]]F[-P[&F]]F
+P -> F[+P[&F]]F[-P[^F]]F
 F -> FF
