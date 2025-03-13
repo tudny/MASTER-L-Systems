@@ -75,7 +75,7 @@ mat4 giveTransformationMatrix(int letter) {
         return rotate_over_left(-delta);
         case 47:// /
         return rotate_over_heading(delta);
-        case 92:// \
+        case 92:// backslash
         return rotate_over_heading(-delta);
         case 124:// |
         return rotate_over_up(M_PI);
