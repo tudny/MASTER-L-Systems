@@ -304,7 +304,12 @@ std::string Grammar::cpu_produce() {
 }
 
 float Grammar::get_property_float(const std::string &name) {
-    return get_properties()->at(name);
+    // Defaults to 0
+    auto it = get_properties()->find(name);
+    if (it == get_properties()->end()) {
+        return 0;
+    }
+    return it->second;
 }
 
 size_t Grammar::get_property_size_t(const std::string &name) {

@@ -29,7 +29,7 @@ public:
         preload_compute_shader_program();
 
         std::string result = grammar->cpu_produce();
-        std::cout << "Result: " << result << std::endl;
+        // std::cout << "Result: " << result << std::endl;
 
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
@@ -493,7 +493,7 @@ private:
         int32_t drawable_instances_count;
         glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, (size - 1) * sizeof(uint32_t), sizeof(uint32_t), &drawable_instances_count);
 
-        std::cout << "Drawable instances count: " << drawable_instances_count << std::endl;
+        // std::cout << "Drawable instances count: " << drawable_instances_count << std::endl;
 
 
         this_matrix_filler_program->use();
@@ -514,19 +514,20 @@ private:
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
         // check matrices in result_ssbo
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, result_ssbo);
-        auto matrices = (glm::mat4 *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-        for (size_t i = 0; i < size; i++) {
-            std::cout << "Matrix[" << i << "]: " << std::endl;
-            for (size_t j = 0; j < 4; j++) {
-                for (size_t k = 0; k < 4; k++) {
-                    std::cout << matrices[i][j][k] << " ";
-                }
-                std::cout << std::endl;
-            }
-        }
+//         glBindBuffer(GL_SHADER_STORAGE_BUFFER, result_ssbo);
+//         auto matrices = (glm::mat4 *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//         for (size_t i = 0; i < size; i++) {
+//            std::cout << "Matrix[" << i << "]: " << std::endl;
+//            for (size_t j = 0; j < 4; j++) {
+//                for (size_t k = 0; k < 4; k++) {
+//                    std::cout << matrices[i][j][k] << " ";
+//                }
+//                std::cout << std::endl;
+//            }
+//        }
+//        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
-        std::exit(1);
+        // std::exit(1);
 
         // END test
     }
