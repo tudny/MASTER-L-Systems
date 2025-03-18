@@ -43,6 +43,10 @@ static std::vector<int32_t> compute_look_back(std::string &successor) {
         }
     }
 
+    if (!stack.empty()) {
+        throw std::runtime_error("Unbalanced brackets in successor: " + successor);
+    }
+
     return look_back;
 }
 

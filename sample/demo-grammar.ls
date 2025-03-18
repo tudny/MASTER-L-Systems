@@ -1,11 +1,9 @@
-step:=10
+step:=4
 depth:=5
-delta:=22.5
+delta:=30
 downset:=50
 --
-A
+aAa
 --
-A -> [&FL!A]/////'[&FL!A]///////'[&FL!A]
-F -> S/////F
-S -> FL
-L -> ['''^^{-f+f+f-|-f+f+f}]
+A -> D[+A][&A][-A][^A]
+D -> DFF
