@@ -1,0 +1,40 @@
+#version 430
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+// this buffer is bigger, as number of letters is bigger
+layout(std430, binding = 0) readonly buffer InputTransformations {
+    mat4 inputTransformations[];
+};
+
+// this buffer is smaller, as number of instances is smaller
+layout(std430, binding = 1) buffer OutputTransformation {
+    mat4 outputTransformations[];
+};
+
+// offsets for each instance - inclusive prefix sum of instance so far
+layout(std430, binding = 2) readonly buffer OffsetsInput {
+    int offsetsInput[];
+};
+
+uniform mat4 common_turtle_matrix;
+uniform mat4 common_cube_matrix;
+
+void main() {
+    int index = int(gl_GlobalInvocationID.x);
+
+    if (
+        // I'm either the first one or I'm not F
+        (index == 0 && offsetsInput[0] == 0)
+        ||
+        // or I'm not F as I didn't add 1 to the sum
+        (offsetsInput[index] == offsetsInput[index - 1])
+    ) {
+        return;
+    }
+
+    // only if I'm F
+    int hoManyInstancesBeforeMe = offsetsInput[index] - 1;
+    // rewrite from input to output
+    outputTransformations[hoManyInstancesBeforeMe] = transpose(inputTransformations[index] * common_turtle_matrix) * common_cube_matrix;
+}

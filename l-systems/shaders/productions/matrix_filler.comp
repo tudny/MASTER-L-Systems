@@ -17,9 +17,9 @@ layout(std430, binding = 1) buffer Output {
 
 mat4 move_forward() {
     return mat4(
-    vec4(1.0, 0.0, 0.0, 0.0),
+    vec4(1.0, 0.0, 0.0, step),
     vec4(0.0, 1.0, 0.0, 0.0),
-    vec4(0.0, 0.0, 1.0, step),
+    vec4(0.0, 0.0, 1.0, 0.0),
     vec4(0.0, 0.0, 0.0, 1.0)
     );
 }

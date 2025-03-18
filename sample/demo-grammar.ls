@@ -1,9 +1,9 @@
-step:=4
+step:=5
 depth:=5
 delta:=30
 downset:=50
 --
-aAa
+P
 --
-A -> D[+A][&A][-A][^A]
-D -> DFF
+P -> D[+P][&P][^P][-P]F
+D -> DDF

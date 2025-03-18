@@ -4,6 +4,7 @@
 #include "GLFW/glfw3.h"
 #include "baseline.hpp"
 #include "args.hpp"
+#include "debug.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <utility>
@@ -99,16 +100,10 @@ public:
 //        };
 
 //        std::vector<glm::mat4> instances = TempSpace::sample_instances();
-        std::vector<glm::mat4> instances = TempSpace::grammar_instances(grammar);
+//        std::vector<glm::mat4> instances = TempSpace::grammar_instances(grammar);
+//
+//        instance_translations_count = instances.size();
 
-        instance_translations_count = instances.size();
-
-        glGenBuffers(1, &ssbo_translations);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, instances.size() * sizeof(decltype(instances)::value_type),
-                     instances.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_translations);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         glEnableVertexAttribArray(0);
 
@@ -198,6 +193,22 @@ private:
             });
         }
         this_matrix_filler_program = matrix_filler_program;
+
+        if (!matrix_multiplier_program) {
+            matrix_multiplier_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("productions/prefix_matrix.comp"), GL_COMPUTE_SHADER}
+            });
+        }
+
+        this_matrix_multiplier_program = matrix_multiplier_program;
+
+        if (!instance_placer_program) {
+            instance_placer_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("productions/instance_placer.comp"), GL_COMPUTE_SHADER}
+            });
+        }
+
+        this_instance_placer_program = instance_placer_program;
     }
 
     void prepare_productions_ssbo() {
@@ -438,7 +449,7 @@ private:
         // ssbo_previous_result_buffer, ssbo_previous_look_back_buffer
         // produced word, and produced look_back
 
-        count_drawable_instances(ssbo_previous_result_buffer, ssbo_word_length);
+        init_transformations(ssbo_previous_result_buffer, ssbo_word_length);
     }
 
     void run_prefix_sum(GLuint ssbo, size_t size) {
@@ -472,7 +483,7 @@ private:
         this_prefix_sum_shader_program->unuse();
     }
 
-    void count_drawable_instances(GLuint ssbo, size_t size) {
+    void init_transformations(GLuint ssbo, size_t size) {
         // reuse ssbo_next_result_buffer for counting
         // resize buffer to the size of the word
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_result_buffer);
@@ -493,8 +504,7 @@ private:
         int32_t drawable_instances_count;
         glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, (size - 1) * sizeof(uint32_t), sizeof(uint32_t), &drawable_instances_count);
 
-        // std::cout << "Drawable instances count: " << drawable_instances_count << std::endl;
-
+//        std::cout << "Drawable instances count: " << drawable_instances_count << std::endl;
 
         this_matrix_filler_program->use();
         auto step = grammar->get_property_float("step");
@@ -503,18 +513,63 @@ private:
         this_matrix_filler_program->setUniform("step", step);
         this_matrix_filler_program->setUniform("delta", delta);
 
-        GLuint result_ssbo;
-        glGenBuffers(1, &result_ssbo);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, result_ssbo);
+        GLuint transformations_input_ssbo;
+        glGenBuffers(1, &transformations_input_ssbo);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, transformations_input_ssbo);
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, result_ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, transformations_input_ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
 
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
-        // check matrices in result_ssbo
-//         glBindBuffer(GL_SHADER_STORAGE_BUFFER, result_ssbo);
+        this_matrix_filler_program->unuse();
+
+        GLuint transformations_output_ssbo;
+        glGenBuffers(1, &transformations_output_ssbo);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, transformations_output_ssbo);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+
+        // init input jumps to be LookBack table
+        GLuint ssbo_input_jumps;
+        glGenBuffers(1, &ssbo_input_jumps);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_input_jumps);
+        // copy ssbo_previous_look_back_buffer into ssbo_input_jumps
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(int32_t), nullptr, GL_STATIC_DRAW);
+        glCopyNamedBufferSubData(ssbo_previous_look_back_buffer, ssbo_input_jumps, 0, 0, size * sizeof(int32_t));
+
+        // init output jumps to be LookBack table
+        GLuint ssbo_output_jumps;
+        glGenBuffers(1, &ssbo_output_jumps);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_output_jumps);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(int32_t), nullptr, GL_STATIC_DRAW);
+
+
+        this_matrix_multiplier_program->use();
+        // bind buffers for prefix matrix run
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, transformations_input_ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, transformations_output_ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_input_jumps);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_output_jumps);
+
+        // overestimate epochs to be ceil of log2 of size
+        // no more epochs needed than all nodes in the tree
+        auto epochs = (size_t) ceil(log2((double) size));
+        for (size_t epoch = 0; epoch <= epochs; ++epoch) {
+
+            // run the compute
+            this_matrix_multiplier_program->setUniform("epoch", (int) epoch);
+            glDispatchCompute(size, 1, 1);
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+            // copy output into output for both jumps and transformations
+            glCopyNamedBufferSubData(ssbo_output_jumps, ssbo_input_jumps, 0, 0, size * sizeof(int32_t));
+            glCopyNamedBufferSubData(transformations_output_ssbo, transformations_input_ssbo, 0, 0, size * sizeof(glm::mat4));
+        }
+        this_matrix_multiplier_program->unuse();
+
+        // check matrices in transformations_input_ssbo
+//         glBindBuffer(GL_SHADER_STORAGE_BUFFER, transformations_input_ssbo);
 //         auto matrices = (glm::mat4 *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
 //         for (size_t i = 0; i < size; i++) {
 //            std::cout << "Matrix[" << i << "]: " << std::endl;
@@ -526,8 +581,62 @@ private:
 //            }
 //        }
 //        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+        instance_translations_count = drawable_instances_count;
+
+        glGenBuffers(1, &ssbo_translations);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, instance_translations_count * sizeof(glm::mat4),
+                     nullptr, GL_STATIC_DRAW);
+
+        // place instances
+        this_instance_placer_program->use();
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, transformations_input_ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_translations);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_next_result_buffer);
+
+        float downset = grammar->get_property_float("downset");
+        glm::mat4 common_turtle_matrix = glm::transpose(glm::mat4{
+            0, 1, 0, 0,
+            -1, 0, 0, 0,
+            0, 0, 1, 0,
+            0, -downset, 0, 1
+        });
+
+        std::cout << "My turtle matrix" << std::endl;
+        print_mat4(common_turtle_matrix);
+
+        auto move_down = glm::translate(glm::mat4(1.0), glm::vec3(-0.5f, 0.0, 0.0f));
+        auto scale_y_by_step = glm::scale(glm::mat4(1.0), glm::vec3(-step, 1.0f, 1.0f));
+        auto move_back_up = glm::translate(glm::mat4(1.0), glm::vec3(0.5f, 0.0f, 0.0f));
+        auto translation = move_down * scale_y_by_step * move_back_up;
+
+        this_instance_placer_program->setUniform("common_turtle_matrix", common_turtle_matrix);
+        this_instance_placer_program->setUniform("common_cube_matrix", translation);
+
+        glDispatchCompute(size, 1, 1);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        this_instance_placer_program->unuse();
+
+        std::cout << "Size of the string produced: " << size << std::endl;
+        std::cout << "Number of instances: " << drawable_instances_count << std::endl;
 
         // std::exit(1);
+
+        // TEST
+
+        std::vector<glm::mat4> expected_instances = TempSpace::grammar_instances(grammar);
+        std::cout << "Expected instances count: " << expected_instances.size() << std::endl;
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
+        auto *data = (glm::mat4 *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+        for (size_t i = 0; i < instance_translations_count; i++) {
+            std::cout << "Instance[" << i << "]: " << std::endl;
+            print_mat4(data[i]);
+            std::cout << "Expected instance[" << i << "]: " << std::endl;
+            print_mat4(expected_instances[i]);
+        }
+
+//        std::exit(1);
 
         // END test
     }
@@ -559,6 +668,8 @@ private:
     std::shared_ptr<ShaderProgram> this_size_shader_program;
     std::shared_ptr<ShaderProgram> this_instance_detector_program;
     std::shared_ptr<ShaderProgram> this_matrix_filler_program;
+    std::shared_ptr<ShaderProgram> this_matrix_multiplier_program;
+    std::shared_ptr<ShaderProgram> this_instance_placer_program;
 
     static std::shared_ptr<ShaderProgram> system_shader_program;
     static std::shared_ptr<ShaderProgram> production_shader_program;
@@ -566,6 +677,8 @@ private:
     static std::shared_ptr<ShaderProgram> size_shader_program;
     static std::shared_ptr<ShaderProgram> instance_detector_program;
     static std::shared_ptr<ShaderProgram> matrix_filler_program;
+    static std::shared_ptr<ShaderProgram> matrix_multiplier_program;
+    static std::shared_ptr<ShaderProgram> instance_placer_program;
 };
 
 std::shared_ptr<ShaderProgram> SystemDrawable::system_shader_program = nullptr;
@@ -574,6 +687,8 @@ std::shared_ptr<ShaderProgram> SystemDrawable::prefix_sum_shader_program = nullp
 std::shared_ptr<ShaderProgram> SystemDrawable::size_shader_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::instance_detector_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::matrix_filler_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::matrix_multiplier_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::instance_placer_program = nullptr;
 
 void register_system(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {
