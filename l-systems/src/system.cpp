@@ -268,6 +268,11 @@ private:
         glGenBuffers(1, &ssbo_next_result_buffer);
         glGenBuffers(1, &ssbo_previous_look_back_buffer);
         glGenBuffers(1, &ssbo_next_look_back_buffer);
+        glGenBuffers(1, &transformations_input_ssbo);
+        glGenBuffers(1, &transformations_output_ssbo);
+        glGenBuffers(1, &ssbo_input_jumps);
+        glGenBuffers(1, &ssbo_output_jumps);
+        glGenBuffers(1, &ssbo_translations);
     }
 
     void run_compute() {
@@ -513,8 +518,6 @@ private:
         this_matrix_filler_program->setUniform("step", step);
         this_matrix_filler_program->setUniform("delta", delta);
 
-        GLuint transformations_input_ssbo;
-        glGenBuffers(1, &transformations_input_ssbo);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, transformations_input_ssbo);
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, transformations_input_ssbo);
@@ -525,22 +528,16 @@ private:
 
         this_matrix_filler_program->unuse();
 
-        GLuint transformations_output_ssbo;
-        glGenBuffers(1, &transformations_output_ssbo);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, transformations_output_ssbo);
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
 
         // init input jumps to be LookBack table
-        GLuint ssbo_input_jumps;
-        glGenBuffers(1, &ssbo_input_jumps);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_input_jumps);
         // copy ssbo_previous_look_back_buffer into ssbo_input_jumps
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(int32_t), nullptr, GL_STATIC_DRAW);
         glCopyNamedBufferSubData(ssbo_previous_look_back_buffer, ssbo_input_jumps, 0, 0, size * sizeof(int32_t));
 
         // init output jumps to be LookBack table
-        GLuint ssbo_output_jumps;
-        glGenBuffers(1, &ssbo_output_jumps);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_output_jumps);
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(int32_t), nullptr, GL_STATIC_DRAW);
 
@@ -583,7 +580,6 @@ private:
 //        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
         instance_translations_count = drawable_instances_count;
 
-        glGenBuffers(1, &ssbo_translations);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
         glBufferData(GL_SHADER_STORAGE_BUFFER, instance_translations_count * sizeof(glm::mat4),
                      nullptr, GL_STATIC_DRAW);
@@ -602,8 +598,8 @@ private:
             0, -downset, 0, 1
         });
 
-        std::cout << "My turtle matrix" << std::endl;
-        print_mat4(common_turtle_matrix);
+//        std::cout << "My turtle matrix" << std::endl;
+//        print_mat4(common_turtle_matrix);
 
         auto move_down = glm::translate(glm::mat4(1.0), glm::vec3(-0.5f, 0.0, 0.0f));
         auto scale_y_by_step = glm::scale(glm::mat4(1.0), glm::vec3(-step, 1.0f, 1.0f));
@@ -617,24 +613,24 @@ private:
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         this_instance_placer_program->unuse();
 
-        std::cout << "Size of the string produced: " << size << std::endl;
-        std::cout << "Number of instances: " << drawable_instances_count << std::endl;
+//        std::cout << "Size of the string produced: " << size << std::endl;
+//        std::cout << "Number of instances: " << drawable_instances_count << std::endl;
 
         // std::exit(1);
 
         // TEST
 
-        std::vector<glm::mat4> expected_instances = TempSpace::grammar_instances(grammar);
-        std::cout << "Expected instances count: " << expected_instances.size() << std::endl;
+//        std::vector<glm::mat4> expected_instances = TempSpace::grammar_instances(grammar);
+//        std::cout << "Expected instances count: " << expected_instances.size() << std::endl;
 
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
-        auto *data = (glm::mat4 *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-        for (size_t i = 0; i < instance_translations_count; i++) {
-            std::cout << "Instance[" << i << "]: " << std::endl;
-            print_mat4(data[i]);
-            std::cout << "Expected instance[" << i << "]: " << std::endl;
-            print_mat4(expected_instances[i]);
-        }
+//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
+//        auto *data = (glm::mat4 *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+//        for (size_t i = 0; i < instance_translations_count; i++) {
+//            std::cout << "Instance[" << i << "]: " << std::endl;
+//            print_mat4(data[i]);
+//            std::cout << "Expected instance[" << i << "]: " << std::endl;
+//            print_mat4(expected_instances[i]);
+//        }
 
 //        std::exit(1);
 
@@ -661,7 +657,10 @@ private:
     GLuint ssbo_next_result_buffer{};
     GLuint ssbo_previous_look_back_buffer{};
     GLuint ssbo_next_look_back_buffer{};
-//    GLuint ssbo_instances_matrices{};
+    GLuint transformations_input_ssbo{};
+    GLuint transformations_output_ssbo{};
+    GLuint ssbo_input_jumps{};
+    GLuint ssbo_output_jumps{};
 
     std::shared_ptr<ShaderProgram> this_production_shader_program;
     std::shared_ptr<ShaderProgram> this_prefix_sum_shader_program;

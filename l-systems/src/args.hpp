@@ -13,7 +13,7 @@ public:
     ) :
             grammar_path(std::move(grammar_path)),
             working_directory(std::move(working_directory)) {
-//        validate_grammar_path();
+        validate_grammar_path();
     }
 
     void print(std::ostream &ostream = std::cout) const;

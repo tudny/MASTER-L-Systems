@@ -41,7 +41,7 @@ ContextPtr parse_args(int argc, char **argv) {
         exit(1);
     }
 
-    auto context = std::make_shared<Context>(grammar_path.Get(), working_directory);
+    auto context = std::make_shared<Context>(grammar_path.Get(), working_directory.string());
 
     context->print();
 
