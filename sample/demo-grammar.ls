@@ -1,7 +1,7 @@
-step:=1
-depth:=7
+step:=7
+depth:=5
 delta:=18.0
-downset:=100
+downset:=200
 --
 P
 --

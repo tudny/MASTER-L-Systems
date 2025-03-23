@@ -13,6 +13,7 @@
 constexpr float ROTATION_SPEED = 0.5f;
 constexpr float ROTATION_DISTANCE = 50.0f;
 constexpr float ROTATION_HEIGHT = 1.0f;
+constexpr float DOWNSET_FACTOR = 10.0f;
 
 
 class SystemDrawable : public Drawable {
@@ -21,6 +22,7 @@ public:
     explicit SystemDrawable(const Viewport &viewport, const std::shared_ptr<View> &view, const std::string &grammarPath)
             : Drawable(viewport, view), grammar(load_grammar(grammarPath)) {
         grammar->print();
+        downset = grammar->get_property_float("downset");
     }
 
     ~SystemDrawable() override = default;
@@ -145,6 +147,14 @@ public:
         this->shader_program->unuse();
     }
 
+    void move_down() {
+        downset += DOWNSET_FACTOR;
+    }
+
+    void move_up() {
+        downset -= DOWNSET_FACTOR;
+    }
+
 private:
 
     void preload_shader_program() {
@@ -209,6 +219,14 @@ private:
         }
 
         this_instance_placer_program = instance_placer_program;
+
+        if (!leaf_detector_program) {
+            leaf_detector_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("productions/leaf_detector.comp"), GL_COMPUTE_SHADER}
+            });
+        }
+
+        this_leaf_detector_program = leaf_detector_program;
     }
 
     void prepare_productions_ssbo() {
@@ -273,6 +291,7 @@ private:
         glGenBuffers(1, &ssbo_input_jumps);
         glGenBuffers(1, &ssbo_output_jumps);
         glGenBuffers(1, &ssbo_translations);
+        glGenBuffers(1, &ssbo_is_a_leaf_output);
     }
 
     void run_compute() {
@@ -489,6 +508,22 @@ private:
     }
 
     void init_transformations(GLuint ssbo, size_t size) {
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_is_a_leaf_output);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
+
+        this_leaf_detector_program->use();
+        this_leaf_detector_program->setUniform("char_to_find_one", (int) '{');
+        this_leaf_detector_program->setUniform("char_to_find_minus_one", (int) '}');
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_is_a_leaf_output);
+
+        glDispatchCompute(size, 1, 1);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        this_leaf_detector_program->unuse();
+
+        run_prefix_sum(ssbo_is_a_leaf_output, size);
+
         // reuse ssbo_next_result_buffer for counting
         // resize buffer to the size of the word
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_result_buffer);
@@ -497,6 +532,7 @@ private:
         this_instance_detector_program->use();
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_next_result_buffer);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_is_a_leaf_output);
 
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -590,16 +626,12 @@ private:
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_translations);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_next_result_buffer);
 
-        float downset = grammar->get_property_float("downset");
         glm::mat4 common_turtle_matrix = glm::transpose(glm::mat4{
             0, 1, 0, 0,
             -1, 0, 0, 0,
             0, 0, 1, 0,
             0, -downset, 0, 1
         });
-
-//        std::cout << "My turtle matrix" << std::endl;
-//        print_mat4(common_turtle_matrix);
 
         auto move_down = glm::translate(glm::mat4(1.0), glm::vec3(-0.5f, 0.0, 0.0f));
         auto scale_y_by_step = glm::scale(glm::mat4(1.0), glm::vec3(-step, 1.0f, 1.0f));
@@ -646,6 +678,8 @@ private:
     GLuint ssbo_translations{};
     GLuint instance_translations_count = -1;
 
+    float downset{};
+
     size_t ssbo_word_length{};
 
     GLuint ssbo_productions_offsets{};
@@ -661,6 +695,7 @@ private:
     GLuint transformations_output_ssbo{};
     GLuint ssbo_input_jumps{};
     GLuint ssbo_output_jumps{};
+    GLuint ssbo_is_a_leaf_output{};
 
     std::shared_ptr<ShaderProgram> this_production_shader_program;
     std::shared_ptr<ShaderProgram> this_prefix_sum_shader_program;
@@ -669,6 +704,7 @@ private:
     std::shared_ptr<ShaderProgram> this_matrix_filler_program;
     std::shared_ptr<ShaderProgram> this_matrix_multiplier_program;
     std::shared_ptr<ShaderProgram> this_instance_placer_program;
+    std::shared_ptr<ShaderProgram> this_leaf_detector_program;
 
     static std::shared_ptr<ShaderProgram> system_shader_program;
     static std::shared_ptr<ShaderProgram> production_shader_program;
@@ -678,6 +714,7 @@ private:
     static std::shared_ptr<ShaderProgram> matrix_filler_program;
     static std::shared_ptr<ShaderProgram> matrix_multiplier_program;
     static std::shared_ptr<ShaderProgram> instance_placer_program;
+    static std::shared_ptr<ShaderProgram> leaf_detector_program;
 };
 
 std::shared_ptr<ShaderProgram> SystemDrawable::system_shader_program = nullptr;
@@ -688,6 +725,7 @@ std::shared_ptr<ShaderProgram> SystemDrawable::instance_detector_program = nullp
 std::shared_ptr<ShaderProgram> SystemDrawable::matrix_filler_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::matrix_multiplier_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::instance_placer_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::leaf_detector_program = nullptr;
 
 void register_system(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {
@@ -719,13 +757,40 @@ void register_system(Application &application, ContextPtr &context) {
             viewport_function
     );
 
-    application.get_window().set_key_callback([&application, rotation_view](int key, int, int action, int) {
+    application.get_window().set_key_callback([&application, rotation_view, the_system](int key, int, int action, int) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(application.get_window().get_window(), GLFW_TRUE);
         }
 
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
             rotation_view->switch_on_off();
+        }
+
+        static bool is_up_pressed = false;
+        static bool is_down_pressed = false;
+
+        if (key == GLFW_KEY_UP) {
+            if (action == GLFW_PRESS) {
+                is_up_pressed = true;
+            } else if (action == GLFW_RELEASE) {
+                is_up_pressed = false;
+            }
+        }
+
+        if (is_up_pressed) {
+            the_system->move_up();
+        }
+
+        if (key == GLFW_KEY_DOWN) {
+            if (action == GLFW_PRESS) {
+                is_down_pressed = true;
+            } else if (action == GLFW_RELEASE) {
+                is_down_pressed = false;
+            }
+        }
+
+        if (is_down_pressed) {
+            the_system->move_down();
         }
     });
 

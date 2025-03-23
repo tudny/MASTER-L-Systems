@@ -1,10 +1,11 @@
 #version 430
 
 #define DRAWABLE_CHAR 70 /* F */
+#define DRAWABLE_CHAR_CONDITIONAL 102 /* f */
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 0) buffer InputBuffer {
+layout(std430, binding = 0) readonly buffer InputBuffer {
     int inputBuffer[];
 };
 
@@ -12,10 +13,14 @@ layout(std430, binding = 1) buffer OutputBuffer {
     int outputBuffer[];
 };
 
+layout(std430, binding = 2) readonly buffer IfLeafbuffer {
+    int ifLeafBuffer[];
+};
+
 void main() {
     uint index = gl_GlobalInvocationID.x;
 
-    if (inputBuffer[index] == DRAWABLE_CHAR) {
+    if (inputBuffer[index] == DRAWABLE_CHAR || (inputBuffer[index] == DRAWABLE_CHAR_CONDITIONAL && ifLeafBuffer[index] == 1)) {
         outputBuffer[index] = 1;
     } else {
         outputBuffer[index] = 0;
