@@ -20,16 +20,17 @@ layout(std430, binding = 2) readonly buffer OffsetsInput {
 uniform mat4 common_turtle_matrix;
 uniform mat4 common_cube_matrix;
 
+int mySumFactor(int index) {
+    if (index == 0) {
+        return offsetsInput[0];
+    }
+    return offsetsInput[index] - offsetsInput[index - 1];
+}
+
 void main() {
     int index = int(gl_GlobalInvocationID.x);
 
-    if (
-        // I'm either the first one or I'm not F
-        (index == 0 && offsetsInput[0] == 0)
-        ||
-        // or I'm not F as I didn't add 1 to the sum
-        (offsetsInput[index] == offsetsInput[index - 1])
-    ) {
+    if (mySumFactor(index) == 0) {
         return;
     }
 

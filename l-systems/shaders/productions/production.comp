@@ -56,7 +56,6 @@ void main() {
         outputBuffer[resultIdx] = letter;
         // We account the calculations for both brackets
         if (letter == 93 /* ] */ || letter == 91 /* [ */) {
-            // LB_{p+1}(x) = SP_{p}[x] - SP_{p}[LB_{p}(x)]
             int my_PS = inputOffsetBuffer[index] - 1;
             int lookBackIndex = index + inputLookBackBuffer[index];
             int my_lookBack_PS = inputOffsetBuffer[lookBackIndex] - 1;
