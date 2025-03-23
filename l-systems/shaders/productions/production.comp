@@ -61,6 +61,8 @@ void main() {
             int my_lookBack_PS = inputOffsetBuffer[lookBackIndex] - 1;
             int lookBackValue = my_lookBack_PS - my_PS;
             outputLookBackBuffer[resultIdx] = lookBackValue;
+        } else {
+            outputLookBackBuffer[resultIdx] = inputLookBackBuffer[index];
         }
         return;
     }
