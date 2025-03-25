@@ -12,12 +12,34 @@
 
 const char STACK_OPENING_BRACKET = '[';
 const char STACK_CLOSING_BRACKET = ']';
+const char LEAF_OPENING_BRACKET = '{';
+const char LEAF_CLOSING_BRACKET = '}';
 
-const char *ALLOWED_OPERATORS = "+-&^/\\|Ff[]";
 constexpr const char *REQUIRED_PROPS[] = {"delta", "step", "depth"};
 
 constexpr const char *PROPERTY_SEPARATOR = ":=";
 constexpr const char *PRODUCTION_SEPARATOR = "->";
+
+/*
+ * ASCII codes for
+ * [ = 01011011
+ * ] = 01011101
+ * { = 01111011
+ * } = 01111101
+ *
+ * Maps [ -> ] and ] -> [ and { -> } and } -> { by bit manipulation
+ * */
+constexpr char matching_bracket(const char bracket) {
+    return (char)(((int) bracket) ^ 0b0110);
+}
+
+constexpr bool is_opening_bracket(const char bracket) {
+    return bracket == STACK_OPENING_BRACKET || bracket == LEAF_OPENING_BRACKET;
+}
+
+constexpr bool is_closing_bracket(const char bracket) {
+    return bracket == STACK_CLOSING_BRACKET || bracket == LEAF_CLOSING_BRACKET;
+}
 
 /*
  * We define look_back table as the look-up for the tree nodes in the generated L-system word
@@ -27,19 +49,22 @@ constexpr const char *PRODUCTION_SEPARATOR = "->";
  * */
 static std::vector<int32_t> compute_look_back(std::string &successor) {
     std::vector<int32_t> look_back(successor.size(), 0);
-    std::stack<int32_t> stack;
+    std::stack<std::pair<int32_t, char>> stack;
 
     for (int32_t i = 0; i < static_cast<int32_t>(successor.size()); i++) {
-        if (successor[i] == STACK_OPENING_BRACKET) {
-            stack.push(i);
-        } else if (successor[i] == STACK_CLOSING_BRACKET) {
+        if (is_opening_bracket(successor[i])) {
+            stack.emplace(i, matching_bracket(successor[i]));
+        } else if (is_closing_bracket(successor[i])) {
             if (stack.empty()) {
                 throw std::runtime_error("Unbalanced brackets in successor: " + successor);
             }
-            auto matching_open_bracket = stack.top();
+            auto [bracket_index, expected_bracket] = stack.top();
+            if (successor[i] != expected_bracket) {
+                throw std::runtime_error("Unbalanced brackets in successor: " + successor);
+            }
             stack.pop();
-            look_back[i] = matching_open_bracket - i;
-            look_back[matching_open_bracket] = i - matching_open_bracket;
+            look_back[i] = bracket_index - i;
+            look_back[bracket_index] = i - bracket_index;
         }
     }
 

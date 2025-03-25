@@ -1,8 +1,8 @@
 step:=10
-depth:=7
+depth:=0
 delta:=22.5
 --
-A
+af{ff+-}A{f+-f}A
 --
 A -> [&FL!A]/////'[&FL!A]///////'[&FL!A]
 F -> S/////F

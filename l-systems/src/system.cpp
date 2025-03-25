@@ -227,6 +227,22 @@ private:
         }
 
         this_leaf_detector_program = leaf_detector_program;
+
+        if (!leaf_edge_detector_program) {
+            leaf_edge_detector_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("leafs/leaf_edge_detector.comp"), GL_COMPUTE_SHADER}
+            });
+        }
+
+        this_leaf_edge_detector_program = leaf_edge_detector_program;
+
+        if (!leaf_begin_detector_program) {
+            leaf_begin_detector_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("leafs/leaf_begin_detector.comp"), GL_COMPUTE_SHADER}
+            });
+        }
+
+        this_leaf_begin_detector_program = leaf_begin_detector_program;
     }
 
     void prepare_productions_ssbo() {
@@ -292,6 +308,8 @@ private:
         glGenBuffers(1, &ssbo_output_jumps);
         glGenBuffers(1, &ssbo_translations);
         glGenBuffers(1, &ssbo_is_a_leaf_output);
+        glGenBuffers(1, &ssbo_leaf_edge_counter);
+        glGenBuffers(1, &ssbo_leaf_begin_counter);
     }
 
     void run_compute() {
@@ -512,6 +530,12 @@ private:
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_is_a_leaf_output);
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
 
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_edge_counter);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_begin_counter);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
+
         this_leaf_detector_program->use();
         this_leaf_detector_program->setUniform("char_to_find_one", (int) '{');
         this_leaf_detector_program->setUniform("char_to_find_minus_one", (int) '}');
@@ -523,6 +547,27 @@ private:
         this_leaf_detector_program->unuse();
 
         run_prefix_sum(ssbo_is_a_leaf_output, size);
+
+        this_leaf_edge_detector_program->use();
+        this_leaf_edge_detector_program->setUniform("char_to_find", (int) 'f');
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_is_a_leaf_output);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_leaf_edge_counter);
+        glDispatchCompute(size, 1, 1);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        this_leaf_edge_detector_program->unuse();
+
+        run_prefix_sum(ssbo_leaf_edge_counter, size);
+
+        this_leaf_begin_detector_program->use();
+        this_leaf_begin_detector_program->setUniform("char_to_find", (int) '{');
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_leaf_begin_counter);
+        glDispatchCompute(size, 1, 1);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        this_leaf_begin_detector_program->unuse();
+
+        run_prefix_sum(ssbo_leaf_begin_counter, size);
 
         // reuse ssbo_next_result_buffer for counting
         // resize buffer to the size of the word
@@ -696,6 +741,8 @@ private:
     GLuint ssbo_input_jumps{};
     GLuint ssbo_output_jumps{};
     GLuint ssbo_is_a_leaf_output{};
+    GLuint ssbo_leaf_edge_counter{};
+    GLuint ssbo_leaf_begin_counter{};
 
     std::shared_ptr<ShaderProgram> this_production_shader_program;
     std::shared_ptr<ShaderProgram> this_prefix_sum_shader_program;
@@ -705,6 +752,8 @@ private:
     std::shared_ptr<ShaderProgram> this_matrix_multiplier_program;
     std::shared_ptr<ShaderProgram> this_instance_placer_program;
     std::shared_ptr<ShaderProgram> this_leaf_detector_program;
+    std::shared_ptr<ShaderProgram> this_leaf_edge_detector_program;
+    std::shared_ptr<ShaderProgram> this_leaf_begin_detector_program;
 
     static std::shared_ptr<ShaderProgram> system_shader_program;
     static std::shared_ptr<ShaderProgram> production_shader_program;
@@ -715,6 +764,8 @@ private:
     static std::shared_ptr<ShaderProgram> matrix_multiplier_program;
     static std::shared_ptr<ShaderProgram> instance_placer_program;
     static std::shared_ptr<ShaderProgram> leaf_detector_program;
+    static std::shared_ptr<ShaderProgram> leaf_edge_detector_program;
+    static std::shared_ptr<ShaderProgram> leaf_begin_detector_program;
 };
 
 std::shared_ptr<ShaderProgram> SystemDrawable::system_shader_program = nullptr;
@@ -726,6 +777,8 @@ std::shared_ptr<ShaderProgram> SystemDrawable::matrix_filler_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::matrix_multiplier_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::instance_placer_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_detector_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::leaf_edge_detector_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::leaf_begin_detector_program = nullptr;
 
 void register_system(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {
