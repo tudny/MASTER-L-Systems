@@ -243,6 +243,22 @@ private:
         }
 
         this_leaf_begin_detector_program = leaf_begin_detector_program;
+
+        if (!leaf_metadata_program) {
+            leaf_metadata_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("leafs/leaf_metadata.comp"), GL_COMPUTE_SHADER}
+            });
+        }
+
+        this_leaf_metadata_program = leaf_metadata_program;
+
+        if (!leaf_position_placer_program) {
+            leaf_position_placer_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("leafs/leaf_position_placer.comp"), GL_COMPUTE_SHADER}
+            });
+        }
+
+        this_leaf_position_placer_program = leaf_position_placer_program;
     }
 
     void prepare_productions_ssbo() {
@@ -310,6 +326,9 @@ private:
         glGenBuffers(1, &ssbo_is_a_leaf_output);
         glGenBuffers(1, &ssbo_leaf_edge_counter);
         glGenBuffers(1, &ssbo_leaf_begin_counter);
+        glGenBuffers(1, &ssbo_leaf_metadata_size);
+        glGenBuffers(1, &ssbo_leaf_metadata_offsets);
+        glGenBuffers(1, &ssbo_leaf_positions_vec3);
     }
 
     void run_compute() {
@@ -525,6 +544,18 @@ private:
         this_prefix_sum_shader_program->unuse();
     }
 
+    template<typename T>
+    void print_ssbo(GLuint ssbo, size_t elem_count, const std::string name, std::function<void(T)> printer = [](T t){std::cout << t;}) {
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+        auto *data = (T *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+        for (size_t i = 0; i < elem_count; i++) {
+            std::cout << name << "[" << i << "] = ";
+            printer(data[i]);
+            std::cout << std::endl;
+        }
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    }
+
     void init_transformations(GLuint ssbo, size_t size) {
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_is_a_leaf_output);
@@ -550,6 +581,7 @@ private:
 
         this_leaf_edge_detector_program->use();
         this_leaf_edge_detector_program->setUniform("char_to_find", (int) 'f');
+        this_leaf_edge_detector_program->setUniform("alternative_char_to_find", (int) '{');
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_is_a_leaf_output);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_leaf_edge_counter);
@@ -568,6 +600,29 @@ private:
         this_leaf_begin_detector_program->unuse();
 
         run_prefix_sum(ssbo_leaf_begin_counter, size);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_begin_counter);
+        glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, (size - 1) * sizeof(int32_t), sizeof(int32_t), &leaf_count);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_edge_counter);
+        glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, (size - 1) * sizeof(int32_t), sizeof(int32_t), &leaf_edge_count);
+
+        // reserve space for leaf metadata
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_metadata_size);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_count * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_metadata_offsets);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_count * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
+
+        this_leaf_metadata_program->use();
+        this_leaf_metadata_program->setUniform("char_of_leaf_end", (int) '}');
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_leaf_edge_counter);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_leaf_begin_counter);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_previous_look_back_buffer);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_leaf_metadata_size);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo_leaf_metadata_offsets);
+        glDispatchCompute(size, 1, 1);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        this_leaf_metadata_program->unuse();
 
         // reuse ssbo_next_result_buffer for counting
         // resize buffer to the size of the word
@@ -629,6 +684,7 @@ private:
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, transformations_output_ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_input_jumps);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_output_jumps);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo);
 
         // overestimate epochs to be ceil of log2 of size
         // no more epochs needed than all nodes in the tree
@@ -690,6 +746,26 @@ private:
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         this_instance_placer_program->unuse();
 
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_positions_vec3);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_edge_count * sizeof(glm::vec4), nullptr, GL_DYNAMIC_DRAW);
+
+        this_leaf_position_placer_program->use();
+        this_leaf_position_placer_program->setUniform("char_of_leaf_edge", (int) 'f');
+        this_leaf_position_placer_program->setUniform("alternative_char_of_leaf_edge", (int) '{');
+        this_leaf_position_placer_program->setUniform("common_turtle_matrix", common_turtle_matrix);
+
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_leaf_edge_counter);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, transformations_input_ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_leaf_positions_vec3);
+
+        glDispatchCompute(size, 1, 1);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        this_leaf_position_placer_program->unuse();
+
+//        std::exit(1);
+
 //        std::cout << "Size of the string produced: " << size << std::endl;
 //        std::cout << "Number of instances: " << drawable_instances_count << std::endl;
 
@@ -726,6 +802,8 @@ private:
     float downset{};
 
     size_t ssbo_word_length{};
+    int32_t leaf_count{};
+    int32_t leaf_edge_count{};
 
     GLuint ssbo_productions_offsets{};
     GLuint ssbo_productions_sizes{};
@@ -743,6 +821,9 @@ private:
     GLuint ssbo_is_a_leaf_output{};
     GLuint ssbo_leaf_edge_counter{};
     GLuint ssbo_leaf_begin_counter{};
+    GLuint ssbo_leaf_metadata_size{};
+    GLuint ssbo_leaf_metadata_offsets{};
+    GLuint ssbo_leaf_positions_vec3{};
 
     std::shared_ptr<ShaderProgram> this_production_shader_program;
     std::shared_ptr<ShaderProgram> this_prefix_sum_shader_program;
@@ -754,6 +835,8 @@ private:
     std::shared_ptr<ShaderProgram> this_leaf_detector_program;
     std::shared_ptr<ShaderProgram> this_leaf_edge_detector_program;
     std::shared_ptr<ShaderProgram> this_leaf_begin_detector_program;
+    std::shared_ptr<ShaderProgram> this_leaf_metadata_program;
+    std::shared_ptr<ShaderProgram> this_leaf_position_placer_program;
 
     static std::shared_ptr<ShaderProgram> system_shader_program;
     static std::shared_ptr<ShaderProgram> production_shader_program;
@@ -766,6 +849,8 @@ private:
     static std::shared_ptr<ShaderProgram> leaf_detector_program;
     static std::shared_ptr<ShaderProgram> leaf_edge_detector_program;
     static std::shared_ptr<ShaderProgram> leaf_begin_detector_program;
+    static std::shared_ptr<ShaderProgram> leaf_metadata_program;
+    static std::shared_ptr<ShaderProgram> leaf_position_placer_program;
 };
 
 std::shared_ptr<ShaderProgram> SystemDrawable::system_shader_program = nullptr;
@@ -779,6 +864,8 @@ std::shared_ptr<ShaderProgram> SystemDrawable::instance_placer_program = nullptr
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_detector_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_edge_detector_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_begin_detector_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::leaf_metadata_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::leaf_position_placer_program = nullptr;
 
 void register_system(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {

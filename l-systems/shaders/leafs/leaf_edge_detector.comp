@@ -19,11 +19,16 @@ bool amIInsideALeaf(uint index) {
 }
 
 uniform int char_to_find;
+uniform int alternative_char_to_find;
+
+bool isCharToFind(int letter) {
+    return letter == char_to_find || letter == alternative_char_to_find;
+}
 
 void main() {
     uint index = gl_GlobalInvocationID.x;
 
-    if (inputBuffer[index] == char_to_find && amIInsideALeaf(index)) {
+    if (isCharToFind(inputBuffer[index]) && amIInsideALeaf(index)) {
         outputBuffer[index] = 1;
     } else {
         outputBuffer[index] = 0;
