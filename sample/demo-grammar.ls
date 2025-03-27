@@ -1,6 +1,7 @@
 step:=10
-depth:=0
+depth:=1
 delta:=90
 --
-{f+f+f}
+LfFL
 --
+L -> {f+f+f}

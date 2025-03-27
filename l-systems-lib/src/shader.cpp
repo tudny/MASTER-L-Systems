@@ -210,3 +210,7 @@ void ShaderProgram::setAttribute(const std::string &name, GLint size, GLsizei st
 void ShaderProgram::setAttribute(const std::string &name, GLint size, GLsizei stride, GLuint offset) {
     setAttribute(name, size, stride, offset, GL_FALSE, GL_FLOAT);
 }
+
+void ShaderProgram::setUniform(const std::string &name, uint32_t val) {
+    glUniform1ui(get_uniform(name), val);
+}

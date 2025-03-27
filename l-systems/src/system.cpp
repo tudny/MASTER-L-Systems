@@ -244,14 +244,6 @@ private:
 
         this_leaf_begin_detector_program = leaf_begin_detector_program;
 
-        if (!leaf_metadata_program) {
-            leaf_metadata_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
-                    Shader{SHADER_PATH("leafs/leaf_metadata.comp"), GL_COMPUTE_SHADER}
-            });
-        }
-
-        this_leaf_metadata_program = leaf_metadata_program;
-
         if (!leaf_position_placer_program) {
             leaf_position_placer_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
                     Shader{SHADER_PATH("leafs/leaf_position_placer.comp"), GL_COMPUTE_SHADER}
@@ -326,9 +318,8 @@ private:
         glGenBuffers(1, &ssbo_is_a_leaf_output);
         glGenBuffers(1, &ssbo_leaf_edge_counter);
         glGenBuffers(1, &ssbo_leaf_begin_counter);
-        glGenBuffers(1, &ssbo_leaf_metadata_size);
-        glGenBuffers(1, &ssbo_leaf_metadata_offsets);
         glGenBuffers(1, &ssbo_leaf_positions_vec3);
+        glGenBuffers(1, &ssbo_leaf_index_array);
     }
 
     void run_compute() {
@@ -582,6 +573,7 @@ private:
         this_leaf_edge_detector_program->use();
         this_leaf_edge_detector_program->setUniform("char_to_find", (int) 'f');
         this_leaf_edge_detector_program->setUniform("alternative_char_to_find", (int) '{');
+        this_leaf_edge_detector_program->setUniform("second_alternative_char_to_find", (int) '}');
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_is_a_leaf_output);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_leaf_edge_counter);
@@ -601,28 +593,8 @@ private:
 
         run_prefix_sum(ssbo_leaf_begin_counter, size);
 
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_begin_counter);
-        glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, (size - 1) * sizeof(int32_t), sizeof(int32_t), &leaf_count);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_edge_counter);
         glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, (size - 1) * sizeof(int32_t), sizeof(int32_t), &leaf_edge_count);
-
-        // reserve space for leaf metadata
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_metadata_size);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_count * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_metadata_offsets);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_count * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
-
-        this_leaf_metadata_program->use();
-        this_leaf_metadata_program->setUniform("char_of_leaf_end", (int) '}');
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_leaf_edge_counter);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_leaf_begin_counter);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_previous_look_back_buffer);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_leaf_metadata_size);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo_leaf_metadata_offsets);
-        glDispatchCompute(size, 1, 1);
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        this_leaf_metadata_program->unuse();
 
         // reuse ssbo_next_result_buffer for counting
         // resize buffer to the size of the word
@@ -749,20 +721,29 @@ private:
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_positions_vec3);
         glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_edge_count * sizeof(glm::vec4), nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_index_array);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_edge_count * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
 
         this_leaf_position_placer_program->use();
         this_leaf_position_placer_program->setUniform("char_of_leaf_edge", (int) 'f');
         this_leaf_position_placer_program->setUniform("alternative_char_of_leaf_edge", (int) '{');
+        this_leaf_position_placer_program->setUniform("second_alternative_char_of_leaf_edge", (int) '}');
         this_leaf_position_placer_program->setUniform("common_turtle_matrix", common_turtle_matrix);
+        this_leaf_position_placer_program->setUniform("reset_index_value", (uint32_t) -1);
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_leaf_edge_counter);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, transformations_input_ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_leaf_positions_vec3);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_leaf_index_array);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo_is_a_leaf_output);
 
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         this_leaf_position_placer_program->unuse();
+
+        print_ssbo<uint32_t>(ssbo_leaf_index_array, leaf_edge_count, "leaf_index_array");
+        std::exit(1);
 
 //        std::exit(1);
 
@@ -802,7 +783,6 @@ private:
     float downset{};
 
     size_t ssbo_word_length{};
-    int32_t leaf_count{};
     int32_t leaf_edge_count{};
 
     GLuint ssbo_productions_offsets{};
@@ -821,9 +801,8 @@ private:
     GLuint ssbo_is_a_leaf_output{};
     GLuint ssbo_leaf_edge_counter{};
     GLuint ssbo_leaf_begin_counter{};
-    GLuint ssbo_leaf_metadata_size{};
-    GLuint ssbo_leaf_metadata_offsets{};
     GLuint ssbo_leaf_positions_vec3{};
+    GLuint ssbo_leaf_index_array{};
 
     std::shared_ptr<ShaderProgram> this_production_shader_program;
     std::shared_ptr<ShaderProgram> this_prefix_sum_shader_program;
@@ -835,7 +814,6 @@ private:
     std::shared_ptr<ShaderProgram> this_leaf_detector_program;
     std::shared_ptr<ShaderProgram> this_leaf_edge_detector_program;
     std::shared_ptr<ShaderProgram> this_leaf_begin_detector_program;
-    std::shared_ptr<ShaderProgram> this_leaf_metadata_program;
     std::shared_ptr<ShaderProgram> this_leaf_position_placer_program;
 
     static std::shared_ptr<ShaderProgram> system_shader_program;
@@ -849,7 +827,6 @@ private:
     static std::shared_ptr<ShaderProgram> leaf_detector_program;
     static std::shared_ptr<ShaderProgram> leaf_edge_detector_program;
     static std::shared_ptr<ShaderProgram> leaf_begin_detector_program;
-    static std::shared_ptr<ShaderProgram> leaf_metadata_program;
     static std::shared_ptr<ShaderProgram> leaf_position_placer_program;
 };
 
@@ -864,7 +841,6 @@ std::shared_ptr<ShaderProgram> SystemDrawable::instance_placer_program = nullptr
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_detector_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_edge_detector_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_begin_detector_program = nullptr;
-std::shared_ptr<ShaderProgram> SystemDrawable::leaf_metadata_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_position_placer_program = nullptr;
 
 void register_system(Application &application, ContextPtr &context) {

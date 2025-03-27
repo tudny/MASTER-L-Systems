@@ -211,6 +211,8 @@ public:
      */
     void setUniform(const std::string &name, int val);
 
+    void setUniform(const std::string &name, uint32_t val);
+
     /**
      * @brief Set uniform
      *
