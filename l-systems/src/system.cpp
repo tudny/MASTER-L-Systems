@@ -34,6 +34,8 @@ public:
         std::string result = grammar->cpu_produce();
         // std::cout << "Result: " << result << std::endl;
 
+        glGenVertexArrays(1, &vao_leaf);
+
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
@@ -134,17 +136,23 @@ public:
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_translations);
 
-        shader_program->setUniform("pvm", pvm);
-        shader_program->setUniform("eyepos", eye_pos);
-        shader_program->setUniform("ls_ambient", glm::vec3(0.1, 0.1, 0.1));
-        shader_program->setUniform("ls_position", glm::vec4(2, 2, 2, 1.0));
-        shader_program->setUniform("ls_attenuation", glm::vec3(0.2f, 0.2f, 0.2f));
-        shader_program->setUniform("ls_direct", glm::vec3(0.0, 3.0, 0.0));
+        set_light_and_pv(this->shader_program, pvm, eye_pos);
 
         glBindVertexArray(vao);
         glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr, instance_translations_count);
 
         this->shader_program->unuse();
+
+        run_leaf_draw(pvm, eye_pos);
+    }
+
+    void set_light_and_pv(const std::shared_ptr<ShaderProgram>& program, const glm::mat4 &pvm, const glm::vec4 &eye_pos) {
+        program->setUniform("pvm", pvm);
+        program->setUniform("eyepos", eye_pos);
+        program->setUniform("ls_ambient", glm::vec3(0.1, 0.1, 0.1));
+        program->setUniform("ls_position", glm::vec4(2, 2, 2, 1.0));
+        program->setUniform("ls_attenuation", glm::vec3(0.2f, 0.2f, 0.2f));
+        program->setUniform("ls_direct", glm::vec3(0.0, 3.0, 0.0));
     }
 
     void move_down() {
@@ -251,6 +259,16 @@ private:
         }
 
         this_leaf_position_placer_program = leaf_position_placer_program;
+
+        if (!leaf_program) {
+            leaf_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                Shader{SHADER_PATH("leafs/leaf.vert"), GL_VERTEX_SHADER},
+                Shader{SHADER_PATH("system.geom"), GL_GEOMETRY_SHADER},
+                Shader{SHADER_PATH("system.frag"), GL_FRAGMENT_SHADER},
+            });
+        }
+
+        this_leaf_program = leaf_program;
     }
 
     void prepare_productions_ssbo() {
@@ -318,7 +336,7 @@ private:
         glGenBuffers(1, &ssbo_is_a_leaf_output);
         glGenBuffers(1, &ssbo_leaf_edge_counter);
         glGenBuffers(1, &ssbo_leaf_begin_counter);
-        glGenBuffers(1, &ssbo_leaf_positions_vec3);
+        glGenBuffers(1, &ssbo_leaf_positions_vec4);
         glGenBuffers(1, &ssbo_leaf_index_array);
     }
 
@@ -602,6 +620,7 @@ private:
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
 
         this_instance_detector_program->use();
+        this_instance_detector_program->setUniform("markLeaf", false);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_next_result_buffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_is_a_leaf_output);
@@ -719,7 +738,7 @@ private:
         this_instance_placer_program->unuse();
 
 
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_positions_vec3);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_positions_vec4);
         glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_edge_count * sizeof(glm::vec4), nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_index_array);
         glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_edge_count * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
@@ -734,16 +753,13 @@ private:
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_leaf_edge_counter);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, transformations_input_ssbo);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_leaf_positions_vec3);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_leaf_positions_vec4);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_leaf_index_array);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo_is_a_leaf_output);
 
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         this_leaf_position_placer_program->unuse();
-
-        print_ssbo<uint32_t>(ssbo_leaf_index_array, leaf_edge_count, "leaf_index_array");
-        std::exit(1);
 
 //        std::exit(1);
 
@@ -771,6 +787,30 @@ private:
         // END test
     }
 
+    void run_leaf_draw(const glm::mat4 &pvm, const glm::vec4 &eye_pos) {
+        // draw GL_TRIANGLE_FAN for vertices in ssbo_leaf_positions_vec4, and indecision in ssbo_leaf_index_array with reset index enabled
+
+        this_leaf_program->use();
+
+        glEnable(GL_PRIMITIVE_RESTART);
+        glPrimitiveRestartIndex((uint32_t) -1);
+
+        glBindVertexArray(vao_leaf);
+        glBindBuffer(GL_ARRAY_BUFFER, ssbo_leaf_positions_vec4);
+        this_leaf_program->setAttribute("position", 4, 0, 0);
+
+        set_light_and_pv(this_leaf_program, pvm, eye_pos);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ssbo_leaf_index_array);
+        glDrawElements(GL_TRIANGLE_FAN, leaf_edge_count, GL_UNSIGNED_INT, nullptr);
+
+        glBindVertexArray(0);
+
+        glDisable(GL_PRIMITIVE_RESTART);
+
+        this_leaf_program->unuse();
+    }
+
     GrammarPtr grammar;
 
     GLuint vao{};
@@ -784,6 +824,8 @@ private:
 
     size_t ssbo_word_length{};
     int32_t leaf_edge_count{};
+
+    GLuint vao_leaf{};
 
     GLuint ssbo_productions_offsets{};
     GLuint ssbo_productions_sizes{};
@@ -801,7 +843,7 @@ private:
     GLuint ssbo_is_a_leaf_output{};
     GLuint ssbo_leaf_edge_counter{};
     GLuint ssbo_leaf_begin_counter{};
-    GLuint ssbo_leaf_positions_vec3{};
+    GLuint ssbo_leaf_positions_vec4{};
     GLuint ssbo_leaf_index_array{};
 
     std::shared_ptr<ShaderProgram> this_production_shader_program;
@@ -815,6 +857,7 @@ private:
     std::shared_ptr<ShaderProgram> this_leaf_edge_detector_program;
     std::shared_ptr<ShaderProgram> this_leaf_begin_detector_program;
     std::shared_ptr<ShaderProgram> this_leaf_position_placer_program;
+    std::shared_ptr<ShaderProgram> this_leaf_program;
 
     static std::shared_ptr<ShaderProgram> system_shader_program;
     static std::shared_ptr<ShaderProgram> production_shader_program;
@@ -828,6 +871,7 @@ private:
     static std::shared_ptr<ShaderProgram> leaf_edge_detector_program;
     static std::shared_ptr<ShaderProgram> leaf_begin_detector_program;
     static std::shared_ptr<ShaderProgram> leaf_position_placer_program;
+    static std::shared_ptr<ShaderProgram> leaf_program;
 };
 
 std::shared_ptr<ShaderProgram> SystemDrawable::system_shader_program = nullptr;
@@ -842,6 +886,7 @@ std::shared_ptr<ShaderProgram> SystemDrawable::leaf_detector_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_edge_detector_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_begin_detector_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_position_placer_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::leaf_program = nullptr;
 
 void register_system(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {

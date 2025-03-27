@@ -1,7 +1,10 @@
 step:=10
-depth:=1
-delta:=90
+depth:=7
+delta:=22.5
 --
-LfFL
+A
 --
-L -> {f+f+f}
+A -> [&FL!A]/////'[&FL!A]///////'[&FL!A]
+F -> S/////F
+S -> FL
+L -> ['''^^{-f+f+f-|-f+f+f}]

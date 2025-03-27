@@ -17,10 +17,12 @@ layout(std430, binding = 2) readonly buffer IfLeafbuffer {
     int ifLeafBuffer[];
 };
 
+uniform bool markLeaf;
+
 void main() {
     uint index = gl_GlobalInvocationID.x;
 
-    if (inputBuffer[index] == DRAWABLE_CHAR || (inputBuffer[index] == DRAWABLE_CHAR_CONDITIONAL && ifLeafBuffer[index] == 1)) {
+    if (inputBuffer[index] == DRAWABLE_CHAR || (inputBuffer[index] == DRAWABLE_CHAR_CONDITIONAL && ifLeafBuffer[index] == 1 && markLeaf)) {
         outputBuffer[index] = 1;
     } else {
         outputBuffer[index] = 0;
