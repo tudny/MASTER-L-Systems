@@ -14,6 +14,7 @@ constexpr float ROTATION_SPEED = 0.5f;
 constexpr float ROTATION_DISTANCE = 50.0f;
 constexpr float ROTATION_HEIGHT = 1.0f;
 constexpr float DOWNSET_FACTOR = 10.0f;
+constexpr bool MARK_LEAF = false;
 
 
 class SystemDrawable : public Drawable {
@@ -620,7 +621,7 @@ private:
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
 
         this_instance_detector_program->use();
-        this_instance_detector_program->setUniform("markLeaf", false);
+        this_instance_detector_program->setUniform("markLeaf", MARK_LEAF);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_next_result_buffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_is_a_leaf_output);
