@@ -1,0 +1,24 @@
+entrypoints Program ;
+
+-- TODO: THIS SHOULD ALLOW SPECIAL CHARACTERS
+token Prod (letter | '{' | '}' | '[' | ']' | '/' | '\\' | '^' | '&' | '+' | '-' | '|' | '!' | '\'' )+ ;
+
+comment "//" ;
+
+LSectionSeparator. SectionSeparator ::= "--" "\n" ;
+
+LProgram.          Program ::= Properties SectionSeparator Axiom SectionSeparator Rules ;
+
+LIProperty.        Property ::= Prod ":=" Integer ;
+LDProperty.        Property ::= Prod ":=" Double ;
+LProperties.       Properties ::= [Property] ;
+separator nonempty Property "\n" ;
+
+LAxiom.            Axiom ::= Prod ;
+
+LRule.             Rule ::=          Prod          "->" Prod ;
+LLeftRule.         Rule ::= Prod "<" Prod          "->" Prod ;
+LRightRule.        Rule ::=          Prod ">" Prod "->" Prod ;
+LBothRule.         Rule ::= Prod "<" Prod ">" Prod "->" Prod ;
+LRules.            Rules ::= [Rule] ;
+separator nonempty Rule "\n" ;

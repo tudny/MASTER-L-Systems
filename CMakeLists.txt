@@ -37,6 +37,7 @@ endif (DOXYGEN_FOUND)
 # Add local submodules
 SET(
         LOCAL_SUBMODULES
+        "l-systems-grammar-raw-lib"
         "l-systems-grammar-lib"
         "l-systems-lib"
         "l-systems"

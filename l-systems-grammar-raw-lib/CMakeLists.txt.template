@@ -1,0 +1,16 @@
+project(L-Systems-grammar-raw-lib)
+
+set(
+        LIB_NAME
+        L-Systems-grammar-raw-lib
+)
+
+set(
+        LIBRARY_SOURCES
+        GENERATED_SOURCES_TEMPLATE_PARAMETER
+)
+
+add_library(
+        ${LIB_NAME}
+        ${LIBRARY_SOURCES}
+)
