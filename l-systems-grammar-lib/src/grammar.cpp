@@ -86,16 +86,15 @@ public:
         properties.push_back({name, value});
     }
 
-    void set_axiom(const std::string &_axiom, const LookBackTable &look_back) {
-        this->axiom = {_axiom, look_back};
+    void set_axiom(const std::string &_axiom) {
+        this->axiom = {_axiom, compute_look_back(_axiom)};
     }
 
     void add_production(char predecessor,
                         const std::string &successor,
                         const std::string &left_context,
-                        const std::string &right_context,
-                        LookBackTable look_back) {
-        productions.push_back({predecessor, successor, left_context, right_context, std::move(look_back)});
+                        const std::string &right_context) {
+        productions.push_back({predecessor, successor, left_context, right_context, compute_look_back(successor)});
     }
 
     GrammarPtr build() {
@@ -133,10 +132,7 @@ public:
     }
 
     void visitASTLAxiom(ASTLAxiom *p) override {
-        builder.set_axiom(
-                p->prod_,
-                compute_look_back(p->prod_)
-        );
+        builder.set_axiom(p->prod_);
     }
 
     void visitASTLRule(ASTLRule *p) override {
@@ -185,8 +181,7 @@ public:
                 of_string(predecessor),
                 successor,
                 left_context,
-                right_context,
-                compute_look_back(successor)
+                right_context
         );
     }
 
