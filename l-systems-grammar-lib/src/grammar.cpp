@@ -20,9 +20,6 @@ const char LEAF_CLOSING_BRACKET = '}';
 
 constexpr const char *REQUIRED_PROPS[] = {"delta", "step", "depth"};
 
-constexpr const char *PROPERTY_SEPARATOR = ":=";
-constexpr const char *PRODUCTION_SEPARATOR = "->";
-
 /*
  * ASCII codes for
  * [ = 01011011
