@@ -22,26 +22,26 @@ typedef std::string Prod;
 
 /********************   Forward Declarations    ********************/
 
-class SectionSeparator;
-class Program;
-class Property;
-class Properties;
-class Axiom;
-class Rule;
-class Rules;
-class LSectionSeparator;
-class LProgram;
-class LIProperty;
-class LDProperty;
-class LProperties;
-class LAxiom;
-class LRule;
-class LLeftRule;
-class LRightRule;
-class LBothRule;
-class LRules;
-class ListProperty;
-class ListRule;
+class ASTSectionSeparator;
+class ASTProgram;
+class ASTProperty;
+class ASTProperties;
+class ASTAxiom;
+class ASTRule;
+class ASTRules;
+class ASTLSectionSeparator;
+class ASTLProgram;
+class ASTLIProperty;
+class ASTLDProperty;
+class ASTLProperties;
+class ASTLAxiom;
+class ASTLRule;
+class ASTLLeftRule;
+class ASTLRightRule;
+class ASTLBothRule;
+class ASTLRules;
+class ListASTProperty;
+class ListASTRule;
 
 
 /********************   Visitor Interfaces    ********************/
@@ -49,26 +49,26 @@ class Visitor
 {
 public:
   virtual ~Visitor() {}
-  virtual void visitSectionSeparator(SectionSeparator *p) = 0;
-  virtual void visitProgram(Program *p) = 0;
-  virtual void visitProperty(Property *p) = 0;
-  virtual void visitProperties(Properties *p) = 0;
-  virtual void visitAxiom(Axiom *p) = 0;
-  virtual void visitRule(Rule *p) = 0;
-  virtual void visitRules(Rules *p) = 0;
-  virtual void visitLSectionSeparator(LSectionSeparator *p) = 0;
-  virtual void visitLProgram(LProgram *p) = 0;
-  virtual void visitLIProperty(LIProperty *p) = 0;
-  virtual void visitLDProperty(LDProperty *p) = 0;
-  virtual void visitLProperties(LProperties *p) = 0;
-  virtual void visitLAxiom(LAxiom *p) = 0;
-  virtual void visitLRule(LRule *p) = 0;
-  virtual void visitLLeftRule(LLeftRule *p) = 0;
-  virtual void visitLRightRule(LRightRule *p) = 0;
-  virtual void visitLBothRule(LBothRule *p) = 0;
-  virtual void visitLRules(LRules *p) = 0;
-  virtual void visitListProperty(ListProperty *p) = 0;
-  virtual void visitListRule(ListRule *p) = 0;
+  virtual void visitASTSectionSeparator(ASTSectionSeparator *p) = 0;
+  virtual void visitASTProgram(ASTProgram *p) = 0;
+  virtual void visitASTProperty(ASTProperty *p) = 0;
+  virtual void visitASTProperties(ASTProperties *p) = 0;
+  virtual void visitASTAxiom(ASTAxiom *p) = 0;
+  virtual void visitASTRule(ASTRule *p) = 0;
+  virtual void visitASTRules(ASTRules *p) = 0;
+  virtual void visitASTLSectionSeparator(ASTLSectionSeparator *p) = 0;
+  virtual void visitASTLProgram(ASTLProgram *p) = 0;
+  virtual void visitASTLIProperty(ASTLIProperty *p) = 0;
+  virtual void visitASTLDProperty(ASTLDProperty *p) = 0;
+  virtual void visitASTLProperties(ASTLProperties *p) = 0;
+  virtual void visitASTLAxiom(ASTLAxiom *p) = 0;
+  virtual void visitASTLRule(ASTLRule *p) = 0;
+  virtual void visitASTLLeftRule(ASTLLeftRule *p) = 0;
+  virtual void visitASTLRightRule(ASTLRightRule *p) = 0;
+  virtual void visitASTLBothRule(ASTLBothRule *p) = 0;
+  virtual void visitASTLRules(ASTLRules *p) = 0;
+  virtual void visitListASTProperty(ListASTProperty *p) = 0;
+  virtual void visitListASTRule(ListASTRule *p) = 0;
 
 
   virtual void visitInteger(Integer x) = 0;
@@ -91,194 +91,194 @@ class Visitable
 
 /********************   Abstract Syntax Classes    ********************/
 
-class SectionSeparator : public Visitable
+class ASTSectionSeparator : public Visitable
 {
 public:
-  virtual SectionSeparator *clone() const = 0;
+  virtual ASTSectionSeparator *clone() const = 0;
 
 };
 
-class Program : public Visitable
+class ASTProgram : public Visitable
 {
 public:
-  virtual Program *clone() const = 0;
+  virtual ASTProgram *clone() const = 0;
 
 };
 
-class Property : public Visitable
+class ASTProperty : public Visitable
 {
 public:
-  virtual Property *clone() const = 0;
+  virtual ASTProperty *clone() const = 0;
 
 };
 
-class Properties : public Visitable
+class ASTProperties : public Visitable
 {
 public:
-  virtual Properties *clone() const = 0;
+  virtual ASTProperties *clone() const = 0;
 
 };
 
-class Axiom : public Visitable
+class ASTAxiom : public Visitable
 {
 public:
-  virtual Axiom *clone() const = 0;
+  virtual ASTAxiom *clone() const = 0;
 
 };
 
-class Rule : public Visitable
+class ASTRule : public Visitable
 {
 public:
-  virtual Rule *clone() const = 0;
+  virtual ASTRule *clone() const = 0;
 
 };
 
-class Rules : public Visitable
+class ASTRules : public Visitable
 {
 public:
-  virtual Rules *clone() const = 0;
+  virtual ASTRules *clone() const = 0;
 
 };
 
 
 
-class LSectionSeparator : public SectionSeparator
+class ASTLSectionSeparator : public ASTSectionSeparator
 {
 public:
 
-  LSectionSeparator(const LSectionSeparator &);
-  LSectionSeparator &operator=(const LSectionSeparator &);
-  LSectionSeparator();
-  ~LSectionSeparator();
+  ASTLSectionSeparator(const ASTLSectionSeparator &);
+  ASTLSectionSeparator &operator=(const ASTLSectionSeparator &);
+  ASTLSectionSeparator();
+  ~ASTLSectionSeparator();
   virtual void accept(Visitor *v);
-  virtual LSectionSeparator *clone() const;
-  void swap(LSectionSeparator &);
+  virtual ASTLSectionSeparator *clone() const;
+  void swap(ASTLSectionSeparator &);
 };
 
-class LProgram : public Program
+class ASTLProgram : public ASTProgram
 {
 public:
-  Properties *properties_;
-  SectionSeparator *sectionseparator_1;
-  Axiom *axiom_;
-  SectionSeparator *sectionseparator_2;
-  Rules *rules_;
+  ASTProperties *astproperties_;
+  ASTSectionSeparator *astsectionseparator_1;
+  ASTAxiom *astaxiom_;
+  ASTSectionSeparator *astsectionseparator_2;
+  ASTRules *astrules_;
 
-  LProgram(const LProgram &);
-  LProgram &operator=(const LProgram &);
-  LProgram(Properties *p1, SectionSeparator *p2, Axiom *p3, SectionSeparator *p4, Rules *p5);
-  ~LProgram();
+  ASTLProgram(const ASTLProgram &);
+  ASTLProgram &operator=(const ASTLProgram &);
+  ASTLProgram(ASTProperties *p1, ASTSectionSeparator *p2, ASTAxiom *p3, ASTSectionSeparator *p4, ASTRules *p5);
+  ~ASTLProgram();
   virtual void accept(Visitor *v);
-  virtual LProgram *clone() const;
-  void swap(LProgram &);
+  virtual ASTLProgram *clone() const;
+  void swap(ASTLProgram &);
 };
 
-class LIProperty : public Property
+class ASTLIProperty : public ASTProperty
 {
 public:
   Prod prod_;
   Integer integer_;
 
-  LIProperty(const LIProperty &);
-  LIProperty &operator=(const LIProperty &);
-  LIProperty(Prod p1, Integer p2);
-  ~LIProperty();
+  ASTLIProperty(const ASTLIProperty &);
+  ASTLIProperty &operator=(const ASTLIProperty &);
+  ASTLIProperty(Prod p1, Integer p2);
+  ~ASTLIProperty();
   virtual void accept(Visitor *v);
-  virtual LIProperty *clone() const;
-  void swap(LIProperty &);
+  virtual ASTLIProperty *clone() const;
+  void swap(ASTLIProperty &);
 };
 
-class LDProperty : public Property
+class ASTLDProperty : public ASTProperty
 {
 public:
   Prod prod_;
   Double double_;
 
-  LDProperty(const LDProperty &);
-  LDProperty &operator=(const LDProperty &);
-  LDProperty(Prod p1, Double p2);
-  ~LDProperty();
+  ASTLDProperty(const ASTLDProperty &);
+  ASTLDProperty &operator=(const ASTLDProperty &);
+  ASTLDProperty(Prod p1, Double p2);
+  ~ASTLDProperty();
   virtual void accept(Visitor *v);
-  virtual LDProperty *clone() const;
-  void swap(LDProperty &);
+  virtual ASTLDProperty *clone() const;
+  void swap(ASTLDProperty &);
 };
 
-class LProperties : public Properties
+class ASTLProperties : public ASTProperties
 {
 public:
-  ListProperty *listproperty_;
+  ListASTProperty *listastproperty_;
 
-  LProperties(const LProperties &);
-  LProperties &operator=(const LProperties &);
-  LProperties(ListProperty *p1);
-  ~LProperties();
+  ASTLProperties(const ASTLProperties &);
+  ASTLProperties &operator=(const ASTLProperties &);
+  ASTLProperties(ListASTProperty *p1);
+  ~ASTLProperties();
   virtual void accept(Visitor *v);
-  virtual LProperties *clone() const;
-  void swap(LProperties &);
+  virtual ASTLProperties *clone() const;
+  void swap(ASTLProperties &);
 };
 
-class LAxiom : public Axiom
+class ASTLAxiom : public ASTAxiom
 {
 public:
   Prod prod_;
 
-  LAxiom(const LAxiom &);
-  LAxiom &operator=(const LAxiom &);
-  LAxiom(Prod p1);
-  ~LAxiom();
+  ASTLAxiom(const ASTLAxiom &);
+  ASTLAxiom &operator=(const ASTLAxiom &);
+  ASTLAxiom(Prod p1);
+  ~ASTLAxiom();
   virtual void accept(Visitor *v);
-  virtual LAxiom *clone() const;
-  void swap(LAxiom &);
+  virtual ASTLAxiom *clone() const;
+  void swap(ASTLAxiom &);
 };
 
-class LRule : public Rule
+class ASTLRule : public ASTRule
 {
 public:
   Prod prod_1;
   Prod prod_2;
 
-  LRule(const LRule &);
-  LRule &operator=(const LRule &);
-  LRule(Prod p1, Prod p2);
-  ~LRule();
+  ASTLRule(const ASTLRule &);
+  ASTLRule &operator=(const ASTLRule &);
+  ASTLRule(Prod p1, Prod p2);
+  ~ASTLRule();
   virtual void accept(Visitor *v);
-  virtual LRule *clone() const;
-  void swap(LRule &);
+  virtual ASTLRule *clone() const;
+  void swap(ASTLRule &);
 };
 
-class LLeftRule : public Rule
-{
-public:
-  Prod prod_1;
-  Prod prod_2;
-  Prod prod_3;
-
-  LLeftRule(const LLeftRule &);
-  LLeftRule &operator=(const LLeftRule &);
-  LLeftRule(Prod p1, Prod p2, Prod p3);
-  ~LLeftRule();
-  virtual void accept(Visitor *v);
-  virtual LLeftRule *clone() const;
-  void swap(LLeftRule &);
-};
-
-class LRightRule : public Rule
+class ASTLLeftRule : public ASTRule
 {
 public:
   Prod prod_1;
   Prod prod_2;
   Prod prod_3;
 
-  LRightRule(const LRightRule &);
-  LRightRule &operator=(const LRightRule &);
-  LRightRule(Prod p1, Prod p2, Prod p3);
-  ~LRightRule();
+  ASTLLeftRule(const ASTLLeftRule &);
+  ASTLLeftRule &operator=(const ASTLLeftRule &);
+  ASTLLeftRule(Prod p1, Prod p2, Prod p3);
+  ~ASTLLeftRule();
   virtual void accept(Visitor *v);
-  virtual LRightRule *clone() const;
-  void swap(LRightRule &);
+  virtual ASTLLeftRule *clone() const;
+  void swap(ASTLLeftRule &);
 };
 
-class LBothRule : public Rule
+class ASTLRightRule : public ASTRule
+{
+public:
+  Prod prod_1;
+  Prod prod_2;
+  Prod prod_3;
+
+  ASTLRightRule(const ASTLRightRule &);
+  ASTLRightRule &operator=(const ASTLRightRule &);
+  ASTLRightRule(Prod p1, Prod p2, Prod p3);
+  ~ASTLRightRule();
+  virtual void accept(Visitor *v);
+  virtual ASTLRightRule *clone() const;
+  void swap(ASTLRightRule &);
+};
+
+class ASTLBothRule : public ASTRule
 {
 public:
   Prod prod_1;
@@ -286,48 +286,48 @@ public:
   Prod prod_3;
   Prod prod_4;
 
-  LBothRule(const LBothRule &);
-  LBothRule &operator=(const LBothRule &);
-  LBothRule(Prod p1, Prod p2, Prod p3, Prod p4);
-  ~LBothRule();
+  ASTLBothRule(const ASTLBothRule &);
+  ASTLBothRule &operator=(const ASTLBothRule &);
+  ASTLBothRule(Prod p1, Prod p2, Prod p3, Prod p4);
+  ~ASTLBothRule();
   virtual void accept(Visitor *v);
-  virtual LBothRule *clone() const;
-  void swap(LBothRule &);
+  virtual ASTLBothRule *clone() const;
+  void swap(ASTLBothRule &);
 };
 
-class LRules : public Rules
+class ASTLRules : public ASTRules
 {
 public:
-  ListRule *listrule_;
+  ListASTRule *listastrule_;
 
-  LRules(const LRules &);
-  LRules &operator=(const LRules &);
-  LRules(ListRule *p1);
-  ~LRules();
+  ASTLRules(const ASTLRules &);
+  ASTLRules &operator=(const ASTLRules &);
+  ASTLRules(ListASTRule *p1);
+  ~ASTLRules();
   virtual void accept(Visitor *v);
-  virtual LRules *clone() const;
-  void swap(LRules &);
+  virtual ASTLRules *clone() const;
+  void swap(ASTLRules &);
 };
 
 
 
-class ListProperty : public Visitable, public std::vector<Property*>
-{
-public:
-  virtual void accept(Visitor *v);
-  virtual ListProperty *clone() const;
-};
-
-ListProperty* consListProperty(Property* x, ListProperty* xs);
-
-class ListRule : public Visitable, public std::vector<Rule*>
+class ListASTProperty : public Visitable, public std::vector<ASTProperty*>
 {
 public:
   virtual void accept(Visitor *v);
-  virtual ListRule *clone() const;
+  virtual ListASTProperty *clone() const;
 };
 
-ListRule* consListRule(Rule* x, ListRule* xs);
+ListASTProperty* consListASTProperty(ASTProperty* x, ListASTProperty* xs);
+
+class ListASTRule : public Visitable, public std::vector<ASTRule*>
+{
+public:
+  virtual void accept(Visitor *v);
+  virtual ListASTRule *clone() const;
+};
+
+ListASTRule* consListASTRule(ASTRule* x, ListASTRule* xs);
 
 
 

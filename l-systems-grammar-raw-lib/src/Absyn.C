@@ -6,382 +6,333 @@
 #include <vector>
 #include "Absyn.H"
 
-/********************   LSectionSeparator    ********************/
-LSectionSeparator::LSectionSeparator()
+/********************   ASTLSectionSeparator    ********************/
+ASTLSectionSeparator::ASTLSectionSeparator()
 {
 
 }
 
-LSectionSeparator::LSectionSeparator(const LSectionSeparator & other)
+ASTLSectionSeparator::ASTLSectionSeparator(const ASTLSectionSeparator & other)
 {
 
 }
 
-LSectionSeparator &LSectionSeparator::operator=(const LSectionSeparator & other)
+ASTLSectionSeparator &ASTLSectionSeparator::operator=(const ASTLSectionSeparator & other)
 {
-  LSectionSeparator tmp(other);
+  ASTLSectionSeparator tmp(other);
   swap(tmp);
   return *this;
 }
 
-void LSectionSeparator::swap(LSectionSeparator & other)
+void ASTLSectionSeparator::swap(ASTLSectionSeparator & other)
 {
 
 }
 
-LSectionSeparator::~LSectionSeparator()
+ASTLSectionSeparator::~ASTLSectionSeparator()
 {
 
 }
 
-void LSectionSeparator::accept(Visitor *v)
+void ASTLSectionSeparator::accept(Visitor *v)
 {
-  v->visitLSectionSeparator(this);
+  v->visitASTLSectionSeparator(this);
 }
 
-LSectionSeparator *LSectionSeparator::clone() const
+ASTLSectionSeparator *ASTLSectionSeparator::clone() const
 {
-  return new LSectionSeparator(*this);
+  return new ASTLSectionSeparator(*this);
 }
 
 
 
-/********************   LProgram    ********************/
-LProgram::LProgram(Properties *p1, SectionSeparator *p2, Axiom *p3, SectionSeparator *p4, Rules *p5)
+/********************   ASTLProgram    ********************/
+ASTLProgram::ASTLProgram(ASTProperties *p1, ASTSectionSeparator *p2, ASTAxiom *p3, ASTSectionSeparator *p4, ASTRules *p5)
 {
-  properties_ = p1;
-  sectionseparator_1 = p2;
-  axiom_ = p3;
-  sectionseparator_2 = p4;
-  rules_ = p5;
-
-}
-
-LProgram::LProgram(const LProgram & other)
-{
-  properties_ = other.properties_->clone();
-  sectionseparator_1 = other.sectionseparator_1->clone();
-  axiom_ = other.axiom_->clone();
-  sectionseparator_2 = other.sectionseparator_2->clone();
-  rules_ = other.rules_->clone();
+  astproperties_ = p1;
+  astsectionseparator_1 = p2;
+  astaxiom_ = p3;
+  astsectionseparator_2 = p4;
+  astrules_ = p5;
 
 }
 
-LProgram &LProgram::operator=(const LProgram & other)
+ASTLProgram::ASTLProgram(const ASTLProgram & other)
 {
-  LProgram tmp(other);
+  astproperties_ = other.astproperties_->clone();
+  astsectionseparator_1 = other.astsectionseparator_1->clone();
+  astaxiom_ = other.astaxiom_->clone();
+  astsectionseparator_2 = other.astsectionseparator_2->clone();
+  astrules_ = other.astrules_->clone();
+
+}
+
+ASTLProgram &ASTLProgram::operator=(const ASTLProgram & other)
+{
+  ASTLProgram tmp(other);
   swap(tmp);
   return *this;
 }
 
-void LProgram::swap(LProgram & other)
+void ASTLProgram::swap(ASTLProgram & other)
 {
-  std::swap(properties_, other.properties_);
-  std::swap(sectionseparator_1, other.sectionseparator_1);
-  std::swap(axiom_, other.axiom_);
-  std::swap(sectionseparator_2, other.sectionseparator_2);
-  std::swap(rules_, other.rules_);
+  std::swap(astproperties_, other.astproperties_);
+  std::swap(astsectionseparator_1, other.astsectionseparator_1);
+  std::swap(astaxiom_, other.astaxiom_);
+  std::swap(astsectionseparator_2, other.astsectionseparator_2);
+  std::swap(astrules_, other.astrules_);
 
 }
 
-LProgram::~LProgram()
+ASTLProgram::~ASTLProgram()
 {
-  delete(properties_);
-  delete(sectionseparator_1);
-  delete(axiom_);
-  delete(sectionseparator_2);
-  delete(rules_);
+  delete(astproperties_);
+  delete(astsectionseparator_1);
+  delete(astaxiom_);
+  delete(astsectionseparator_2);
+  delete(astrules_);
 
 }
 
-void LProgram::accept(Visitor *v)
+void ASTLProgram::accept(Visitor *v)
 {
-  v->visitLProgram(this);
+  v->visitASTLProgram(this);
 }
 
-LProgram *LProgram::clone() const
+ASTLProgram *ASTLProgram::clone() const
 {
-  return new LProgram(*this);
+  return new ASTLProgram(*this);
 }
 
 
 
-/********************   LIProperty    ********************/
-LIProperty::LIProperty(Prod p1, Integer p2)
+/********************   ASTLIProperty    ********************/
+ASTLIProperty::ASTLIProperty(Prod p1, Integer p2)
 {
   prod_ = p1;
   integer_ = p2;
 
 }
 
-LIProperty::LIProperty(const LIProperty & other)
+ASTLIProperty::ASTLIProperty(const ASTLIProperty & other)
 {
   prod_ = other.prod_;
   integer_ = other.integer_;
 
 }
 
-LIProperty &LIProperty::operator=(const LIProperty & other)
+ASTLIProperty &ASTLIProperty::operator=(const ASTLIProperty & other)
 {
-  LIProperty tmp(other);
+  ASTLIProperty tmp(other);
   swap(tmp);
   return *this;
 }
 
-void LIProperty::swap(LIProperty & other)
+void ASTLIProperty::swap(ASTLIProperty & other)
 {
   std::swap(prod_, other.prod_);
   std::swap(integer_, other.integer_);
 
 }
 
-LIProperty::~LIProperty()
+ASTLIProperty::~ASTLIProperty()
 {
 
 }
 
-void LIProperty::accept(Visitor *v)
+void ASTLIProperty::accept(Visitor *v)
 {
-  v->visitLIProperty(this);
+  v->visitASTLIProperty(this);
 }
 
-LIProperty *LIProperty::clone() const
+ASTLIProperty *ASTLIProperty::clone() const
 {
-  return new LIProperty(*this);
+  return new ASTLIProperty(*this);
 }
 
 
 
-/********************   LDProperty    ********************/
-LDProperty::LDProperty(Prod p1, Double p2)
+/********************   ASTLDProperty    ********************/
+ASTLDProperty::ASTLDProperty(Prod p1, Double p2)
 {
   prod_ = p1;
   double_ = p2;
 
 }
 
-LDProperty::LDProperty(const LDProperty & other)
+ASTLDProperty::ASTLDProperty(const ASTLDProperty & other)
 {
   prod_ = other.prod_;
   double_ = other.double_;
 
 }
 
-LDProperty &LDProperty::operator=(const LDProperty & other)
+ASTLDProperty &ASTLDProperty::operator=(const ASTLDProperty & other)
 {
-  LDProperty tmp(other);
+  ASTLDProperty tmp(other);
   swap(tmp);
   return *this;
 }
 
-void LDProperty::swap(LDProperty & other)
+void ASTLDProperty::swap(ASTLDProperty & other)
 {
   std::swap(prod_, other.prod_);
   std::swap(double_, other.double_);
 
 }
 
-LDProperty::~LDProperty()
+ASTLDProperty::~ASTLDProperty()
 {
 
 }
 
-void LDProperty::accept(Visitor *v)
+void ASTLDProperty::accept(Visitor *v)
 {
-  v->visitLDProperty(this);
+  v->visitASTLDProperty(this);
 }
 
-LDProperty *LDProperty::clone() const
+ASTLDProperty *ASTLDProperty::clone() const
 {
-  return new LDProperty(*this);
+  return new ASTLDProperty(*this);
 }
 
 
 
-/********************   LProperties    ********************/
-LProperties::LProperties(ListProperty *p1)
+/********************   ASTLProperties    ********************/
+ASTLProperties::ASTLProperties(ListASTProperty *p1)
 {
-  listproperty_ = p1;
-
-}
-
-LProperties::LProperties(const LProperties & other)
-{
-  listproperty_ = other.listproperty_->clone();
+  listastproperty_ = p1;
 
 }
 
-LProperties &LProperties::operator=(const LProperties & other)
+ASTLProperties::ASTLProperties(const ASTLProperties & other)
 {
-  LProperties tmp(other);
+  listastproperty_ = other.listastproperty_->clone();
+
+}
+
+ASTLProperties &ASTLProperties::operator=(const ASTLProperties & other)
+{
+  ASTLProperties tmp(other);
   swap(tmp);
   return *this;
 }
 
-void LProperties::swap(LProperties & other)
+void ASTLProperties::swap(ASTLProperties & other)
 {
-  std::swap(listproperty_, other.listproperty_);
+  std::swap(listastproperty_, other.listastproperty_);
 
 }
 
-LProperties::~LProperties()
+ASTLProperties::~ASTLProperties()
 {
-  delete(listproperty_);
+  delete(listastproperty_);
 
 }
 
-void LProperties::accept(Visitor *v)
+void ASTLProperties::accept(Visitor *v)
 {
-  v->visitLProperties(this);
+  v->visitASTLProperties(this);
 }
 
-LProperties *LProperties::clone() const
+ASTLProperties *ASTLProperties::clone() const
 {
-  return new LProperties(*this);
+  return new ASTLProperties(*this);
 }
 
 
 
-/********************   LAxiom    ********************/
-LAxiom::LAxiom(Prod p1)
+/********************   ASTLAxiom    ********************/
+ASTLAxiom::ASTLAxiom(Prod p1)
 {
   prod_ = p1;
 
 }
 
-LAxiom::LAxiom(const LAxiom & other)
+ASTLAxiom::ASTLAxiom(const ASTLAxiom & other)
 {
   prod_ = other.prod_;
 
 }
 
-LAxiom &LAxiom::operator=(const LAxiom & other)
+ASTLAxiom &ASTLAxiom::operator=(const ASTLAxiom & other)
 {
-  LAxiom tmp(other);
+  ASTLAxiom tmp(other);
   swap(tmp);
   return *this;
 }
 
-void LAxiom::swap(LAxiom & other)
+void ASTLAxiom::swap(ASTLAxiom & other)
 {
   std::swap(prod_, other.prod_);
 
 }
 
-LAxiom::~LAxiom()
+ASTLAxiom::~ASTLAxiom()
 {
 
 }
 
-void LAxiom::accept(Visitor *v)
+void ASTLAxiom::accept(Visitor *v)
 {
-  v->visitLAxiom(this);
+  v->visitASTLAxiom(this);
 }
 
-LAxiom *LAxiom::clone() const
+ASTLAxiom *ASTLAxiom::clone() const
 {
-  return new LAxiom(*this);
+  return new ASTLAxiom(*this);
 }
 
 
 
-/********************   LRule    ********************/
-LRule::LRule(Prod p1, Prod p2)
+/********************   ASTLRule    ********************/
+ASTLRule::ASTLRule(Prod p1, Prod p2)
 {
   prod_1 = p1;
   prod_2 = p2;
 
 }
 
-LRule::LRule(const LRule & other)
+ASTLRule::ASTLRule(const ASTLRule & other)
 {
   prod_1 = other.prod_1;
   prod_2 = other.prod_2;
 
 }
 
-LRule &LRule::operator=(const LRule & other)
+ASTLRule &ASTLRule::operator=(const ASTLRule & other)
 {
-  LRule tmp(other);
+  ASTLRule tmp(other);
   swap(tmp);
   return *this;
 }
 
-void LRule::swap(LRule & other)
+void ASTLRule::swap(ASTLRule & other)
 {
   std::swap(prod_1, other.prod_1);
   std::swap(prod_2, other.prod_2);
 
 }
 
-LRule::~LRule()
+ASTLRule::~ASTLRule()
 {
 
 }
 
-void LRule::accept(Visitor *v)
+void ASTLRule::accept(Visitor *v)
 {
-  v->visitLRule(this);
+  v->visitASTLRule(this);
 }
 
-LRule *LRule::clone() const
+ASTLRule *ASTLRule::clone() const
 {
-  return new LRule(*this);
-}
-
-
-
-/********************   LLeftRule    ********************/
-LLeftRule::LLeftRule(Prod p1, Prod p2, Prod p3)
-{
-  prod_1 = p1;
-  prod_2 = p2;
-  prod_3 = p3;
-
-}
-
-LLeftRule::LLeftRule(const LLeftRule & other)
-{
-  prod_1 = other.prod_1;
-  prod_2 = other.prod_2;
-  prod_3 = other.prod_3;
-
-}
-
-LLeftRule &LLeftRule::operator=(const LLeftRule & other)
-{
-  LLeftRule tmp(other);
-  swap(tmp);
-  return *this;
-}
-
-void LLeftRule::swap(LLeftRule & other)
-{
-  std::swap(prod_1, other.prod_1);
-  std::swap(prod_2, other.prod_2);
-  std::swap(prod_3, other.prod_3);
-
-}
-
-LLeftRule::~LLeftRule()
-{
-
-}
-
-void LLeftRule::accept(Visitor *v)
-{
-  v->visitLLeftRule(this);
-}
-
-LLeftRule *LLeftRule::clone() const
-{
-  return new LLeftRule(*this);
+  return new ASTLRule(*this);
 }
 
 
 
-/********************   LRightRule    ********************/
-LRightRule::LRightRule(Prod p1, Prod p2, Prod p3)
+/********************   ASTLLeftRule    ********************/
+ASTLLeftRule::ASTLLeftRule(Prod p1, Prod p2, Prod p3)
 {
   prod_1 = p1;
   prod_2 = p2;
@@ -389,7 +340,7 @@ LRightRule::LRightRule(Prod p1, Prod p2, Prod p3)
 
 }
 
-LRightRule::LRightRule(const LRightRule & other)
+ASTLLeftRule::ASTLLeftRule(const ASTLLeftRule & other)
 {
   prod_1 = other.prod_1;
   prod_2 = other.prod_2;
@@ -397,14 +348,14 @@ LRightRule::LRightRule(const LRightRule & other)
 
 }
 
-LRightRule &LRightRule::operator=(const LRightRule & other)
+ASTLLeftRule &ASTLLeftRule::operator=(const ASTLLeftRule & other)
 {
-  LRightRule tmp(other);
+  ASTLLeftRule tmp(other);
   swap(tmp);
   return *this;
 }
 
-void LRightRule::swap(LRightRule & other)
+void ASTLLeftRule::swap(ASTLLeftRule & other)
 {
   std::swap(prod_1, other.prod_1);
   std::swap(prod_2, other.prod_2);
@@ -412,25 +363,74 @@ void LRightRule::swap(LRightRule & other)
 
 }
 
-LRightRule::~LRightRule()
+ASTLLeftRule::~ASTLLeftRule()
 {
 
 }
 
-void LRightRule::accept(Visitor *v)
+void ASTLLeftRule::accept(Visitor *v)
 {
-  v->visitLRightRule(this);
+  v->visitASTLLeftRule(this);
 }
 
-LRightRule *LRightRule::clone() const
+ASTLLeftRule *ASTLLeftRule::clone() const
 {
-  return new LRightRule(*this);
+  return new ASTLLeftRule(*this);
 }
 
 
 
-/********************   LBothRule    ********************/
-LBothRule::LBothRule(Prod p1, Prod p2, Prod p3, Prod p4)
+/********************   ASTLRightRule    ********************/
+ASTLRightRule::ASTLRightRule(Prod p1, Prod p2, Prod p3)
+{
+  prod_1 = p1;
+  prod_2 = p2;
+  prod_3 = p3;
+
+}
+
+ASTLRightRule::ASTLRightRule(const ASTLRightRule & other)
+{
+  prod_1 = other.prod_1;
+  prod_2 = other.prod_2;
+  prod_3 = other.prod_3;
+
+}
+
+ASTLRightRule &ASTLRightRule::operator=(const ASTLRightRule & other)
+{
+  ASTLRightRule tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void ASTLRightRule::swap(ASTLRightRule & other)
+{
+  std::swap(prod_1, other.prod_1);
+  std::swap(prod_2, other.prod_2);
+  std::swap(prod_3, other.prod_3);
+
+}
+
+ASTLRightRule::~ASTLRightRule()
+{
+
+}
+
+void ASTLRightRule::accept(Visitor *v)
+{
+  v->visitASTLRightRule(this);
+}
+
+ASTLRightRule *ASTLRightRule::clone() const
+{
+  return new ASTLRightRule(*this);
+}
+
+
+
+/********************   ASTLBothRule    ********************/
+ASTLBothRule::ASTLBothRule(Prod p1, Prod p2, Prod p3, Prod p4)
 {
   prod_1 = p1;
   prod_2 = p2;
@@ -439,7 +439,7 @@ LBothRule::LBothRule(Prod p1, Prod p2, Prod p3, Prod p4)
 
 }
 
-LBothRule::LBothRule(const LBothRule & other)
+ASTLBothRule::ASTLBothRule(const ASTLBothRule & other)
 {
   prod_1 = other.prod_1;
   prod_2 = other.prod_2;
@@ -448,14 +448,14 @@ LBothRule::LBothRule(const LBothRule & other)
 
 }
 
-LBothRule &LBothRule::operator=(const LBothRule & other)
+ASTLBothRule &ASTLBothRule::operator=(const ASTLBothRule & other)
 {
-  LBothRule tmp(other);
+  ASTLBothRule tmp(other);
   swap(tmp);
   return *this;
 }
 
-void LBothRule::swap(LBothRule & other)
+void ASTLBothRule::swap(ASTLBothRule & other)
 {
   std::swap(prod_1, other.prod_1);
   std::swap(prod_2, other.prod_2);
@@ -464,99 +464,99 @@ void LBothRule::swap(LBothRule & other)
 
 }
 
-LBothRule::~LBothRule()
+ASTLBothRule::~ASTLBothRule()
 {
 
 }
 
-void LBothRule::accept(Visitor *v)
+void ASTLBothRule::accept(Visitor *v)
 {
-  v->visitLBothRule(this);
+  v->visitASTLBothRule(this);
 }
 
-LBothRule *LBothRule::clone() const
+ASTLBothRule *ASTLBothRule::clone() const
 {
-  return new LBothRule(*this);
+  return new ASTLBothRule(*this);
 }
 
 
 
-/********************   LRules    ********************/
-LRules::LRules(ListRule *p1)
+/********************   ASTLRules    ********************/
+ASTLRules::ASTLRules(ListASTRule *p1)
 {
-  listrule_ = p1;
-
-}
-
-LRules::LRules(const LRules & other)
-{
-  listrule_ = other.listrule_->clone();
+  listastrule_ = p1;
 
 }
 
-LRules &LRules::operator=(const LRules & other)
+ASTLRules::ASTLRules(const ASTLRules & other)
 {
-  LRules tmp(other);
+  listastrule_ = other.listastrule_->clone();
+
+}
+
+ASTLRules &ASTLRules::operator=(const ASTLRules & other)
+{
+  ASTLRules tmp(other);
   swap(tmp);
   return *this;
 }
 
-void LRules::swap(LRules & other)
+void ASTLRules::swap(ASTLRules & other)
 {
-  std::swap(listrule_, other.listrule_);
+  std::swap(listastrule_, other.listastrule_);
 
 }
 
-LRules::~LRules()
+ASTLRules::~ASTLRules()
 {
-  delete(listrule_);
+  delete(listastrule_);
 
 }
 
-void LRules::accept(Visitor *v)
+void ASTLRules::accept(Visitor *v)
 {
-  v->visitLRules(this);
+  v->visitASTLRules(this);
 }
 
-LRules *LRules::clone() const
+ASTLRules *ASTLRules::clone() const
 {
-  return new LRules(*this);
+  return new ASTLRules(*this);
 }
 
 
 
 
-/********************   ListProperty    ********************/
+/********************   ListASTProperty    ********************/
 
-void ListProperty::accept(Visitor *v)
+void ListASTProperty::accept(Visitor *v)
 {
-  v->visitListProperty(this);
+  v->visitListASTProperty(this);
 }
 
-ListProperty *ListProperty::clone() const
+ListASTProperty *ListASTProperty::clone() const
 {
-  return new ListProperty(*this);
+  return new ListASTProperty(*this);
 }
 
-ListProperty* consListProperty(Property* x, ListProperty* xs) {
+ListASTProperty* consListASTProperty(ASTProperty* x, ListASTProperty* xs) {
   xs->insert(xs->begin(), x);
   return xs;
 }
 
 
-/********************   ListRule    ********************/
+/********************   ListASTRule    ********************/
 
-void ListRule::accept(Visitor *v)
+void ListASTRule::accept(Visitor *v)
 {
-  v->visitListRule(this);
+  v->visitListASTRule(this);
 }
 
-ListRule *ListRule::clone() const
+ListASTRule *ListASTRule::clone() const
 {
-  return new ListRule(*this);
+  return new ListASTRule(*this);
 }
 
-ListRule* consListRule(Rule* x, ListRule* xs) {
+ListASTRule* consListASTRule(ASTRule* x, ListASTRule* xs) {
   xs->insert(xs->begin(), x);
   return xs;
 }

@@ -77,15 +77,15 @@ union YYSTYPE
   char   _char;
   double _double;
   char*  _string;
-  SectionSeparator* sectionseparator_;
-  Program* program_;
-  Property* property_;
-  Properties* properties_;
-  ListProperty* listproperty_;
-  Axiom* axiom_;
-  Rule* rule_;
-  Rules* rules_;
-  ListRule* listrule_;
+  ASTSectionSeparator* astsectionseparator_;
+  ASTProgram* astprogram_;
+  ASTProperty* astproperty_;
+  ASTProperties* astproperties_;
+  ListASTProperty* listastproperty_;
+  ASTAxiom* astaxiom_;
+  ASTRule* astrule_;
+  ASTRules* astrules_;
+  ListASTRule* listastrule_;
 
 #line 91 "Bison.H"
 

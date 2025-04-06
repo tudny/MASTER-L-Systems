@@ -10,26 +10,26 @@
 class Skeleton : public Visitor
 {
 public:
-  void visitSectionSeparator(SectionSeparator *p);
-  void visitProgram(Program *p);
-  void visitProperty(Property *p);
-  void visitProperties(Properties *p);
-  void visitAxiom(Axiom *p);
-  void visitRule(Rule *p);
-  void visitRules(Rules *p);
-  void visitLSectionSeparator(LSectionSeparator *p);
-  void visitLProgram(LProgram *p);
-  void visitLIProperty(LIProperty *p);
-  void visitLDProperty(LDProperty *p);
-  void visitLProperties(LProperties *p);
-  void visitLAxiom(LAxiom *p);
-  void visitLRule(LRule *p);
-  void visitLLeftRule(LLeftRule *p);
-  void visitLRightRule(LRightRule *p);
-  void visitLBothRule(LBothRule *p);
-  void visitLRules(LRules *p);
-  void visitListProperty(ListProperty *p);
-  void visitListRule(ListRule *p);
+  void visitASTSectionSeparator(ASTSectionSeparator *p);
+  void visitASTProgram(ASTProgram *p);
+  void visitASTProperty(ASTProperty *p);
+  void visitASTProperties(ASTProperties *p);
+  void visitASTAxiom(ASTAxiom *p);
+  void visitASTRule(ASTRule *p);
+  void visitASTRules(ASTRules *p);
+  void visitASTLSectionSeparator(ASTLSectionSeparator *p);
+  void visitASTLProgram(ASTLProgram *p);
+  void visitASTLIProperty(ASTLIProperty *p);
+  void visitASTLDProperty(ASTLDProperty *p);
+  void visitASTLProperties(ASTLProperties *p);
+  void visitASTLAxiom(ASTLAxiom *p);
+  void visitASTLRule(ASTLRule *p);
+  void visitASTLLeftRule(ASTLLeftRule *p);
+  void visitASTLRightRule(ASTLRightRule *p);
+  void visitASTLBothRule(ASTLBothRule *p);
+  void visitASTLRules(ASTLRules *p);
+  void visitListASTProperty(ListASTProperty *p);
+  void visitListASTRule(ListASTRule *p);
 
   void visitInteger(Integer x);
   void visitChar(Char x);

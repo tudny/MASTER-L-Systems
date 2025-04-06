@@ -50,9 +50,9 @@ int main(int argc, char ** argv)
     }
   } else input = stdin;
   /* The default entry point is used. For other options see Parser.H */
-  Program *parse_tree = NULL;
+  ASTProgram *parse_tree = NULL;
   try {
-  parse_tree = pProgram(input);
+  parse_tree = pASTProgram(input);
   } catch( parse_error &e) {
      std::cerr << "Parse error on line " << e.getLine() << "\n";
   }

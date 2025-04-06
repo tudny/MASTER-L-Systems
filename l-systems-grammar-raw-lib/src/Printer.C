@@ -134,9 +134,9 @@ char *PrintAbsyn::print(Visitable *v)
   return buf_;
 }
 
-void PrintAbsyn::visitSectionSeparator(SectionSeparator *p) {} //abstract class
+void PrintAbsyn::visitASTSectionSeparator(ASTSectionSeparator *p) {} //abstract class
 
-void PrintAbsyn::visitLSectionSeparator(LSectionSeparator *p)
+void PrintAbsyn::visitASTLSectionSeparator(ASTLSectionSeparator *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
@@ -147,26 +147,26 @@ void PrintAbsyn::visitLSectionSeparator(LSectionSeparator *p)
   _i_ = oldi;
 }
 
-void PrintAbsyn::visitProgram(Program *p) {} //abstract class
+void PrintAbsyn::visitASTProgram(ASTProgram *p) {} //abstract class
 
-void PrintAbsyn::visitLProgram(LProgram *p)
+void PrintAbsyn::visitASTLProgram(ASTLProgram *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
 
-  _i_ = 0; p->properties_->accept(this);
-  _i_ = 0; p->sectionseparator_1->accept(this);
-  _i_ = 0; p->axiom_->accept(this);
-  _i_ = 0; p->sectionseparator_2->accept(this);
-  _i_ = 0; p->rules_->accept(this);
+  _i_ = 0; p->astproperties_->accept(this);
+  _i_ = 0; p->astsectionseparator_1->accept(this);
+  _i_ = 0; p->astaxiom_->accept(this);
+  _i_ = 0; p->astsectionseparator_2->accept(this);
+  _i_ = 0; p->astrules_->accept(this);
 
   if (oldi > 0) render(_R_PAREN);
   _i_ = oldi;
 }
 
-void PrintAbsyn::visitProperty(Property *p) {} //abstract class
+void PrintAbsyn::visitASTProperty(ASTProperty *p) {} //abstract class
 
-void PrintAbsyn::visitLIProperty(LIProperty *p)
+void PrintAbsyn::visitASTLIProperty(ASTLIProperty *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
@@ -179,7 +179,7 @@ void PrintAbsyn::visitLIProperty(LIProperty *p)
   _i_ = oldi;
 }
 
-void PrintAbsyn::visitLDProperty(LDProperty *p)
+void PrintAbsyn::visitASTLDProperty(ASTLDProperty *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
@@ -192,25 +192,25 @@ void PrintAbsyn::visitLDProperty(LDProperty *p)
   _i_ = oldi;
 }
 
-void PrintAbsyn::visitProperties(Properties *p) {} //abstract class
+void PrintAbsyn::visitASTProperties(ASTProperties *p) {} //abstract class
 
-void PrintAbsyn::visitLProperties(LProperties *p)
+void PrintAbsyn::visitASTLProperties(ASTLProperties *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
 
-  _i_ = 0; visitListProperty(p->listproperty_);
+  _i_ = 0; visitListASTProperty(p->listastproperty_);
 
   if (oldi > 0) render(_R_PAREN);
   _i_ = oldi;
 }
 
-void PrintAbsyn::visitListProperty(ListProperty *listproperty)
+void PrintAbsyn::visitListASTProperty(ListASTProperty *listastproperty)
 {
-  iterListProperty(listproperty->begin(), listproperty->end());
+  iterListASTProperty(listastproperty->begin(), listastproperty->end());
 }
 
-void PrintAbsyn::iterListProperty(ListProperty::const_iterator i, ListProperty::const_iterator j)
+void PrintAbsyn::iterListASTProperty(ListASTProperty::const_iterator i, ListASTProperty::const_iterator j)
 {
   if (i == j) return;
   if (i == j-1)
@@ -219,13 +219,13 @@ void PrintAbsyn::iterListProperty(ListProperty::const_iterator i, ListProperty::
   }
   else
   { /* cons */
-    (*i)->accept(this); render('\n'); iterListProperty(i+1, j);
+    (*i)->accept(this); render('\n'); iterListASTProperty(i+1, j);
   }
 }
 
-void PrintAbsyn::visitAxiom(Axiom *p) {} //abstract class
+void PrintAbsyn::visitASTAxiom(ASTAxiom *p) {} //abstract class
 
-void PrintAbsyn::visitLAxiom(LAxiom *p)
+void PrintAbsyn::visitASTLAxiom(ASTLAxiom *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
@@ -236,9 +236,9 @@ void PrintAbsyn::visitLAxiom(LAxiom *p)
   _i_ = oldi;
 }
 
-void PrintAbsyn::visitRule(Rule *p) {} //abstract class
+void PrintAbsyn::visitASTRule(ASTRule *p) {} //abstract class
 
-void PrintAbsyn::visitLRule(LRule *p)
+void PrintAbsyn::visitASTLRule(ASTLRule *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
@@ -251,7 +251,7 @@ void PrintAbsyn::visitLRule(LRule *p)
   _i_ = oldi;
 }
 
-void PrintAbsyn::visitLLeftRule(LLeftRule *p)
+void PrintAbsyn::visitASTLLeftRule(ASTLLeftRule *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
@@ -266,7 +266,7 @@ void PrintAbsyn::visitLLeftRule(LLeftRule *p)
   _i_ = oldi;
 }
 
-void PrintAbsyn::visitLRightRule(LRightRule *p)
+void PrintAbsyn::visitASTLRightRule(ASTLRightRule *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
@@ -281,7 +281,7 @@ void PrintAbsyn::visitLRightRule(LRightRule *p)
   _i_ = oldi;
 }
 
-void PrintAbsyn::visitLBothRule(LBothRule *p)
+void PrintAbsyn::visitASTLBothRule(ASTLBothRule *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
@@ -298,25 +298,25 @@ void PrintAbsyn::visitLBothRule(LBothRule *p)
   _i_ = oldi;
 }
 
-void PrintAbsyn::visitRules(Rules *p) {} //abstract class
+void PrintAbsyn::visitASTRules(ASTRules *p) {} //abstract class
 
-void PrintAbsyn::visitLRules(LRules *p)
+void PrintAbsyn::visitASTLRules(ASTLRules *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
 
-  _i_ = 0; visitListRule(p->listrule_);
+  _i_ = 0; visitListASTRule(p->listastrule_);
 
   if (oldi > 0) render(_R_PAREN);
   _i_ = oldi;
 }
 
-void PrintAbsyn::visitListRule(ListRule *listrule)
+void PrintAbsyn::visitListASTRule(ListASTRule *listastrule)
 {
-  iterListRule(listrule->begin(), listrule->end());
+  iterListASTRule(listastrule->begin(), listastrule->end());
 }
 
-void PrintAbsyn::iterListRule(ListRule::const_iterator i, ListRule::const_iterator j)
+void PrintAbsyn::iterListASTRule(ListASTRule::const_iterator i, ListASTRule::const_iterator j)
 {
   if (i == j) return;
   if (i == j-1)
@@ -325,7 +325,7 @@ void PrintAbsyn::iterListRule(ListRule::const_iterator i, ListRule::const_iterat
   }
   else
   { /* cons */
-    (*i)->accept(this); render('\n'); iterListRule(i+1, j);
+    (*i)->accept(this); render('\n'); iterListASTRule(i+1, j);
   }
 }
 
@@ -387,117 +387,105 @@ char *ShowAbsyn::show(Visitable *v)
   return buf_;
 }
 
-void ShowAbsyn::visitSectionSeparator(SectionSeparator *p) {} //abstract class
+void ShowAbsyn::visitASTSectionSeparator(ASTSectionSeparator *p) {} //abstract class
 
-void ShowAbsyn::visitLSectionSeparator(LSectionSeparator *p)
+void ShowAbsyn::visitASTLSectionSeparator(ASTLSectionSeparator *p)
 {
-  bufAppend("LSectionSeparator");
+  bufAppend("ASTLSectionSeparator");
 }
-void ShowAbsyn::visitProgram(Program *p) {} //abstract class
+void ShowAbsyn::visitASTProgram(ASTProgram *p) {} //abstract class
 
-void ShowAbsyn::visitLProgram(LProgram *p)
+void ShowAbsyn::visitASTLProgram(ASTLProgram *p)
 {
   bufAppend('(');
-  bufAppend("LProgram");
+  bufAppend("ASTLProgram");
   bufAppend(' ');
   bufAppend('[');
-  if (p->properties_)  p->properties_->accept(this);
+  if (p->astproperties_)  p->astproperties_->accept(this);
   bufAppend(']');
   bufAppend(' ');
-  p->sectionseparator_1->accept(this);
+  p->astsectionseparator_1->accept(this);
   bufAppend(' ');
   bufAppend('[');
-  if (p->axiom_)  p->axiom_->accept(this);
+  if (p->astaxiom_)  p->astaxiom_->accept(this);
   bufAppend(']');
   bufAppend(' ');
-  p->sectionseparator_2->accept(this);
+  p->astsectionseparator_2->accept(this);
   bufAppend(' ');
   bufAppend('[');
-  if (p->rules_)  p->rules_->accept(this);
+  if (p->astrules_)  p->astrules_->accept(this);
   bufAppend(']');
   bufAppend(')');
 }
-void ShowAbsyn::visitProperty(Property *p) {} //abstract class
+void ShowAbsyn::visitASTProperty(ASTProperty *p) {} //abstract class
 
-void ShowAbsyn::visitLIProperty(LIProperty *p)
+void ShowAbsyn::visitASTLIProperty(ASTLIProperty *p)
 {
   bufAppend('(');
-  bufAppend("LIProperty");
+  bufAppend("ASTLIProperty");
   bufAppend(' ');
   visitProd(p->prod_);
   bufAppend(' ');
   visitInteger(p->integer_);
   bufAppend(')');
 }
-void ShowAbsyn::visitLDProperty(LDProperty *p)
+void ShowAbsyn::visitASTLDProperty(ASTLDProperty *p)
 {
   bufAppend('(');
-  bufAppend("LDProperty");
+  bufAppend("ASTLDProperty");
   bufAppend(' ');
   visitProd(p->prod_);
   bufAppend(' ');
   visitDouble(p->double_);
   bufAppend(')');
 }
-void ShowAbsyn::visitProperties(Properties *p) {} //abstract class
+void ShowAbsyn::visitASTProperties(ASTProperties *p) {} //abstract class
 
-void ShowAbsyn::visitLProperties(LProperties *p)
+void ShowAbsyn::visitASTLProperties(ASTLProperties *p)
 {
   bufAppend('(');
-  bufAppend("LProperties");
+  bufAppend("ASTLProperties");
   bufAppend(' ');
   bufAppend('[');
-  if (p->listproperty_)  p->listproperty_->accept(this);
+  if (p->listastproperty_)  p->listastproperty_->accept(this);
   bufAppend(']');
   bufAppend(')');
 }
-void ShowAbsyn::visitListProperty(ListProperty *listproperty)
+void ShowAbsyn::visitListASTProperty(ListASTProperty *listastproperty)
 {
-  for (ListProperty::const_iterator i = listproperty->begin() ; i != listproperty->end() ; ++i)
+  for (ListASTProperty::const_iterator i = listastproperty->begin() ; i != listastproperty->end() ; ++i)
   {
     (*i)->accept(this);
-    if (i != listproperty->end() - 1) bufAppend(", ");
+    if (i != listastproperty->end() - 1) bufAppend(", ");
   }
 }
 
-void ShowAbsyn::visitAxiom(Axiom *p) {} //abstract class
+void ShowAbsyn::visitASTAxiom(ASTAxiom *p) {} //abstract class
 
-void ShowAbsyn::visitLAxiom(LAxiom *p)
+void ShowAbsyn::visitASTLAxiom(ASTLAxiom *p)
 {
   bufAppend('(');
-  bufAppend("LAxiom");
+  bufAppend("ASTLAxiom");
   bufAppend(' ');
   visitProd(p->prod_);
   bufAppend(')');
 }
-void ShowAbsyn::visitRule(Rule *p) {} //abstract class
+void ShowAbsyn::visitASTRule(ASTRule *p) {} //abstract class
 
-void ShowAbsyn::visitLRule(LRule *p)
+void ShowAbsyn::visitASTLRule(ASTLRule *p)
 {
   bufAppend('(');
-  bufAppend("LRule");
+  bufAppend("ASTLRule");
   bufAppend(' ');
   visitProd(p->prod_1);
   bufAppend(' ');
   visitProd(p->prod_2);
   bufAppend(')');
 }
-void ShowAbsyn::visitLLeftRule(LLeftRule *p)
+void ShowAbsyn::visitASTLLeftRule(ASTLLeftRule *p)
 {
   bufAppend('(');
-  bufAppend("LLeftRule");
-  bufAppend(' ');
-  visitProd(p->prod_1);
-  bufAppend(' ');
-  visitProd(p->prod_2);
-  bufAppend(' ');
-  visitProd(p->prod_3);
-  bufAppend(')');
-}
-void ShowAbsyn::visitLRightRule(LRightRule *p)
-{
-  bufAppend('(');
-  bufAppend("LRightRule");
+  bufAppend("ASTLLeftRule");
   bufAppend(' ');
   visitProd(p->prod_1);
   bufAppend(' ');
@@ -506,10 +494,22 @@ void ShowAbsyn::visitLRightRule(LRightRule *p)
   visitProd(p->prod_3);
   bufAppend(')');
 }
-void ShowAbsyn::visitLBothRule(LBothRule *p)
+void ShowAbsyn::visitASTLRightRule(ASTLRightRule *p)
 {
   bufAppend('(');
-  bufAppend("LBothRule");
+  bufAppend("ASTLRightRule");
+  bufAppend(' ');
+  visitProd(p->prod_1);
+  bufAppend(' ');
+  visitProd(p->prod_2);
+  bufAppend(' ');
+  visitProd(p->prod_3);
+  bufAppend(')');
+}
+void ShowAbsyn::visitASTLBothRule(ASTLBothRule *p)
+{
+  bufAppend('(');
+  bufAppend("ASTLBothRule");
   bufAppend(' ');
   visitProd(p->prod_1);
   bufAppend(' ');
@@ -520,24 +520,24 @@ void ShowAbsyn::visitLBothRule(LBothRule *p)
   visitProd(p->prod_4);
   bufAppend(')');
 }
-void ShowAbsyn::visitRules(Rules *p) {} //abstract class
+void ShowAbsyn::visitASTRules(ASTRules *p) {} //abstract class
 
-void ShowAbsyn::visitLRules(LRules *p)
+void ShowAbsyn::visitASTLRules(ASTLRules *p)
 {
   bufAppend('(');
-  bufAppend("LRules");
+  bufAppend("ASTLRules");
   bufAppend(' ');
   bufAppend('[');
-  if (p->listrule_)  p->listrule_->accept(this);
+  if (p->listastrule_)  p->listastrule_->accept(this);
   bufAppend(']');
   bufAppend(')');
 }
-void ShowAbsyn::visitListRule(ListRule *listrule)
+void ShowAbsyn::visitListASTRule(ListASTRule *listastrule)
 {
-  for (ListRule::const_iterator i = listrule->begin() ; i != listrule->end() ; ++i)
+  for (ListASTRule::const_iterator i = listastrule->begin() ; i != listastrule->end() ; ++i)
   {
     (*i)->accept(this);
-    if (i != listrule->end() - 1) bufAppend(", ");
+    if (i != listastrule->end() - 1) bufAppend(", ");
   }
 }
 

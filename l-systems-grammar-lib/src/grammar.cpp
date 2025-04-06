@@ -9,6 +9,8 @@
 #include "grammar.h"
 #include "str_utils.h"
 #include "memory_utils.h"
+#include "Parser.H"
+#include "Absyn.H"
 
 const char STACK_OPENING_BRACKET = '[';
 const char STACK_CLOSING_BRACKET = ']';
@@ -30,7 +32,7 @@ constexpr const char *PRODUCTION_SEPARATOR = "->";
  * Maps [ -> ] and ] -> [ and { -> } and } -> { by bit manipulation
  * */
 constexpr char matching_bracket(const char bracket) {
-    return (char)(((int) bracket) ^ 0b0110);
+    return (char) (((int) bracket) ^ 0b0110);
 }
 
 constexpr bool is_opening_bracket(const char bracket) {
@@ -87,8 +89,12 @@ public:
         this->axiom = {_axiom, look_back};
     }
 
-    void add_production(char predecessor, const std::string &successor, LookBackTable look_back) {
-        productions.push_back({predecessor, successor, std::move(look_back)});
+    void add_production(char predecessor,
+                        const std::string &successor,
+                        const std::string &left_context,
+                        const std::string &right_context,
+                        LookBackTable look_back) {
+        productions.push_back({predecessor, successor, left_context, right_context, std::move(look_back)});
     }
 
     GrammarPtr build() {
@@ -109,100 +115,24 @@ private:
     std::vector<Production> productions;
 };
 
-enum ParseState {
-    PROPERTY,
-    AXIOM,
-    PRODUCTION
-};
 
-// if line begins with "--" it moves to next state
-// if line begins with "#" it is just a comment
-// props are passed as:
-// property_name := value
-// axiom is just a word over [a-zA-Z]
-// productions are passed as:
-// <char> -> <string>
-// productions are words over [a-zA-Z] and operators
-// last value of axiom and productions is taken
-
-// This grammar should be accepted
-
-//delta:=90
-//step:=100
-//depth:=7
-//--
-//L
-//--
-//L -> +RF−LFL−FR+
-//R -> −LF+RFR+FL−
-GrammarPtr load_grammar(const std::string &path) {
-    GrammarBuilder builder{};
-
-    std::string line;
-    ParseState state = PROPERTY;
-    std::ifstream file(path);
-
-    if (!file.is_open()) {
-        auto workdir = std::filesystem::current_path();
-        throw std::runtime_error("Failed to open file: " + path + " in " + workdir.string());
-    }
-
-    while (std::getline(file, line)) {
-        // Line can be ignored, as it is a comment, or is empty
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-
-        // Line is a state switcher
-        if (line[0] == '-' && line[1] == '-') {
-            switch (state) {
-                case PROPERTY:
-                    state = AXIOM;
-                    break;
-                case AXIOM:
-                    state = PRODUCTION;
-                    break;
-                case PRODUCTION:
-                    // Productions cannot change the builder state
-                    throw std::runtime_error("Unexpected '--' in productions");
-            }
-            continue;
-        }
-
-        switch (state) {
-            case PROPERTY: {
-                auto pos = line.find(PROPERTY_SEPARATOR);
-                if (pos == std::string::npos) {
-                    throw std::runtime_error("Invalid property definition: " + line);
-                }
-
-                std::string name = trim(line.substr(0, pos));
-                float value = std::stof(line.substr(pos + strlen(PROPERTY_SEPARATOR)));
-                builder.add_property(name, value);
-                break;
-            }
-            case AXIOM:
-                builder.set_axiom(line, compute_look_back(line));
-                break;
-            case PRODUCTION: {
-                auto pos = line.find(PRODUCTION_SEPARATOR);
-                if (pos == std::string::npos) {
-                    throw std::runtime_error("Invalid production definition: " + line);
-                }
-
-                std::string predecessor = trim(line.substr(0, pos));
-                if (predecessor.size() != 1) {
-                    throw std::runtime_error("Predecessor must be a single char, but got: " + predecessor);
-                }
-                std::string successor = trim(line.substr(pos + strlen(PRODUCTION_SEPARATOR)));
-                auto look_back = compute_look_back(successor);
-                builder.add_production(predecessor[0], successor, look_back);
-                break;
-            }
-        }
-    }
+static GrammarPtr parse_grammar(ASTProgram *program) {
+    GrammarBuilder builder;
 
     return builder.build();
+}
+
+GrammarPtr load_grammar(const std::string &path) {
+    FILE *input = fopen(path.c_str(), "r");
+    if (!input) {
+        throw std::runtime_error("Failed to open file: " + path);
+    }
+    auto *parse_tree = pASTProgram(input);
+    fclose(input);
+    if (!parse_tree) {
+        throw std::runtime_error("Failed to parse file: " + path);
+    }
+    return parse_grammar(parse_tree);
 }
 
 void Grammar::print(std::ostream &os) {

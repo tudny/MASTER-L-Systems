@@ -35,28 +35,28 @@ class PrintAbsyn : public Visitor
   ~PrintAbsyn(void);
   char *print(Visitable *v);
 
-  void visitSectionSeparator(SectionSeparator *p); /* abstract class */
-  void visitLSectionSeparator(LSectionSeparator *p);
-  void visitProgram(Program *p); /* abstract class */
-  void visitLProgram(LProgram *p);
-  void visitProperty(Property *p); /* abstract class */
-  void visitLIProperty(LIProperty *p);
-  void visitLDProperty(LDProperty *p);
-  void visitProperties(Properties *p); /* abstract class */
-  void visitLProperties(LProperties *p);
-  void visitListProperty(ListProperty *p);
-  void iterListProperty(ListProperty::const_iterator i, ListProperty::const_iterator j);
-  void visitAxiom(Axiom *p); /* abstract class */
-  void visitLAxiom(LAxiom *p);
-  void visitRule(Rule *p); /* abstract class */
-  void visitLRule(LRule *p);
-  void visitLLeftRule(LLeftRule *p);
-  void visitLRightRule(LRightRule *p);
-  void visitLBothRule(LBothRule *p);
-  void visitRules(Rules *p); /* abstract class */
-  void visitLRules(LRules *p);
-  void visitListRule(ListRule *p);
-  void iterListRule(ListRule::const_iterator i, ListRule::const_iterator j);
+  void visitASTSectionSeparator(ASTSectionSeparator *p); /* abstract class */
+  void visitASTLSectionSeparator(ASTLSectionSeparator *p);
+  void visitASTProgram(ASTProgram *p); /* abstract class */
+  void visitASTLProgram(ASTLProgram *p);
+  void visitASTProperty(ASTProperty *p); /* abstract class */
+  void visitASTLIProperty(ASTLIProperty *p);
+  void visitASTLDProperty(ASTLDProperty *p);
+  void visitASTProperties(ASTProperties *p); /* abstract class */
+  void visitASTLProperties(ASTLProperties *p);
+  void visitListASTProperty(ListASTProperty *p);
+  void iterListASTProperty(ListASTProperty::const_iterator i, ListASTProperty::const_iterator j);
+  void visitASTAxiom(ASTAxiom *p); /* abstract class */
+  void visitASTLAxiom(ASTLAxiom *p);
+  void visitASTRule(ASTRule *p); /* abstract class */
+  void visitASTLRule(ASTLRule *p);
+  void visitASTLLeftRule(ASTLLeftRule *p);
+  void visitASTLRightRule(ASTLRightRule *p);
+  void visitASTLBothRule(ASTLBothRule *p);
+  void visitASTRules(ASTRules *p); /* abstract class */
+  void visitASTLRules(ASTLRules *p);
+  void visitListASTRule(ListASTRule *p);
+  void iterListASTRule(ListASTRule::const_iterator i, ListASTRule::const_iterator j);
 
   void visitInteger(Integer i);
   void visitDouble(Double d);
@@ -152,28 +152,28 @@ class ShowAbsyn : public Visitor
   ~ShowAbsyn(void);
   char *show(Visitable *v);
 
-  void visitSectionSeparator(SectionSeparator *p); /* abstract class */
-  void visitLSectionSeparator(LSectionSeparator *p);
-  void visitProgram(Program *p); /* abstract class */
-  void visitLProgram(LProgram *p);
-  void visitProperty(Property *p); /* abstract class */
-  void visitLIProperty(LIProperty *p);
-  void visitLDProperty(LDProperty *p);
-  void visitProperties(Properties *p); /* abstract class */
-  void visitLProperties(LProperties *p);
-  void visitListProperty(ListProperty *p);
-  void iterListProperty(ListProperty::const_iterator i, ListProperty::const_iterator j);
-  void visitAxiom(Axiom *p); /* abstract class */
-  void visitLAxiom(LAxiom *p);
-  void visitRule(Rule *p); /* abstract class */
-  void visitLRule(LRule *p);
-  void visitLLeftRule(LLeftRule *p);
-  void visitLRightRule(LRightRule *p);
-  void visitLBothRule(LBothRule *p);
-  void visitRules(Rules *p); /* abstract class */
-  void visitLRules(LRules *p);
-  void visitListRule(ListRule *p);
-  void iterListRule(ListRule::const_iterator i, ListRule::const_iterator j);
+  void visitASTSectionSeparator(ASTSectionSeparator *p); /* abstract class */
+  void visitASTLSectionSeparator(ASTLSectionSeparator *p);
+  void visitASTProgram(ASTProgram *p); /* abstract class */
+  void visitASTLProgram(ASTLProgram *p);
+  void visitASTProperty(ASTProperty *p); /* abstract class */
+  void visitASTLIProperty(ASTLIProperty *p);
+  void visitASTLDProperty(ASTLDProperty *p);
+  void visitASTProperties(ASTProperties *p); /* abstract class */
+  void visitASTLProperties(ASTLProperties *p);
+  void visitListASTProperty(ListASTProperty *p);
+  void iterListASTProperty(ListASTProperty::const_iterator i, ListASTProperty::const_iterator j);
+  void visitASTAxiom(ASTAxiom *p); /* abstract class */
+  void visitASTLAxiom(ASTLAxiom *p);
+  void visitASTRule(ASTRule *p); /* abstract class */
+  void visitASTLRule(ASTLRule *p);
+  void visitASTLLeftRule(ASTLLeftRule *p);
+  void visitASTLRightRule(ASTLRightRule *p);
+  void visitASTLBothRule(ASTLBothRule *p);
+  void visitASTRules(ASTRules *p); /* abstract class */
+  void visitASTLRules(ASTLRules *p);
+  void visitListASTRule(ListASTRule *p);
+  void iterListASTRule(ListASTRule::const_iterator i, ListASTRule::const_iterator j);
 
   void visitInteger(Integer i);
   void visitDouble(Double d);

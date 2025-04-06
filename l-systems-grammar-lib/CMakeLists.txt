@@ -20,4 +20,5 @@ add_library(
 target_link_libraries(
         ${LIB_NAME}
         PRIVATE L-Systems-lib
+        PRIVATE L-Systems-grammar-raw-lib
 )

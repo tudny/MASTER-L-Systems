@@ -7,8 +7,6 @@
 #include <optional>
 #include <memory>
 
-extern const char *ALLOWED_OPERATORS;
-
 using LookBackTable = std::vector<int32_t>;
 
 class Property {
@@ -33,6 +31,8 @@ using AxiomPtr = std::shared_ptr<Axiom>;
 class Production {
 public:
     char predecessor;
+    std::string left_context;
+    std::string right_context;
     std::string successor;
     LookBackTable look_back;
 };

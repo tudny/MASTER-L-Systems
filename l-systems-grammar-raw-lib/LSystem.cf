@@ -1,24 +1,24 @@
-entrypoints Program ;
+entrypoints ASTProgram ;
 
 -- TODO: THIS SHOULD ALLOW SPECIAL CHARACTERS
 token Prod (letter | '{' | '}' | '[' | ']' | '/' | '\\' | '^' | '&' | '+' | '-' | '|' | '!' | '\'' )+ ;
 
 comment "//" ;
 
-LSectionSeparator. SectionSeparator ::= "--" "\n" ;
+ASTLSectionSeparator. ASTSectionSeparator ::= "--" "\n" ;
 
-LProgram.          Program ::= Properties SectionSeparator Axiom SectionSeparator Rules ;
+ASTLProgram.          ASTProgram ::= ASTProperties ASTSectionSeparator ASTAxiom ASTSectionSeparator ASTRules ;
 
-LIProperty.        Property ::= Prod ":=" Integer ;
-LDProperty.        Property ::= Prod ":=" Double ;
-LProperties.       Properties ::= [Property] ;
-separator nonempty Property "\n" ;
+ASTLIProperty.        ASTProperty ::= Prod ":=" Integer ;
+ASTLDProperty.        ASTProperty ::= Prod ":=" Double ;
+ASTLProperties.       ASTProperties ::= [ASTProperty] ;
+separator nonempty ASTProperty "\n" ;
 
-LAxiom.            Axiom ::= Prod ;
+ASTLAxiom.            ASTAxiom ::= Prod ;
 
-LRule.             Rule ::=          Prod          "->" Prod ;
-LLeftRule.         Rule ::= Prod "<" Prod          "->" Prod ;
-LRightRule.        Rule ::=          Prod ">" Prod "->" Prod ;
-LBothRule.         Rule ::= Prod "<" Prod ">" Prod "->" Prod ;
-LRules.            Rules ::= [Rule] ;
-separator nonempty Rule "\n" ;
+ASTLRule.             ASTRule ::=          Prod          "->" Prod ;
+ASTLLeftRule.         ASTRule ::= Prod "<" Prod          "->" Prod ;
+ASTLRightRule.        ASTRule ::=          Prod ">" Prod "->" Prod ;
+ASTLBothRule.         ASTRule ::= Prod "<" Prod ">" Prod "->" Prod ;
+ASTLRules.            ASTRules ::= [ASTRule] ;
+separator nonempty ASTRule "\n" ;

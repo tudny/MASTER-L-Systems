@@ -142,15 +142,15 @@ enum yysymbol_kind_t
   YYSYMBOL__INTEGER_ = 10,                 /* _INTEGER_  */
   YYSYMBOL__DOUBLE_ = 11,                  /* _DOUBLE_  */
   YYSYMBOL_YYACCEPT = 12,                  /* $accept  */
-  YYSYMBOL_SectionSeparator = 13,          /* SectionSeparator  */
-  YYSYMBOL_Program = 14,                   /* Program  */
-  YYSYMBOL_Property = 15,                  /* Property  */
-  YYSYMBOL_Properties = 16,                /* Properties  */
-  YYSYMBOL_ListProperty = 17,              /* ListProperty  */
-  YYSYMBOL_Axiom = 18,                     /* Axiom  */
-  YYSYMBOL_Rule = 19,                      /* Rule  */
-  YYSYMBOL_Rules = 20,                     /* Rules  */
-  YYSYMBOL_ListRule = 21                   /* ListRule  */
+  YYSYMBOL_ASTSectionSeparator = 13,       /* ASTSectionSeparator  */
+  YYSYMBOL_ASTProgram = 14,                /* ASTProgram  */
+  YYSYMBOL_ASTProperty = 15,               /* ASTProperty  */
+  YYSYMBOL_ASTProperties = 16,             /* ASTProperties  */
+  YYSYMBOL_ListASTProperty = 17,           /* ListASTProperty  */
+  YYSYMBOL_ASTAxiom = 18,                  /* ASTAxiom  */
+  YYSYMBOL_ASTRule = 19,                   /* ASTRule  */
+  YYSYMBOL_ASTRules = 20,                  /* ASTRules  */
+  YYSYMBOL_ListASTRule = 21                /* ListASTRule  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -573,8 +573,9 @@ static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "_ERROR_", "_DMINUS",
   "_RARROW", "_COLONEQ", "_LT", "_GT", "T_Prod", "_INTEGER_", "_DOUBLE_",
-  "$accept", "SectionSeparator", "Program", "Property", "Properties",
-  "ListProperty", "Axiom", "Rule", "Rules", "ListRule", YY_NULLPTR
+  "$accept", "ASTSectionSeparator", "ASTProgram", "ASTProperty",
+  "ASTProperties", "ListASTProperty", "ASTAxiom", "ASTRule", "ASTRules",
+  "ListASTRule", YY_NULLPTR
 };
 
 static const char *
@@ -1255,98 +1256,98 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 2: /* SectionSeparator: _DMINUS  */
+  case 2: /* ASTSectionSeparator: _DMINUS  */
 #line 102 "LSystem.y"
-                           { (yyval.sectionseparator_) = new LSectionSeparator(); }
-#line 1262 "Parser.C"
+                              { (yyval.astsectionseparator_) = new ASTLSectionSeparator(); }
+#line 1263 "Parser.C"
     break;
 
-  case 3: /* Program: Properties SectionSeparator Axiom SectionSeparator Rules  */
+  case 3: /* ASTProgram: ASTProperties ASTSectionSeparator ASTAxiom ASTSectionSeparator ASTRules  */
 #line 104 "LSystem.y"
-                                                                   { (yyval.program_) = new LProgram((yyvsp[-4].properties_), (yyvsp[-3].sectionseparator_), (yyvsp[-2].axiom_), (yyvsp[-1].sectionseparator_), (yyvsp[0].rules_)); result->program_ = (yyval.program_); }
-#line 1268 "Parser.C"
+                                                                                     { (yyval.astprogram_) = new ASTLProgram((yyvsp[-4].astproperties_), (yyvsp[-3].astsectionseparator_), (yyvsp[-2].astaxiom_), (yyvsp[-1].astsectionseparator_), (yyvsp[0].astrules_)); result->astprogram_ = (yyval.astprogram_); }
+#line 1269 "Parser.C"
     break;
 
-  case 4: /* Property: T_Prod _COLONEQ _INTEGER_  */
+  case 4: /* ASTProperty: T_Prod _COLONEQ _INTEGER_  */
 #line 106 "LSystem.y"
-                                     { (yyval.property_) = new LIProperty((yyvsp[-2]._string), (yyvsp[0]._int)); }
-#line 1274 "Parser.C"
+                                        { (yyval.astproperty_) = new ASTLIProperty((yyvsp[-2]._string), (yyvsp[0]._int)); }
+#line 1275 "Parser.C"
     break;
 
-  case 5: /* Property: T_Prod _COLONEQ _DOUBLE_  */
+  case 5: /* ASTProperty: T_Prod _COLONEQ _DOUBLE_  */
 #line 107 "LSystem.y"
-                             { (yyval.property_) = new LDProperty((yyvsp[-2]._string), (yyvsp[0]._double)); }
-#line 1280 "Parser.C"
+                             { (yyval.astproperty_) = new ASTLDProperty((yyvsp[-2]._string), (yyvsp[0]._double)); }
+#line 1281 "Parser.C"
     break;
 
-  case 6: /* Properties: ListProperty  */
+  case 6: /* ASTProperties: ListASTProperty  */
 #line 109 "LSystem.y"
-                          { std::reverse((yyvsp[0].listproperty_)->begin(),(yyvsp[0].listproperty_)->end()) ;(yyval.properties_) = new LProperties((yyvsp[0].listproperty_)); }
-#line 1286 "Parser.C"
+                                { std::reverse((yyvsp[0].listastproperty_)->begin(),(yyvsp[0].listastproperty_)->end()) ;(yyval.astproperties_) = new ASTLProperties((yyvsp[0].listastproperty_)); }
+#line 1287 "Parser.C"
     break;
 
-  case 7: /* ListProperty: Property  */
+  case 7: /* ListASTProperty: ASTProperty  */
 #line 111 "LSystem.y"
-                        { (yyval.listproperty_) = new ListProperty(); (yyval.listproperty_)->push_back((yyvsp[0].property_)); }
-#line 1292 "Parser.C"
+                              { (yyval.listastproperty_) = new ListASTProperty(); (yyval.listastproperty_)->push_back((yyvsp[0].astproperty_)); }
+#line 1293 "Parser.C"
     break;
 
-  case 8: /* ListProperty: Property ListProperty  */
+  case 8: /* ListASTProperty: ASTProperty ListASTProperty  */
 #line 112 "LSystem.y"
-                          { (yyvsp[0].listproperty_)->push_back((yyvsp[-1].property_)); (yyval.listproperty_) = (yyvsp[0].listproperty_); }
-#line 1298 "Parser.C"
+                                { (yyvsp[0].listastproperty_)->push_back((yyvsp[-1].astproperty_)); (yyval.listastproperty_) = (yyvsp[0].listastproperty_); }
+#line 1299 "Parser.C"
     break;
 
-  case 9: /* Axiom: T_Prod  */
+  case 9: /* ASTAxiom: T_Prod  */
 #line 114 "LSystem.y"
-               { (yyval.axiom_) = new LAxiom((yyvsp[0]._string)); }
-#line 1304 "Parser.C"
+                  { (yyval.astaxiom_) = new ASTLAxiom((yyvsp[0]._string)); }
+#line 1305 "Parser.C"
     break;
 
-  case 10: /* Rule: T_Prod _RARROW T_Prod  */
+  case 10: /* ASTRule: T_Prod _RARROW T_Prod  */
 #line 116 "LSystem.y"
-                             { (yyval.rule_) = new LRule((yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1310 "Parser.C"
+                                { (yyval.astrule_) = new ASTLRule((yyvsp[-2]._string), (yyvsp[0]._string)); }
+#line 1311 "Parser.C"
     break;
 
-  case 11: /* Rule: T_Prod _LT T_Prod _RARROW T_Prod  */
+  case 11: /* ASTRule: T_Prod _LT T_Prod _RARROW T_Prod  */
 #line 117 "LSystem.y"
-                                     { (yyval.rule_) = new LLeftRule((yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1316 "Parser.C"
+                                     { (yyval.astrule_) = new ASTLLeftRule((yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
+#line 1317 "Parser.C"
     break;
 
-  case 12: /* Rule: T_Prod _GT T_Prod _RARROW T_Prod  */
+  case 12: /* ASTRule: T_Prod _GT T_Prod _RARROW T_Prod  */
 #line 118 "LSystem.y"
-                                     { (yyval.rule_) = new LRightRule((yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1322 "Parser.C"
+                                     { (yyval.astrule_) = new ASTLRightRule((yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
+#line 1323 "Parser.C"
     break;
 
-  case 13: /* Rule: T_Prod _LT T_Prod _GT T_Prod _RARROW T_Prod  */
+  case 13: /* ASTRule: T_Prod _LT T_Prod _GT T_Prod _RARROW T_Prod  */
 #line 119 "LSystem.y"
-                                                { (yyval.rule_) = new LBothRule((yyvsp[-6]._string), (yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1328 "Parser.C"
+                                                { (yyval.astrule_) = new ASTLBothRule((yyvsp[-6]._string), (yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
+#line 1329 "Parser.C"
     break;
 
-  case 14: /* Rules: ListRule  */
+  case 14: /* ASTRules: ListASTRule  */
 #line 121 "LSystem.y"
-                 { std::reverse((yyvsp[0].listrule_)->begin(),(yyvsp[0].listrule_)->end()) ;(yyval.rules_) = new LRules((yyvsp[0].listrule_)); }
-#line 1334 "Parser.C"
+                       { std::reverse((yyvsp[0].listastrule_)->begin(),(yyvsp[0].listastrule_)->end()) ;(yyval.astrules_) = new ASTLRules((yyvsp[0].listastrule_)); }
+#line 1335 "Parser.C"
     break;
 
-  case 15: /* ListRule: Rule  */
+  case 15: /* ListASTRule: ASTRule  */
 #line 123 "LSystem.y"
-                { (yyval.listrule_) = new ListRule(); (yyval.listrule_)->push_back((yyvsp[0].rule_)); }
-#line 1340 "Parser.C"
+                      { (yyval.listastrule_) = new ListASTRule(); (yyval.listastrule_)->push_back((yyvsp[0].astrule_)); }
+#line 1341 "Parser.C"
     break;
 
-  case 16: /* ListRule: Rule ListRule  */
+  case 16: /* ListASTRule: ASTRule ListASTRule  */
 #line 124 "LSystem.y"
-                  { (yyvsp[0].listrule_)->push_back((yyvsp[-1].rule_)); (yyval.listrule_) = (yyvsp[0].listrule_); }
-#line 1346 "Parser.C"
+                        { (yyvsp[0].listastrule_)->push_back((yyvsp[-1].astrule_)); (yyval.listastrule_) = (yyvsp[0].listastrule_); }
+#line 1347 "Parser.C"
     break;
 
 
-#line 1350 "Parser.C"
+#line 1351 "Parser.C"
 
       default: break;
     }
@@ -1548,8 +1549,8 @@ yyreturnlab:
 
 
 
-/* Entrypoint: parse Program* from file. */
-Program* pProgram(FILE *inp)
+/* Entrypoint: parse ASTProgram* from file. */
+ASTProgram* pASTProgram(FILE *inp)
 {
   YYSTYPE result;
   yyscan_t scanner = l_system__initialize_lexer(inp);
@@ -1565,12 +1566,12 @@ Program* pProgram(FILE *inp)
   }
   else
   { /* Success */
-    return result.program_;
+    return result.astprogram_;
   }
 }
 
-/* Entrypoint: parse Program* from string. */
-Program* psProgram(const char *str)
+/* Entrypoint: parse ASTProgram* from string. */
+ASTProgram* psASTProgram(const char *str)
 {
   YYSTYPE result;
   yyscan_t scanner = l_system__initialize_lexer(0);
@@ -1588,7 +1589,7 @@ Program* psProgram(const char *str)
   }
   else
   { /* Success */
-    return result.program_;
+    return result.astprogram_;
   }
 }
 

@@ -9,8 +9,8 @@
 #include "Absyn.H"
 
 
-Program* pProgram(FILE *inp);
-Program* pProgram(const char *str);
+ASTProgram* pASTProgram(FILE *inp);
+ASTProgram* pASTProgram(const char *str);
 
 
 #endif

@@ -10,127 +10,127 @@
 
 
 
-void Skeleton::visitSectionSeparator(SectionSeparator *t) {} //abstract class
-void Skeleton::visitProgram(Program *t) {} //abstract class
-void Skeleton::visitProperty(Property *t) {} //abstract class
-void Skeleton::visitProperties(Properties *t) {} //abstract class
-void Skeleton::visitAxiom(Axiom *t) {} //abstract class
-void Skeleton::visitRule(Rule *t) {} //abstract class
-void Skeleton::visitRules(Rules *t) {} //abstract class
+void Skeleton::visitASTSectionSeparator(ASTSectionSeparator *t) {} //abstract class
+void Skeleton::visitASTProgram(ASTProgram *t) {} //abstract class
+void Skeleton::visitASTProperty(ASTProperty *t) {} //abstract class
+void Skeleton::visitASTProperties(ASTProperties *t) {} //abstract class
+void Skeleton::visitASTAxiom(ASTAxiom *t) {} //abstract class
+void Skeleton::visitASTRule(ASTRule *t) {} //abstract class
+void Skeleton::visitASTRules(ASTRules *t) {} //abstract class
 
-void Skeleton::visitLSectionSeparator(LSectionSeparator *l_section_separator)
+void Skeleton::visitASTLSectionSeparator(ASTLSectionSeparator *astl_section_separator)
 {
-  /* Code For LSectionSeparator Goes Here */
+  /* Code For ASTLSectionSeparator Goes Here */
 
 
 }
 
-void Skeleton::visitLProgram(LProgram *l_program)
+void Skeleton::visitASTLProgram(ASTLProgram *astl_program)
 {
-  /* Code For LProgram Goes Here */
+  /* Code For ASTLProgram Goes Here */
 
-  if (l_program->properties_) l_program->properties_->accept(this);
-  if (l_program->sectionseparator_1) l_program->sectionseparator_1->accept(this);
-  if (l_program->axiom_) l_program->axiom_->accept(this);
-  if (l_program->sectionseparator_2) l_program->sectionseparator_2->accept(this);
-  if (l_program->rules_) l_program->rules_->accept(this);
+  if (astl_program->astproperties_) astl_program->astproperties_->accept(this);
+  if (astl_program->astsectionseparator_1) astl_program->astsectionseparator_1->accept(this);
+  if (astl_program->astaxiom_) astl_program->astaxiom_->accept(this);
+  if (astl_program->astsectionseparator_2) astl_program->astsectionseparator_2->accept(this);
+  if (astl_program->astrules_) astl_program->astrules_->accept(this);
 
 }
 
-void Skeleton::visitLIProperty(LIProperty *li_property)
+void Skeleton::visitASTLIProperty(ASTLIProperty *astli_property)
 {
-  /* Code For LIProperty Goes Here */
+  /* Code For ASTLIProperty Goes Here */
 
-  visitProd(li_property->prod_);
-  visitInteger(li_property->integer_);
+  visitProd(astli_property->prod_);
+  visitInteger(astli_property->integer_);
 
 }
 
-void Skeleton::visitLDProperty(LDProperty *ld_property)
+void Skeleton::visitASTLDProperty(ASTLDProperty *astld_property)
 {
-  /* Code For LDProperty Goes Here */
+  /* Code For ASTLDProperty Goes Here */
 
-  visitProd(ld_property->prod_);
-  visitDouble(ld_property->double_);
+  visitProd(astld_property->prod_);
+  visitDouble(astld_property->double_);
 
 }
 
-void Skeleton::visitLProperties(LProperties *l_properties)
+void Skeleton::visitASTLProperties(ASTLProperties *astl_properties)
 {
-  /* Code For LProperties Goes Here */
+  /* Code For ASTLProperties Goes Here */
 
-  if (l_properties->listproperty_) l_properties->listproperty_->accept(this);
+  if (astl_properties->listastproperty_) astl_properties->listastproperty_->accept(this);
 
 }
 
-void Skeleton::visitLAxiom(LAxiom *l_axiom)
+void Skeleton::visitASTLAxiom(ASTLAxiom *astl_axiom)
 {
-  /* Code For LAxiom Goes Here */
+  /* Code For ASTLAxiom Goes Here */
 
-  visitProd(l_axiom->prod_);
+  visitProd(astl_axiom->prod_);
 
 }
 
-void Skeleton::visitLRule(LRule *l_rule)
+void Skeleton::visitASTLRule(ASTLRule *astl_rule)
 {
-  /* Code For LRule Goes Here */
+  /* Code For ASTLRule Goes Here */
 
-  visitProd(l_rule->prod_1);
-  visitProd(l_rule->prod_2);
+  visitProd(astl_rule->prod_1);
+  visitProd(astl_rule->prod_2);
 
 }
 
-void Skeleton::visitLLeftRule(LLeftRule *l_left_rule)
+void Skeleton::visitASTLLeftRule(ASTLLeftRule *astl_left_rule)
 {
-  /* Code For LLeftRule Goes Here */
+  /* Code For ASTLLeftRule Goes Here */
 
-  visitProd(l_left_rule->prod_1);
-  visitProd(l_left_rule->prod_2);
-  visitProd(l_left_rule->prod_3);
+  visitProd(astl_left_rule->prod_1);
+  visitProd(astl_left_rule->prod_2);
+  visitProd(astl_left_rule->prod_3);
 
 }
 
-void Skeleton::visitLRightRule(LRightRule *l_right_rule)
+void Skeleton::visitASTLRightRule(ASTLRightRule *astl_right_rule)
 {
-  /* Code For LRightRule Goes Here */
+  /* Code For ASTLRightRule Goes Here */
 
-  visitProd(l_right_rule->prod_1);
-  visitProd(l_right_rule->prod_2);
-  visitProd(l_right_rule->prod_3);
+  visitProd(astl_right_rule->prod_1);
+  visitProd(astl_right_rule->prod_2);
+  visitProd(astl_right_rule->prod_3);
 
 }
 
-void Skeleton::visitLBothRule(LBothRule *l_both_rule)
+void Skeleton::visitASTLBothRule(ASTLBothRule *astl_both_rule)
 {
-  /* Code For LBothRule Goes Here */
+  /* Code For ASTLBothRule Goes Here */
 
-  visitProd(l_both_rule->prod_1);
-  visitProd(l_both_rule->prod_2);
-  visitProd(l_both_rule->prod_3);
-  visitProd(l_both_rule->prod_4);
+  visitProd(astl_both_rule->prod_1);
+  visitProd(astl_both_rule->prod_2);
+  visitProd(astl_both_rule->prod_3);
+  visitProd(astl_both_rule->prod_4);
 
 }
 
-void Skeleton::visitLRules(LRules *l_rules)
+void Skeleton::visitASTLRules(ASTLRules *astl_rules)
 {
-  /* Code For LRules Goes Here */
+  /* Code For ASTLRules Goes Here */
 
-  if (l_rules->listrule_) l_rules->listrule_->accept(this);
+  if (astl_rules->listastrule_) astl_rules->listastrule_->accept(this);
 
 }
 
 
-void Skeleton::visitListProperty(ListProperty *list_property)
+void Skeleton::visitListASTProperty(ListASTProperty *list_ast_property)
 {
-  for (ListProperty::iterator i = list_property->begin() ; i != list_property->end() ; ++i)
+  for (ListASTProperty::iterator i = list_ast_property->begin() ; i != list_ast_property->end() ; ++i)
   {
     (*i)->accept(this);
   }
 }
 
-void Skeleton::visitListRule(ListRule *list_rule)
+void Skeleton::visitListASTRule(ListASTRule *list_ast_rule)
 {
-  for (ListRule::iterator i = list_rule->begin() ; i != list_rule->end() ; ++i)
+  for (ListASTRule::iterator i = list_ast_rule->begin() ; i != list_ast_rule->end() ; ++i)
   {
     (*i)->accept(this);
   }
