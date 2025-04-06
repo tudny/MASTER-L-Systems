@@ -11,6 +11,7 @@
 #include "memory_utils.h"
 #include "Parser.H"
 #include "Absyn.H"
+#include "Skeleton.H"
 
 const char STACK_OPENING_BRACKET = '[';
 const char STACK_CLOSING_BRACKET = ']';
@@ -49,7 +50,7 @@ constexpr bool is_closing_bracket(const char bracket) {
  * Negative look_back indicates that the opening bracket is n steps before us
  * Positive look_back indicates that the closing bracket is n steps ahead of us
  * */
-static std::vector<int32_t> compute_look_back(std::string &successor) {
+static std::vector<int32_t> compute_look_back(const std::string &successor) {
     std::vector<int32_t> look_back(successor.size(), 0);
     std::stack<std::pair<int32_t, char>> stack;
 
@@ -115,11 +116,96 @@ private:
     std::vector<Production> productions;
 };
 
+class GrammarVisitor : public Skeleton {
+public:
+    void visitASTLIProperty(ASTLIProperty *p) override {
+        builder.add_property(
+                p->prod_,
+                static_cast<float>(p->integer_)
+        );
+    }
+
+    void visitASTLDProperty(ASTLDProperty *p) override {
+        builder.add_property(
+                p->prod_,
+                static_cast<float>(p->double_)
+        );
+    }
+
+    void visitASTLAxiom(ASTLAxiom *p) override {
+        builder.set_axiom(
+                p->prod_,
+                compute_look_back(p->prod_)
+        );
+    }
+
+    void visitASTLRule(ASTLRule *p) override {
+        append_production(
+                p->prod_1,
+                p->prod_2,
+                std::string(),
+                std::string()
+        );
+    }
+
+    void visitASTLLeftRule(ASTLLeftRule *p) override {
+        append_production(
+                p->prod_2,
+                p->prod_3,
+                p->prod_1,
+                std::string()
+        );
+    }
+
+    void visitASTLRightRule(ASTLRightRule *p) override {
+        append_production(
+                p->prod_1,
+                p->prod_3,
+                std::string(),
+                p->prod_2
+        );
+    }
+
+    void visitASTLBothRule(ASTLBothRule *p) override {
+        append_production(
+                p->prod_2,
+                p->prod_4,
+                p->prod_1,
+                p->prod_3
+        );
+    }
+
+    void append_production(
+            const std::string &predecessor,
+            const std::string &successor,
+            const std::string &left_context,
+            const std::string &right_context
+    ) {
+        builder.add_production(
+                of_string(predecessor),
+                successor,
+                left_context,
+                right_context,
+                compute_look_back(successor)
+        );
+    }
+
+    static char of_string(const std::string &str) {
+        if (str.size() != 1) {
+            throw std::runtime_error("Expected single character, got: " + str);
+        }
+        return str[0];
+    }
+
+public:
+    GrammarBuilder builder;
+};
 
 static GrammarPtr parse_grammar(ASTProgram *program) {
-    GrammarBuilder builder;
-
-    return builder.build();
+    std::shared_ptr<GrammarVisitor> visitor = std::make_shared<GrammarVisitor>();
+    program->accept(visitor.get());
+    auto grammar = visitor->builder.build();
+    return grammar;
 }
 
 GrammarPtr load_grammar(const std::string &path) {

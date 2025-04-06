@@ -31,9 +31,9 @@ using AxiomPtr = std::shared_ptr<Axiom>;
 class Production {
 public:
     char predecessor;
+    std::string successor;
     std::string left_context;
     std::string right_context;
-    std::string successor;
     LookBackTable look_back;
 };
 
