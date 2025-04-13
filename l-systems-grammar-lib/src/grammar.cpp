@@ -418,12 +418,17 @@ OpenGLReadyProductions Grammar::get_opengl_ready_productions() const {
             left_context_data,
             right_context_sizes,
             right_context_offsets,
-            right_context_data
+            right_context_data,
+            this->ignored->get_ignored_as_opengl_data()
     };
 }
 
 const std::vector<Production> &Grammar::get_raw_productions() const {
     return this->productions;
+}
+
+IgnoredPtr Grammar::get_ignored() {
+    return this->ignored;
 }
 
 std::vector<int32_t> Axiom::get_as_opengl_data() const {

@@ -288,9 +288,11 @@ private:
                 {&ssbo_new_productions__right_context_sizes, productions_gl_data.right_context_sizes},
                 {&ssbo_new_productions__right_context_offsets, productions_gl_data.right_context_offsets},
                 {&ssbo_new_productions__right_context_data, productions_gl_data.right_context_data},
+                {&ssbo_new_productions__ignored, productions_gl_data.ignored}
         };
 
         this->productions_count = grammar->get_raw_productions().size();
+        this->ignored_count = grammar->get_ignored()->ignored.size();
 
         for (const auto &[buffer, data]: mappings) {
             glGenBuffers(1, buffer);
@@ -346,6 +348,7 @@ private:
             this_find_production_and_size_program->use();
             this_find_production_and_size_program->setUniform("wholeInputSize", (int) result_buffer_size);
             this_find_production_and_size_program->setUniform("numberOfProductions", (int) productions_count);
+            this_find_production_and_size_program->setUniform("ignoredSize", (int) ignored_count);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_new_productions__predecessors);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_new_productions__look_back);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_new_productions__successors_sizes);
@@ -360,6 +363,8 @@ private:
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 11, ssbo_previous_result_buffer);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 12, ssbo_production_index_buffer);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 13, ssbo_offset_buffer);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 14, ssbo_new_productions__ignored);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 15, ssbo_previous_look_back_buffer);
             glDispatchCompute(result_buffer_size, 1, 1);
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
             this_find_production_and_size_program->unuse();
@@ -685,6 +690,7 @@ private:
 
     size_t ssbo_word_length{};
     size_t productions_count{};
+    size_t ignored_count{};
     int32_t leaf_edge_count{};
 
     GLuint vao_leaf{};
@@ -700,6 +706,7 @@ private:
     GLuint ssbo_new_productions__right_context_sizes{};
     GLuint ssbo_new_productions__right_context_offsets{};
     GLuint ssbo_new_productions__right_context_data{};
+    GLuint ssbo_new_productions__ignored{};
 
     GLuint ssbo_previous_result_buffer{};
     GLuint ssbo_offset_buffer{};

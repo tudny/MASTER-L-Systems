@@ -21,8 +21,8 @@ using PropertiesPtr = std::shared_ptr<Properties>;
 
 class Ignored {
 public:
-    [[nodiscard]] std::vector<int32_t> get_ignored_as_opengl_data() const {
-        return ignored;
+    [[nodiscard]] std::shared_ptr<std::vector<int32_t>> get_ignored_as_opengl_data() const {
+        return std::make_shared<std::vector<int32_t>>(ignored);
     }
 
     std::vector<int32_t> ignored;
@@ -77,11 +77,14 @@ public:
     PRODUCTION_DATA(successors)
     PRODUCTION_DATA(left_context)
     PRODUCTION_DATA(right_context)
+    OpenGLReadyProductionDataType ignored;
 };
 
 class Grammar {
 public:
     PropertiesPtr get_properties();
+
+    IgnoredPtr get_ignored();
 
     AxiomPtr get_axiom();
 
