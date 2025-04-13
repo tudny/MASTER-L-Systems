@@ -339,12 +339,6 @@ private:
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_production_index_buffer);
             glBufferData(GL_SHADER_STORAGE_BUFFER, result_buffer_size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
 
-            // productionSizeOutput -> ssbo_offset_buffer
-            // productionNumberOutput -> ssbo_production_index_buffer
-            // uniform wholeInputSize -> result_buffer_size
-            // uniform numberOfProductions -> productions_count
-            // inputBuffer -> ssbo_previous_result_buffer
-
             this_find_production_and_size_program->use();
             this_find_production_and_size_program->setUniform("wholeInputSize", (int) result_buffer_size);
             this_find_production_and_size_program->setUniform("numberOfProductions", (int) productions_count);

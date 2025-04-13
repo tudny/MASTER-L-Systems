@@ -256,6 +256,7 @@ void Grammar::print(std::ostream &os) {
     os << sep(1) << "Productions{" << std::endl;
     for (const auto &prod: this->productions) {
         os << sep(2) << prod.predecessor << " -> " << prod.successor << std::endl;
+        os << sep(2) << prod.left_context << " < . > " << prod.right_context << std::endl;
         print_lookback(prod.look_back);
     }
     os << sep(1) << "}" << std::endl;

@@ -80,6 +80,13 @@ bool amIIgnored(int letter) {
     return false;
 }
 
+bool doMatch(int wordLetter, int contextLetter) {
+    if (contextLetter == 42 /* * */) {
+        return true;
+    }
+    return wordLetter == contextLetter;
+}
+
 bool checkLeftContext(int productionIndex, int index) {
     int leftContextSize = left_context_sizes[productionIndex];
     if (leftContextSize == 0) {
@@ -104,7 +111,7 @@ bool checkLeftContext(int productionIndex, int index) {
             // Ignore ignored letter
             currentWordIndex -= 1;
         } else {
-            if (inputBuffer[currentWordIndex] != left_context_data[currentContextIndex]) {
+            if (!doMatch(inputBuffer[currentWordIndex], left_context_data[currentContextIndex])) {
                 return false;
             }
             currentWordIndex -= 1;
@@ -113,12 +120,12 @@ bool checkLeftContext(int productionIndex, int index) {
         }
     }
 
-    return true;
+    return stepToPerform == 0;
 }
 
 bool checkRightContext(int productionIndex, int index) {
     int rightContextSize = right_context_sizes[productionIndex];
-    if (right_context_sizes[productionIndex] == 0) {
+    if (rightContextSize == 0) {
         return true;
     }
 
@@ -140,16 +147,16 @@ bool checkRightContext(int productionIndex, int index) {
             // Ignore ignored letter
             currentWordIndex += 1;
         } else {
-            if (inputBuffer[currentWordIndex] != right_context_data[currentContextIndex]) {
+            if (!doMatch(inputBuffer[currentWordIndex], right_context_data[currentContextIndex])) {
                 return false;
             }
             currentWordIndex += 1;
             currentContextIndex += 1;
-            stepToPerform += 1;
+            stepToPerform -= 1;
         }
     }
 
-    return true;
+    return stepToPerform == 0;
 }
 
 bool checkIfproductionIsMatching(int productionIndex, int index) {

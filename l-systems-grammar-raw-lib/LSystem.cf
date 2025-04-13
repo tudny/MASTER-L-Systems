@@ -1,6 +1,6 @@
 entrypoints ASTProgram ;
 
-token Prod (letter | digit | '{' | '}' | '[' | ']' | '/' | '\\' | '^' | '&' | '+' | '-' | '|' | '!' | '\'' | '.' )+ ;
+token Prod (letter | digit | '{' | '}' | '[' | ']' | '/' | '\\' | '^' | '&' | '+' | '-' | '|' | '!' | '\'' | '.' | '*')+ ;
 
 comment "//" ;
 
