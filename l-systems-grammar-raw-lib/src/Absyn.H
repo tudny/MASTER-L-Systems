@@ -31,8 +31,7 @@ class ASTRule;
 class ASTRules;
 class ASTLSectionSeparator;
 class ASTLProgram;
-class ASTLIProperty;
-class ASTLDProperty;
+class ASTLProperty;
 class ASTIgnore;
 class ASTLProperties;
 class ASTLAxiom;
@@ -59,8 +58,7 @@ public:
   virtual void visitASTRules(ASTRules *p) = 0;
   virtual void visitASTLSectionSeparator(ASTLSectionSeparator *p) = 0;
   virtual void visitASTLProgram(ASTLProgram *p) = 0;
-  virtual void visitASTLIProperty(ASTLIProperty *p) = 0;
-  virtual void visitASTLDProperty(ASTLDProperty *p) = 0;
+  virtual void visitASTLProperty(ASTLProperty *p) = 0;
   virtual void visitASTIgnore(ASTIgnore *p) = 0;
   virtual void visitASTLProperties(ASTLProperties *p) = 0;
   virtual void visitASTLAxiom(ASTLAxiom *p) = 0;
@@ -175,34 +173,19 @@ public:
   void swap(ASTLProgram &);
 };
 
-class ASTLIProperty : public ASTProperty
+class ASTLProperty : public ASTProperty
 {
 public:
-  Prod prod_;
-  Integer integer_;
+  Prod prod_1;
+  Prod prod_2;
 
-  ASTLIProperty(const ASTLIProperty &);
-  ASTLIProperty &operator=(const ASTLIProperty &);
-  ASTLIProperty(Prod p1, Integer p2);
-  ~ASTLIProperty();
+  ASTLProperty(const ASTLProperty &);
+  ASTLProperty &operator=(const ASTLProperty &);
+  ASTLProperty(Prod p1, Prod p2);
+  ~ASTLProperty();
   virtual void accept(Visitor *v);
-  virtual ASTLIProperty *clone() const;
-  void swap(ASTLIProperty &);
-};
-
-class ASTLDProperty : public ASTProperty
-{
-public:
-  Prod prod_;
-  Double double_;
-
-  ASTLDProperty(const ASTLDProperty &);
-  ASTLDProperty &operator=(const ASTLDProperty &);
-  ASTLDProperty(Prod p1, Double p2);
-  ~ASTLDProperty();
-  virtual void accept(Visitor *v);
-  virtual ASTLDProperty *clone() const;
-  void swap(ASTLDProperty &);
+  virtual ASTLProperty *clone() const;
+  void swap(ASTLProperty &);
 };
 
 class ASTIgnore : public ASTProperty

@@ -119,17 +119,10 @@ private:
 
 class GrammarVisitor : public Skeleton {
 public:
-    void visitASTLIProperty(ASTLIProperty *p) override {
+    void visitASTLProperty(ASTLProperty *p) override {
         builder.add_property(
-                p->prod_,
-                static_cast<float>(p->integer_)
-        );
-    }
-
-    void visitASTLDProperty(ASTLDProperty *p) override {
-        builder.add_property(
-                p->prod_,
-                static_cast<float>(p->double_)
+                p->prod_1,
+                std::stof(p->prod_2)
         );
     }
 

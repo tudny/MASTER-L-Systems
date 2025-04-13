@@ -106,94 +106,48 @@ ASTLProgram *ASTLProgram::clone() const
 
 
 
-/********************   ASTLIProperty    ********************/
-ASTLIProperty::ASTLIProperty(Prod p1, Integer p2)
+/********************   ASTLProperty    ********************/
+ASTLProperty::ASTLProperty(Prod p1, Prod p2)
 {
-  prod_ = p1;
-  integer_ = p2;
+  prod_1 = p1;
+  prod_2 = p2;
 
 }
 
-ASTLIProperty::ASTLIProperty(const ASTLIProperty & other)
+ASTLProperty::ASTLProperty(const ASTLProperty & other)
 {
-  prod_ = other.prod_;
-  integer_ = other.integer_;
+  prod_1 = other.prod_1;
+  prod_2 = other.prod_2;
 
 }
 
-ASTLIProperty &ASTLIProperty::operator=(const ASTLIProperty & other)
+ASTLProperty &ASTLProperty::operator=(const ASTLProperty & other)
 {
-  ASTLIProperty tmp(other);
+  ASTLProperty tmp(other);
   swap(tmp);
   return *this;
 }
 
-void ASTLIProperty::swap(ASTLIProperty & other)
+void ASTLProperty::swap(ASTLProperty & other)
 {
-  std::swap(prod_, other.prod_);
-  std::swap(integer_, other.integer_);
+  std::swap(prod_1, other.prod_1);
+  std::swap(prod_2, other.prod_2);
 
 }
 
-ASTLIProperty::~ASTLIProperty()
-{
-
-}
-
-void ASTLIProperty::accept(Visitor *v)
-{
-  v->visitASTLIProperty(this);
-}
-
-ASTLIProperty *ASTLIProperty::clone() const
-{
-  return new ASTLIProperty(*this);
-}
-
-
-
-/********************   ASTLDProperty    ********************/
-ASTLDProperty::ASTLDProperty(Prod p1, Double p2)
-{
-  prod_ = p1;
-  double_ = p2;
-
-}
-
-ASTLDProperty::ASTLDProperty(const ASTLDProperty & other)
-{
-  prod_ = other.prod_;
-  double_ = other.double_;
-
-}
-
-ASTLDProperty &ASTLDProperty::operator=(const ASTLDProperty & other)
-{
-  ASTLDProperty tmp(other);
-  swap(tmp);
-  return *this;
-}
-
-void ASTLDProperty::swap(ASTLDProperty & other)
-{
-  std::swap(prod_, other.prod_);
-  std::swap(double_, other.double_);
-
-}
-
-ASTLDProperty::~ASTLDProperty()
+ASTLProperty::~ASTLProperty()
 {
 
 }
 
-void ASTLDProperty::accept(Visitor *v)
+void ASTLProperty::accept(Visitor *v)
 {
-  v->visitASTLDProperty(this);
+  v->visitASTLProperty(this);
 }
 
-ASTLDProperty *ASTLDProperty::clone() const
+ASTLProperty *ASTLProperty::clone() const
 {
-  return new ASTLDProperty(*this);
+  return new ASTLProperty(*this);
 }
 
 

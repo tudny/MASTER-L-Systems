@@ -40,8 +40,7 @@ class PrintAbsyn : public Visitor
   void visitASTProgram(ASTProgram *p); /* abstract class */
   void visitASTLProgram(ASTLProgram *p);
   void visitASTProperty(ASTProperty *p); /* abstract class */
-  void visitASTLIProperty(ASTLIProperty *p);
-  void visitASTLDProperty(ASTLDProperty *p);
+  void visitASTLProperty(ASTLProperty *p);
   void visitASTIgnore(ASTIgnore *p);
   void visitASTProperties(ASTProperties *p); /* abstract class */
   void visitASTLProperties(ASTLProperties *p);
@@ -158,8 +157,7 @@ class ShowAbsyn : public Visitor
   void visitASTProgram(ASTProgram *p); /* abstract class */
   void visitASTLProgram(ASTLProgram *p);
   void visitASTProperty(ASTProperty *p); /* abstract class */
-  void visitASTLIProperty(ASTLIProperty *p);
-  void visitASTLDProperty(ASTLDProperty *p);
+  void visitASTLProperty(ASTLProperty *p);
   void visitASTIgnore(ASTIgnore *p);
   void visitASTProperties(ASTProperties *p); /* abstract class */
   void visitASTLProperties(ASTLProperties *p);

@@ -1,6 +1,6 @@
 entrypoints ASTProgram ;
 
-token Prod (letter | '{' | '}' | '[' | ']' | '/' | '\\' | '^' | '&' | '+' | '-' | '|' | '!' | '\'' )+ ;
+token Prod (letter | digit | '{' | '}' | '[' | ']' | '/' | '\\' | '^' | '&' | '+' | '-' | '|' | '!' | '\'' | '.' )+ ;
 
 comment "//" ;
 
@@ -8,8 +8,7 @@ ASTLSectionSeparator. ASTSectionSeparator ::= "--" "\n" ;
 
 ASTLProgram.          ASTProgram ::= ASTProperties ASTSectionSeparator ASTAxiom ASTSectionSeparator ASTRules ;
 
-ASTLIProperty.        ASTProperty ::= Prod ":=" Integer ;
-ASTLDProperty.        ASTProperty ::= Prod ":=" Double ;
+ASTLProperty.         ASTProperty ::= Prod ":=" Prod ;
 ASTIgnore.            ASTProperty ::= "#ignore" Prod ;
 ASTLProperties.       ASTProperties ::= [ASTProperty] ;
 separator nonempty ASTProperty "\n" ;

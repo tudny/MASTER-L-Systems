@@ -19,8 +19,7 @@ public:
   void visitASTRules(ASTRules *p);
   void visitASTLSectionSeparator(ASTLSectionSeparator *p);
   void visitASTLProgram(ASTLProgram *p);
-  void visitASTLIProperty(ASTLIProperty *p);
-  void visitASTLDProperty(ASTLDProperty *p);
+  void visitASTLProperty(ASTLProperty *p);
   void visitASTIgnore(ASTIgnore *p);
   void visitASTLProperties(ASTLProperties *p);
   void visitASTLAxiom(ASTLAxiom *p);

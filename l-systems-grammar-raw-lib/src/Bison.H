@@ -61,9 +61,7 @@ extern int l_system_debug;
     _COLONEQ = 262,                /* _COLONEQ  */
     _LT = 263,                     /* _LT  */
     _GT = 264,                     /* _GT  */
-    T_Prod = 265,                  /* T_Prod  */
-    _INTEGER_ = 266,               /* _INTEGER_  */
-    _DOUBLE_ = 267                 /* _DOUBLE_  */
+    T_Prod = 265                   /* T_Prod  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -88,7 +86,7 @@ union YYSTYPE
   ASTRules* astrules_;
   ListASTRule* listastrule_;
 
-#line 92 "Bison.H"
+#line 90 "Bison.H"
 
 };
 typedef union YYSTYPE YYSTYPE;

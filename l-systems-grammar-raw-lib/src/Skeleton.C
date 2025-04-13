@@ -37,21 +37,12 @@ void Skeleton::visitASTLProgram(ASTLProgram *astl_program)
 
 }
 
-void Skeleton::visitASTLIProperty(ASTLIProperty *astli_property)
+void Skeleton::visitASTLProperty(ASTLProperty *astl_property)
 {
-  /* Code For ASTLIProperty Goes Here */
+  /* Code For ASTLProperty Goes Here */
 
-  visitProd(astli_property->prod_);
-  visitInteger(astli_property->integer_);
-
-}
-
-void Skeleton::visitASTLDProperty(ASTLDProperty *astld_property)
-{
-  /* Code For ASTLDProperty Goes Here */
-
-  visitProd(astld_property->prod_);
-  visitDouble(astld_property->double_);
+  visitProd(astl_property->prod_1);
+  visitProd(astl_property->prod_2);
 
 }
 
