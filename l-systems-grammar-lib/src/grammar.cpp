@@ -8,7 +8,6 @@
 #include <stack>
 #include <numeric>
 #include "grammar.h"
-#include "str_utils.h"
 #include "memory_utils.h"
 #include "Parser.H"
 #include "Absyn.H"

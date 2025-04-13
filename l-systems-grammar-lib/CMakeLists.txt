@@ -9,7 +9,6 @@ set(
         LIBRARY_SOURCES
         src/grammar.cpp
         src/grammar.h
-        src/str_utils.h
 )
 
 add_library(
