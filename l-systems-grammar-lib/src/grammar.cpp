@@ -6,6 +6,7 @@
 #include <cstring>
 #include <utility>
 #include <stack>
+#include <numeric>
 #include "grammar.h"
 #include "str_utils.h"
 #include "memory_utils.h"
@@ -102,6 +103,8 @@ public:
                 throw std::runtime_error("Missing required property: " + std::string(prop));
             }
         }
+
+        std::sort(productions.begin(), productions.end());
 
         return std::make_shared<Grammar>(properties, axiom, productions);
     }
@@ -367,6 +370,119 @@ std::optional<std::string> Grammar::get_production_successor(char predecessor) {
         return {};
     }
     return std::get<0>(*production);
+}
+
+static int32_t collect_size(const std::vector<Production> &productions, std::function<int32_t(Production)> sizer) {
+    return std::accumulate(productions.begin(), productions.end(), 0,
+                           [&sizer](int32_t size, const Production &prod) {
+                               return size + sizer(prod);
+                           });
+}
+
+static OpenGLReadyProductionDataType prepare_vector(size_t size) {
+    return std::make_shared<std::vector<int32_t>>(size);
+}
+
+static OpenGLReadyProductionDataType prepare_vector(
+        const std::vector<Production> &productions,
+        const std::function<int32_t(Production)> &sizer
+) {
+    auto total_size = collect_size(productions, sizer);
+    return prepare_vector(total_size);
+}
+
+static void copy_data_to_vector(
+        std::vector<int32_t> &buffer,
+        size_t offset,
+        size_t size,
+        const std::function<int32_t(size_t)> &source
+) {
+    for (size_t i = 0; i < size; i++) {
+        buffer[offset + i] = source(i);
+    }
+}
+
+template<typename T>
+static void fill_vector(
+        const std::vector<Production> &productions,
+        std::function<const T *(const Production&)> &base,
+        OpenGLReadyProductionDataType data,
+        OpenGLReadyProductionDataType sizes = nullptr,
+        OpenGLReadyProductionDataType offsets = nullptr
+) {
+    int32_t offset = 0;
+    for (size_t i = 0; i < productions.size(); ++i) {
+        auto &prod = productions[i];
+        auto prop = base(prod);
+        auto size = (int32_t) prop->size();
+        if (sizes) (*sizes)[i] = size;
+        if (offsets) (*offsets)[i] = offset;
+        copy_data_to_vector(*data, offset, prop->size(), [&prop](size_t i) {
+            return (int32_t) (*prop)[i];
+        });
+        offset += size;
+    }
+}
+
+static
+/* size, offset, data */
+std::tuple<OpenGLReadyProductionDataType, OpenGLReadyProductionDataType, OpenGLReadyProductionDataType>
+make_and_fill_vector(
+        const std::vector<Production> &productions,
+        std::function<const std::string *(const Production&)> base
+) {
+    OpenGLReadyProductionDataType sizes = prepare_vector(productions.size());
+    OpenGLReadyProductionDataType offsets = prepare_vector(productions.size());
+    OpenGLReadyProductionDataType data = prepare_vector(productions, [&base](auto prod) {
+        return base(prod)->size();
+    });
+
+    fill_vector(productions, base, data, sizes, offsets);
+
+    return {sizes, offsets, data};
+}
+
+OpenGLReadyProductions Grammar::get_opengl_ready_productions() const {
+    auto predecessors = prepare_vector(productions, [](auto) { return 1; });
+    copy_data_to_vector(*predecessors, 0, productions.size(), [this](size_t i) { return productions[i].predecessor; });
+    auto look_back = prepare_vector(productions, [](auto p) { return p.look_back.size(); });
+    std::function<const std::vector<int32_t> *(const Production&)> look_back_getter = [](const Production &p) {
+        return &p.look_back;
+    };
+    fill_vector(productions, look_back_getter, look_back);
+    auto [successors_sizes, successors_offsets, successors_data] = make_and_fill_vector(
+            productions,
+            [](const auto &p) {
+                return &p.successor;
+            });
+    auto [left_context_sizes, left_context_offsets, left_context_data] = make_and_fill_vector(
+            productions,
+            [](const auto &p) {
+                return &p.left_context;
+            });
+    auto [right_context_sizes, right_context_offsets, right_context_data] = make_and_fill_vector(
+            productions,
+            [](const auto &p) {
+                return &p.right_context;
+            });
+
+    return {
+            predecessors,
+            look_back,
+            successors_sizes,
+            successors_offsets,
+            successors_data,
+            left_context_sizes,
+            left_context_offsets,
+            left_context_data,
+            right_context_sizes,
+            right_context_offsets,
+            right_context_data
+    };
+}
+
+const std::vector<Production> &Grammar::get_raw_productions() const {
+    return this->productions;
 }
 
 std::vector<int32_t> Axiom::get_as_opengl_data() const {

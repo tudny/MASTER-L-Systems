@@ -35,26 +35,64 @@ public:
     std::string left_context;
     std::string right_context;
     LookBackTable look_back;
+
+    bool operator<(const Production &other) const {
+        if (predecessor != other.predecessor) {
+            return predecessor < other.predecessor;
+        }
+        if (successor != other.successor) {
+            return successor < other.successor;
+        }
+        if (left_context != other.left_context) {
+            return left_context < other.left_context;
+        }
+        return right_context < other.right_context;
+        // look back is a derivative of the successor
+    }
 };
 
 using Productions = std::unordered_map<decltype(Production::predecessor), std::tuple<decltype(Production::successor), decltype(Production::look_back)>>;
 using ProductionsPtr = std::shared_ptr<Productions>;
 
+using OpenGLReadyProductionDataType = const std::shared_ptr<std::vector<int32_t>>;
+
+#define PRODUCTION_DATA(X) \
+    OpenGLReadyProductionDataType X ## _sizes; \
+    OpenGLReadyProductionDataType X ## _offsets; \
+    OpenGLReadyProductionDataType X ## _data;
+
+class OpenGLReadyProductions {
+public:
+    OpenGLReadyProductionDataType predecessors;
+    OpenGLReadyProductionDataType look_back;
+    PRODUCTION_DATA(successors)
+    PRODUCTION_DATA(left_context)
+    PRODUCTION_DATA(right_context)
+};
+
 class Grammar {
 public:
     PropertiesPtr get_properties();
+
     AxiomPtr get_axiom();
+
     ProductionsPtr get_productions();
 
+    const std::vector<Production> &get_raw_productions() const;
+
     float get_property_float(const std::string &name);
+
     size_t get_property_size_t(const std::string &name);
 
     std::optional<std::tuple<std::string, LookBackTable>> get_production(char predecessor);
+
     std::optional<std::string> get_production_successor(char predecessor);
 
     void print(std::ostream &os = std::cout);
 
     std::string cpu_produce();
+
+    OpenGLReadyProductions get_opengl_ready_productions() const;
 
     Grammar(const std::vector<Property> &properties, Axiom axiom, const std::vector<Production> &productions);
 
