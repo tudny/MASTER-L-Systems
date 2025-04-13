@@ -1,10 +1,8 @@
 step:=10
-depth:=7
-delta:=22.5
+depth:=1
+delta:=45
 --
-A
+aPa
 --
-A -> [&FL!A]/////'[&FL!A]///////'[&FL!A]
-F -> S/////F
-S -> FL
-L -> ['''^^{-f+f+f-|-f+f+f}]
+a < P > a -> {-f++f++f++f+++}F
+a < P -> FF

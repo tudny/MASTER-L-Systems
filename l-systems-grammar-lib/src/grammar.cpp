@@ -103,8 +103,6 @@ public:
             }
         }
 
-        std::sort(productions.begin(), productions.end());
-
         return std::make_shared<Grammar>(properties, axiom, productions);
     }
 
@@ -230,10 +228,10 @@ void Grammar::print(std::ostream &os) {
 
     os << "Grammar{" << std::endl;
     os << sep(1) << "Properties{" << std::endl;
-    for (const auto &prop: this->properties) {
-        os << sep(2) << prop.name << " := " << prop.value;
+    for (const auto &[prop_name, prop_value]: *this->properties) {
+        os << sep(2) << prop_name << " := " << prop_value;
         // if prop.name in REQUIRED_PROPS print (REQUIRED)
-        if (std::find(std::begin(REQUIRED_PROPS), std::end(REQUIRED_PROPS), prop.name) != std::end(REQUIRED_PROPS)) {
+        if (std::find(std::begin(REQUIRED_PROPS), std::end(REQUIRED_PROPS), prop_name) != std::end(REQUIRED_PROPS)) {
             os << " (required)";
         } else {
             os << " (optional)";
@@ -243,9 +241,9 @@ void Grammar::print(std::ostream &os) {
     os << sep(1) << "}" << std::endl;
 
     os << sep(1) << "Axiom{" << std::endl;
-    os << sep(2) << "length := " << this->axiom.axiom.size() << std::endl;
-    os << sep(2) << "axiom := " << this->axiom.axiom << std::endl;
-    print_lookback(this->axiom.look_back);
+    os << sep(2) << "length := " << this->axiom->axiom.size() << std::endl;
+    os << sep(2) << "axiom := " << this->axiom->axiom << std::endl;
+    print_lookback(this->axiom->look_back);
     os << sep(1) << "}" << std::endl;
 
     os << sep(1) << "Productions{" << std::endl;
@@ -258,89 +256,26 @@ void Grammar::print(std::ostream &os) {
 }
 
 PropertiesPtr Grammar::get_properties() {
-    static PropertiesPtr _props;
-    if (!_props) {
-        _props = std::make_shared<Properties>();
-        for (const auto &prop: this->properties) {
-            _props->insert({prop.name, prop.value});
-        }
-    }
-    return _props;
+    return this->properties;
 }
 
 AxiomPtr Grammar::get_axiom() {
-    static AxiomPtr _axiom;
-    if (!_axiom) {
-        _axiom = std::make_shared<Axiom>(this->axiom);
-    }
-    return _axiom;
+    return this->axiom;
 }
 
-ProductionsPtr Grammar::get_productions() {
-    static ProductionsPtr _prods;
-    if (!_prods) {
-        _prods = std::make_shared<Productions>();
-        for (const auto &prod: this->productions) {
-            _prods->insert({prod.predecessor, {prod.successor, prod.look_back}});
-        }
+static PropertiesPtr make_properties(const std::vector<Property> &properties) {
+    auto props = std::make_shared<Properties>();
+    for (const auto &property: properties) {
+        (*props)[property.name] = property.value;
     }
-    return _prods;
+    return props;
 }
 
 Grammar::Grammar(
         const std::vector<Property> &properties,
         Axiom axiom,
         const std::vector<Production> &productions
-) : properties(properties), axiom(std::move(axiom)), productions(productions) {}
-
-static size_t collect_size(Grammar &grammar, char *previous_result, size_t previous_size) {
-    size_t result_size = 0;
-
-    for (size_t i = 0; i < previous_size; i++) {
-        auto production = grammar.get_production_successor(previous_result[i]);
-        if (!production.has_value()) {
-            result_size++;
-            continue;
-        }
-        result_size += production->size();
-    }
-
-    return result_size;
-}
-
-static void collect_result(Grammar &grammar, char *previous_result, size_t previous_size, char *result) {
-    size_t result_size = 0;
-
-    for (size_t i = 0; i < previous_size; i++) {
-        auto production = grammar.get_production_successor(previous_result[i]);
-        if (!production.has_value()) {
-            result[result_size++] = previous_result[i];
-            continue;
-        }
-        std::memcpy(result + result_size, production->c_str(), production->size());
-        result_size += production->size();
-    }
-}
-
-std::string Grammar::cpu_produce() {
-    size_t result_size = axiom.axiom.size();
-    char *result = (char *) safe_calloc(result_size, sizeof(char));
-    std::memcpy(result, axiom.axiom.c_str(), axiom.axiom.size());
-
-    size_t steps = get_property_size_t("depth");
-    for (size_t i = 0; i < steps; i++) {
-        size_t new_size = collect_size(*this, result, result_size);
-        char *new_result = (char *) safe_calloc(new_size, sizeof(char));
-        collect_result(*this, result, result_size, new_result);
-        safe_free(reinterpret_cast<void **>(&result));
-        result = new_result;
-        result_size = new_size;
-    }
-
-    std::string result_str(result, result_size);
-    safe_free(reinterpret_cast<void **>(&result));
-    return result_str;
-}
+) : properties(make_properties(properties)), axiom(std::make_shared<Axiom>(std::move(axiom))), productions(productions) {}
 
 float Grammar::get_property_float(const std::string &name) {
     // Defaults to 0
@@ -353,22 +288,6 @@ float Grammar::get_property_float(const std::string &name) {
 
 size_t Grammar::get_property_size_t(const std::string &name) {
     return static_cast<size_t>(get_property_float(name));
-}
-
-std::optional<std::tuple<std::string, LookBackTable>> Grammar::get_production(char predecessor) {
-    auto it = get_productions()->find(predecessor);
-    if (it == get_productions()->end()) {
-        return {};
-    }
-    return it->second;
-}
-
-std::optional<std::string> Grammar::get_production_successor(char predecessor) {
-    auto production = get_production(predecessor);
-    if (!production.has_value()) {
-        return {};
-    }
-    return std::get<0>(*production);
 }
 
 static int32_t collect_size(const std::vector<Production> &productions, std::function<int32_t(Production)> sizer) {
@@ -404,7 +323,7 @@ static void copy_data_to_vector(
 template<typename T>
 static void fill_vector(
         const std::vector<Production> &productions,
-        std::function<const T *(const Production&)> &base,
+        std::function<const T *(const Production &)> &base,
         OpenGLReadyProductionDataType data,
         OpenGLReadyProductionDataType sizes = nullptr,
         OpenGLReadyProductionDataType offsets = nullptr
@@ -428,7 +347,7 @@ static
 std::tuple<OpenGLReadyProductionDataType, OpenGLReadyProductionDataType, OpenGLReadyProductionDataType>
 make_and_fill_vector(
         const std::vector<Production> &productions,
-        std::function<const std::string *(const Production&)> base
+        std::function<const std::string *(const Production &)> base
 ) {
     OpenGLReadyProductionDataType sizes = prepare_vector(productions.size());
     OpenGLReadyProductionDataType offsets = prepare_vector(productions.size());
@@ -445,7 +364,7 @@ OpenGLReadyProductions Grammar::get_opengl_ready_productions() const {
     auto predecessors = prepare_vector(productions, [](auto) { return 1; });
     copy_data_to_vector(*predecessors, 0, productions.size(), [this](size_t i) { return productions[i].predecessor; });
     auto look_back = prepare_vector(productions, [](auto p) { return p.look_back.size(); });
-    std::function<const std::vector<int32_t> *(const Production&)> look_back_getter = [](const Production &p) {
+    std::function<const std::vector<int32_t> *(const Production &)> look_back_getter = [](const Production &p) {
         return &p.look_back;
     };
     fill_vector(productions, look_back_getter, look_back);

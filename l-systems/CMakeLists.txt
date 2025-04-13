@@ -11,8 +11,6 @@ set(
         src/constants.hpp
         src/system.cpp
         src/system.hpp
-        src/baseline.cpp
-        src/baseline.hpp
         src/args.cpp
         src/args.hpp
 )

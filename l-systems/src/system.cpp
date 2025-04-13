@@ -2,7 +2,6 @@
 #include "properties.hpp"
 #include "grammar.h"
 #include "GLFW/glfw3.h"
-#include "baseline.hpp"
 #include "args.hpp"
 #include "debug.hpp"
 #include <glm/glm.hpp>
@@ -31,9 +30,6 @@ public:
     void init() override {
         preload_shader_program();
         preload_compute_shader_program();
-
-        std::string result = grammar->cpu_produce();
-        // std::cout << "Result: " << result << std::endl;
 
         glGenVertexArrays(1, &vao_leaf);
 

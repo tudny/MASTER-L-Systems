@@ -51,9 +51,6 @@ public:
     }
 };
 
-using Productions = std::unordered_map<decltype(Production::predecessor), std::tuple<decltype(Production::successor), decltype(Production::look_back)>>;
-using ProductionsPtr = std::shared_ptr<Productions>;
-
 using OpenGLReadyProductionDataType = const std::shared_ptr<std::vector<int32_t>>;
 
 #define PRODUCTION_DATA(X) \
@@ -76,29 +73,21 @@ public:
 
     AxiomPtr get_axiom();
 
-    ProductionsPtr get_productions();
-
-    const std::vector<Production> &get_raw_productions() const;
+    [[nodiscard]] const std::vector<Production> &get_raw_productions() const;
 
     float get_property_float(const std::string &name);
 
     size_t get_property_size_t(const std::string &name);
 
-    std::optional<std::tuple<std::string, LookBackTable>> get_production(char predecessor);
-
-    std::optional<std::string> get_production_successor(char predecessor);
-
     void print(std::ostream &os = std::cout);
 
-    std::string cpu_produce();
-
-    OpenGLReadyProductions get_opengl_ready_productions() const;
+    [[nodiscard]] OpenGLReadyProductions get_opengl_ready_productions() const;
 
     Grammar(const std::vector<Property> &properties, Axiom axiom, const std::vector<Production> &productions);
 
 private:
-    std::vector<Property> properties;
-    Axiom axiom;
+    PropertiesPtr properties;
+    AxiomPtr axiom;
     std::vector<Production> productions;
 };
 
