@@ -198,6 +198,49 @@ ASTLDProperty *ASTLDProperty::clone() const
 
 
 
+/********************   ASTIgnore    ********************/
+ASTIgnore::ASTIgnore(Prod p1)
+{
+  prod_ = p1;
+
+}
+
+ASTIgnore::ASTIgnore(const ASTIgnore & other)
+{
+  prod_ = other.prod_;
+
+}
+
+ASTIgnore &ASTIgnore::operator=(const ASTIgnore & other)
+{
+  ASTIgnore tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void ASTIgnore::swap(ASTIgnore & other)
+{
+  std::swap(prod_, other.prod_);
+
+}
+
+ASTIgnore::~ASTIgnore()
+{
+
+}
+
+void ASTIgnore::accept(Visitor *v)
+{
+  v->visitASTIgnore(this);
+}
+
+ASTIgnore *ASTIgnore::clone() const
+{
+  return new ASTIgnore(*this);
+}
+
+
+
 /********************   ASTLProperties    ********************/
 ASTLProperties::ASTLProperties(ListASTProperty *p1)
 {

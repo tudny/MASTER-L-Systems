@@ -55,6 +55,14 @@ void Skeleton::visitASTLDProperty(ASTLDProperty *astld_property)
 
 }
 
+void Skeleton::visitASTIgnore(ASTIgnore *ast_ignore)
+{
+  /* Code For ASTIgnore Goes Here */
+
+  visitProd(ast_ignore->prod_);
+
+}
+
 void Skeleton::visitASTLProperties(ASTLProperties *astl_properties)
 {
   /* Code For ASTLProperties Goes Here */

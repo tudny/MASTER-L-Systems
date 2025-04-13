@@ -55,14 +55,15 @@ extern int l_system_debug;
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
     _ERROR_ = 258,                 /* _ERROR_  */
-    _DMINUS = 259,                 /* _DMINUS  */
-    _RARROW = 260,                 /* _RARROW  */
-    _COLONEQ = 261,                /* _COLONEQ  */
-    _LT = 262,                     /* _LT  */
-    _GT = 263,                     /* _GT  */
-    T_Prod = 264,                  /* T_Prod  */
-    _INTEGER_ = 265,               /* _INTEGER_  */
-    _DOUBLE_ = 266                 /* _DOUBLE_  */
+    _SYMB_2 = 259,                 /* _SYMB_2  */
+    _DMINUS = 260,                 /* _DMINUS  */
+    _RARROW = 261,                 /* _RARROW  */
+    _COLONEQ = 262,                /* _COLONEQ  */
+    _LT = 263,                     /* _LT  */
+    _GT = 264,                     /* _GT  */
+    T_Prod = 265,                  /* T_Prod  */
+    _INTEGER_ = 266,               /* _INTEGER_  */
+    _DOUBLE_ = 267                 /* _DOUBLE_  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -87,7 +88,7 @@ union YYSTYPE
   ASTRules* astrules_;
   ListASTRule* listastrule_;
 
-#line 91 "Bison.H"
+#line 92 "Bison.H"
 
 };
 typedef union YYSTYPE YYSTYPE;

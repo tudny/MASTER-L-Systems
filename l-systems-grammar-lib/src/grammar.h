@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <optional>
 #include <memory>
+#include <set>
 
 using LookBackTable = std::vector<int32_t>;
 
@@ -17,6 +18,17 @@ public:
 
 using Properties = std::unordered_map<decltype(Property::name), decltype(Property::value)>;
 using PropertiesPtr = std::shared_ptr<Properties>;
+
+class Ignored {
+public:
+    [[nodiscard]] std::vector<int32_t> get_ignored_as_opengl_data() const {
+        return ignored;
+    }
+
+    std::vector<int32_t> ignored;
+};
+
+using IgnoredPtr = std::shared_ptr<Ignored>;
 
 class Axiom {
 public:
@@ -83,10 +95,16 @@ public:
 
     [[nodiscard]] OpenGLReadyProductions get_opengl_ready_productions() const;
 
-    Grammar(const std::vector<Property> &properties, Axiom axiom, const std::vector<Production> &productions);
+    Grammar(
+            const std::vector<Property> &properties,
+            const std::string &ignored,
+            Axiom axiom,
+            const std::vector<Production> &productions
+    );
 
 private:
     PropertiesPtr properties;
+    IgnoredPtr ignored;
     AxiomPtr axiom;
     std::vector<Production> productions;
 };

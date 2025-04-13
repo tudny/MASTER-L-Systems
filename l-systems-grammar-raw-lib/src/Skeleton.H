@@ -21,6 +21,7 @@ public:
   void visitASTLProgram(ASTLProgram *p);
   void visitASTLIProperty(ASTLIProperty *p);
   void visitASTLDProperty(ASTLDProperty *p);
+  void visitASTIgnore(ASTIgnore *p);
   void visitASTLProperties(ASTLProperties *p);
   void visitASTLAxiom(ASTLAxiom *p);
   void visitASTLRule(ASTLRule *p);

@@ -1,6 +1,5 @@
 entrypoints ASTProgram ;
 
--- TODO: THIS SHOULD ALLOW SPECIAL CHARACTERS
 token Prod (letter | '{' | '}' | '[' | ']' | '/' | '\\' | '^' | '&' | '+' | '-' | '|' | '!' | '\'' )+ ;
 
 comment "//" ;
@@ -11,6 +10,7 @@ ASTLProgram.          ASTProgram ::= ASTProperties ASTSectionSeparator ASTAxiom 
 
 ASTLIProperty.        ASTProperty ::= Prod ":=" Integer ;
 ASTLDProperty.        ASTProperty ::= Prod ":=" Double ;
+ASTIgnore.            ASTProperty ::= "#ignore" Prod ;
 ASTLProperties.       ASTProperties ::= [ASTProperty] ;
 separator nonempty ASTProperty "\n" ;
 

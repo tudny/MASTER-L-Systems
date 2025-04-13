@@ -83,6 +83,10 @@ public:
         properties.push_back({name, value});
     }
 
+    void set_ignored(const std::string &_ignored) {
+        this->ignored = _ignored;
+    }
+
     void set_axiom(const std::string &_axiom) {
         this->axiom = {_axiom, compute_look_back(_axiom)};
     }
@@ -103,11 +107,12 @@ public:
             }
         }
 
-        return std::make_shared<Grammar>(properties, axiom, productions);
+        return std::make_shared<Grammar>(properties, ignored, axiom, productions);
     }
 
 private:
     std::vector<Property> properties;
+    std::string ignored;
     Axiom axiom;
     std::vector<Production> productions;
 };
@@ -126,6 +131,10 @@ public:
                 p->prod_,
                 static_cast<float>(p->double_)
         );
+    }
+
+    void visitASTIgnore(ASTIgnore *p) override {
+        builder.set_ignored(p->prod_);
     }
 
     void visitASTLAxiom(ASTLAxiom *p) override {
@@ -239,6 +248,11 @@ void Grammar::print(std::ostream &os) {
         os << std::endl;
     }
     os << sep(1) << "}" << std::endl;
+    os << sep(1) << "Ignored{" << std::endl;
+    for (const auto &ig: this->ignored->ignored) {
+        os << sep(2) << "char := " << (char) ig << std::endl;
+    }
+    os << sep(1) << "}" << std::endl;
 
     os << sep(1) << "Axiom{" << std::endl;
     os << sep(2) << "length := " << this->axiom->axiom.size() << std::endl;
@@ -271,11 +285,20 @@ static PropertiesPtr make_properties(const std::vector<Property> &properties) {
     return props;
 }
 
+static IgnoredPtr make_ignored(const std::string &ignored) {
+    std::set<char> ignored_set(ignored.begin(), ignored.end());
+    return std::make_shared<Ignored>(std::vector<int32_t>(ignored_set.begin(), ignored_set.end()));
+}
+
 Grammar::Grammar(
         const std::vector<Property> &properties,
+        const std::string &ignored,
         Axiom axiom,
         const std::vector<Production> &productions
-) : properties(make_properties(properties)), axiom(std::make_shared<Axiom>(std::move(axiom))), productions(productions) {}
+) : properties(make_properties(properties)),
+    ignored(make_ignored(ignored)),
+    axiom(std::make_shared<Axiom>(std::move(axiom))),
+    productions(productions) {}
 
 float Grammar::get_property_float(const std::string &name) {
     // Defaults to 0

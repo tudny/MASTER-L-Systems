@@ -133,24 +133,25 @@ enum yysymbol_kind_t
   YYSYMBOL_YYerror = 1,                    /* error  */
   YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
   YYSYMBOL__ERROR_ = 3,                    /* _ERROR_  */
-  YYSYMBOL__DMINUS = 4,                    /* _DMINUS  */
-  YYSYMBOL__RARROW = 5,                    /* _RARROW  */
-  YYSYMBOL__COLONEQ = 6,                   /* _COLONEQ  */
-  YYSYMBOL__LT = 7,                        /* _LT  */
-  YYSYMBOL__GT = 8,                        /* _GT  */
-  YYSYMBOL_T_Prod = 9,                     /* T_Prod  */
-  YYSYMBOL__INTEGER_ = 10,                 /* _INTEGER_  */
-  YYSYMBOL__DOUBLE_ = 11,                  /* _DOUBLE_  */
-  YYSYMBOL_YYACCEPT = 12,                  /* $accept  */
-  YYSYMBOL_ASTSectionSeparator = 13,       /* ASTSectionSeparator  */
-  YYSYMBOL_ASTProgram = 14,                /* ASTProgram  */
-  YYSYMBOL_ASTProperty = 15,               /* ASTProperty  */
-  YYSYMBOL_ASTProperties = 16,             /* ASTProperties  */
-  YYSYMBOL_ListASTProperty = 17,           /* ListASTProperty  */
-  YYSYMBOL_ASTAxiom = 18,                  /* ASTAxiom  */
-  YYSYMBOL_ASTRule = 19,                   /* ASTRule  */
-  YYSYMBOL_ASTRules = 20,                  /* ASTRules  */
-  YYSYMBOL_ListASTRule = 21                /* ListASTRule  */
+  YYSYMBOL__SYMB_2 = 4,                    /* _SYMB_2  */
+  YYSYMBOL__DMINUS = 5,                    /* _DMINUS  */
+  YYSYMBOL__RARROW = 6,                    /* _RARROW  */
+  YYSYMBOL__COLONEQ = 7,                   /* _COLONEQ  */
+  YYSYMBOL__LT = 8,                        /* _LT  */
+  YYSYMBOL__GT = 9,                        /* _GT  */
+  YYSYMBOL_T_Prod = 10,                    /* T_Prod  */
+  YYSYMBOL__INTEGER_ = 11,                 /* _INTEGER_  */
+  YYSYMBOL__DOUBLE_ = 12,                  /* _DOUBLE_  */
+  YYSYMBOL_YYACCEPT = 13,                  /* $accept  */
+  YYSYMBOL_ASTSectionSeparator = 14,       /* ASTSectionSeparator  */
+  YYSYMBOL_ASTProgram = 15,                /* ASTProgram  */
+  YYSYMBOL_ASTProperty = 16,               /* ASTProperty  */
+  YYSYMBOL_ASTProperties = 17,             /* ASTProperties  */
+  YYSYMBOL_ListASTProperty = 18,           /* ListASTProperty  */
+  YYSYMBOL_ASTAxiom = 19,                  /* ASTAxiom  */
+  YYSYMBOL_ASTRule = 20,                   /* ASTRule  */
+  YYSYMBOL_ASTRules = 21,                  /* ASTRules  */
+  YYSYMBOL_ListASTRule = 22                /* ListASTRule  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -168,7 +169,7 @@ int yyparse(yyscan_t scanner, YYSTYPE *result);
 
 extern int yylex(YYSTYPE *lvalp, YYLTYPE *llocp, yyscan_t scanner);
 
-#line 172 "Parser.C"
+#line 173 "Parser.C"
 
 
 #ifdef short
@@ -493,21 +494,21 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  7
+#define YYFINAL  9
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   32
+#define YYLAST   28
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  12
+#define YYNTOKENS  13
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  10
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  16
+#define YYNRULES  17
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  35
+#define YYNSTATES  37
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   266
+#define YYMAXUTOK   267
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -547,15 +548,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11
+       5,     6,     7,     8,     9,    10,    11,    12
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,   102,   102,   104,   106,   107,   109,   111,   112,   114,
-     116,   117,   118,   119,   121,   123,   124
+       0,   103,   103,   105,   107,   108,   109,   111,   113,   114,
+     116,   118,   119,   120,   121,   123,   125,   126
 };
 #endif
 
@@ -571,11 +572,11 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "\"end of file\"", "error", "\"invalid token\"", "_ERROR_", "_DMINUS",
-  "_RARROW", "_COLONEQ", "_LT", "_GT", "T_Prod", "_INTEGER_", "_DOUBLE_",
-  "$accept", "ASTSectionSeparator", "ASTProgram", "ASTProperty",
-  "ASTProperties", "ListASTProperty", "ASTAxiom", "ASTRule", "ASTRules",
-  "ListASTRule", YY_NULLPTR
+  "\"end of file\"", "error", "\"invalid token\"", "_ERROR_", "_SYMB_2",
+  "_DMINUS", "_RARROW", "_COLONEQ", "_LT", "_GT", "T_Prod", "_INTEGER_",
+  "_DOUBLE_", "$accept", "ASTSectionSeparator", "ASTProgram",
+  "ASTProperty", "ASTProperties", "ListASTProperty", "ASTAxiom", "ASTRule",
+  "ASTRules", "ListASTRule", YY_NULLPTR
 };
 
 static const char *
@@ -585,7 +586,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-6)
+#define YYPACT_NINF (-9)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -599,10 +600,10 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       0,    -1,     6,     0,     7,    -6,    -3,    -6,    -6,    -6,
-       1,    -6,    -6,    -6,     7,     3,    -5,     3,    -6,    -6,
-       4,     5,     8,    -6,    -6,    -4,    10,     9,    11,    12,
-      -6,    14,    -6,    13,    -6
+      -4,    -8,     0,    11,    -4,     7,    -9,    -9,    -2,    -9,
+      -9,    -9,     3,    -9,    -9,    -9,     7,     4,    -5,     4,
+      -9,    -9,     5,     6,     8,    -9,    -9,    -1,    13,    10,
+      12,    14,    -9,    15,    -9,    16,    -9
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -610,22 +611,22 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     0,     0,     7,     0,     6,     0,     1,     8,     2,
-       0,     4,     5,     9,     0,     0,     0,    15,     3,    14,
-       0,     0,     0,    16,    10,     0,     0,     0,     0,     0,
-      11,     0,    12,     0,    13
+       0,     0,     0,     0,     8,     0,     7,     6,     0,     1,
+       9,     2,     0,     4,     5,    10,     0,     0,     0,    16,
+       3,    15,     0,     0,     0,    17,    11,     0,     0,     0,
+       0,     0,    12,     0,    13,     0,    14
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -6,     2,    -6,    -6,    -6,    20,    -6,    -6,    -6,    15
+      -9,     1,    -9,    -9,    -9,    19,    -9,    -9,    -9,     9
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,    10,     2,     3,     4,     5,    14,    17,    18,    19
+       0,    12,     3,     4,     5,     6,    16,    19,    20,    21
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -633,42 +634,40 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      20,    27,    21,    22,    28,     6,     7,    11,    12,     1,
-      13,     9,    16,    24,    25,    29,    15,    26,    30,    33,
-      31,    32,    34,     8,     0,     0,     0,     0,     0,     0,
-       0,     0,    23
+       1,    22,     7,    23,    24,    29,     2,     8,    30,    13,
+      14,     9,    11,    15,    18,    26,    27,    17,    28,    31,
+      32,    35,    33,    10,    34,     0,    36,     0,    25
 };
 
 static const yytype_int8 yycheck[] =
 {
-       5,     5,     7,     8,     8,     6,     0,    10,    11,     9,
-       9,     4,     9,     9,     9,     5,    14,     9,     9,     5,
-       9,     9,     9,     3,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    17
+       4,     6,    10,     8,     9,     6,    10,     7,     9,    11,
+      12,     0,     5,    10,    10,    10,    10,    16,    10,     6,
+      10,     6,    10,     4,    10,    -1,    10,    -1,    19
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     9,    14,    15,    16,    17,     6,     0,    17,     4,
-      13,    10,    11,     9,    18,    13,     9,    19,    20,    21,
-       5,     7,     8,    21,     9,     9,     9,     5,     8,     5,
-       9,     9,     9,     5,     9
+       0,     4,    10,    15,    16,    17,    18,    10,     7,     0,
+      18,     5,    14,    11,    12,    10,    19,    14,    10,    20,
+      21,    22,     6,     8,     9,    22,    10,    10,    10,     6,
+       9,     6,    10,    10,    10,     6,    10
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    12,    13,    14,    15,    15,    16,    17,    17,    18,
-      19,    19,    19,    19,    20,    21,    21
+       0,    13,    14,    15,    16,    16,    16,    17,    18,    18,
+      19,    20,    20,    20,    20,    21,    22,    22
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     1,     5,     3,     3,     1,     1,     2,     1,
-       3,     5,     5,     7,     1,     1,     2
+       0,     2,     1,     5,     3,     3,     2,     1,     1,     2,
+       1,     3,     5,     5,     7,     1,     1,     2
 };
 
 
@@ -1257,97 +1256,103 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* ASTSectionSeparator: _DMINUS  */
-#line 102 "LSystem.y"
+#line 103 "LSystem.y"
                               { (yyval.astsectionseparator_) = new ASTLSectionSeparator(); }
-#line 1263 "Parser.C"
+#line 1262 "Parser.C"
     break;
 
   case 3: /* ASTProgram: ASTProperties ASTSectionSeparator ASTAxiom ASTSectionSeparator ASTRules  */
-#line 104 "LSystem.y"
+#line 105 "LSystem.y"
                                                                                      { (yyval.astprogram_) = new ASTLProgram((yyvsp[-4].astproperties_), (yyvsp[-3].astsectionseparator_), (yyvsp[-2].astaxiom_), (yyvsp[-1].astsectionseparator_), (yyvsp[0].astrules_)); result->astprogram_ = (yyval.astprogram_); }
-#line 1269 "Parser.C"
+#line 1268 "Parser.C"
     break;
 
   case 4: /* ASTProperty: T_Prod _COLONEQ _INTEGER_  */
-#line 106 "LSystem.y"
+#line 107 "LSystem.y"
                                         { (yyval.astproperty_) = new ASTLIProperty((yyvsp[-2]._string), (yyvsp[0]._int)); }
-#line 1275 "Parser.C"
+#line 1274 "Parser.C"
     break;
 
   case 5: /* ASTProperty: T_Prod _COLONEQ _DOUBLE_  */
-#line 107 "LSystem.y"
+#line 108 "LSystem.y"
                              { (yyval.astproperty_) = new ASTLDProperty((yyvsp[-2]._string), (yyvsp[0]._double)); }
-#line 1281 "Parser.C"
+#line 1280 "Parser.C"
     break;
 
-  case 6: /* ASTProperties: ListASTProperty  */
+  case 6: /* ASTProperty: _SYMB_2 T_Prod  */
 #line 109 "LSystem.y"
-                                { std::reverse((yyvsp[0].listastproperty_)->begin(),(yyvsp[0].listastproperty_)->end()) ;(yyval.astproperties_) = new ASTLProperties((yyvsp[0].listastproperty_)); }
-#line 1287 "Parser.C"
+                   { (yyval.astproperty_) = new ASTIgnore((yyvsp[0]._string)); }
+#line 1286 "Parser.C"
     break;
 
-  case 7: /* ListASTProperty: ASTProperty  */
+  case 7: /* ASTProperties: ListASTProperty  */
 #line 111 "LSystem.y"
+                                { std::reverse((yyvsp[0].listastproperty_)->begin(),(yyvsp[0].listastproperty_)->end()) ;(yyval.astproperties_) = new ASTLProperties((yyvsp[0].listastproperty_)); }
+#line 1292 "Parser.C"
+    break;
+
+  case 8: /* ListASTProperty: ASTProperty  */
+#line 113 "LSystem.y"
                               { (yyval.listastproperty_) = new ListASTProperty(); (yyval.listastproperty_)->push_back((yyvsp[0].astproperty_)); }
-#line 1293 "Parser.C"
+#line 1298 "Parser.C"
     break;
 
-  case 8: /* ListASTProperty: ASTProperty ListASTProperty  */
-#line 112 "LSystem.y"
-                                { (yyvsp[0].listastproperty_)->push_back((yyvsp[-1].astproperty_)); (yyval.listastproperty_) = (yyvsp[0].listastproperty_); }
-#line 1299 "Parser.C"
-    break;
-
-  case 9: /* ASTAxiom: T_Prod  */
+  case 9: /* ListASTProperty: ASTProperty ListASTProperty  */
 #line 114 "LSystem.y"
-                  { (yyval.astaxiom_) = new ASTLAxiom((yyvsp[0]._string)); }
-#line 1305 "Parser.C"
+                                { (yyvsp[0].listastproperty_)->push_back((yyvsp[-1].astproperty_)); (yyval.listastproperty_) = (yyvsp[0].listastproperty_); }
+#line 1304 "Parser.C"
     break;
 
-  case 10: /* ASTRule: T_Prod _RARROW T_Prod  */
+  case 10: /* ASTAxiom: T_Prod  */
 #line 116 "LSystem.y"
-                                { (yyval.astrule_) = new ASTLRule((yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1311 "Parser.C"
+                  { (yyval.astaxiom_) = new ASTLAxiom((yyvsp[0]._string)); }
+#line 1310 "Parser.C"
     break;
 
-  case 11: /* ASTRule: T_Prod _LT T_Prod _RARROW T_Prod  */
-#line 117 "LSystem.y"
-                                     { (yyval.astrule_) = new ASTLLeftRule((yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1317 "Parser.C"
-    break;
-
-  case 12: /* ASTRule: T_Prod _GT T_Prod _RARROW T_Prod  */
+  case 11: /* ASTRule: T_Prod _RARROW T_Prod  */
 #line 118 "LSystem.y"
-                                     { (yyval.astrule_) = new ASTLRightRule((yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1323 "Parser.C"
+                                { (yyval.astrule_) = new ASTLRule((yyvsp[-2]._string), (yyvsp[0]._string)); }
+#line 1316 "Parser.C"
     break;
 
-  case 13: /* ASTRule: T_Prod _LT T_Prod _GT T_Prod _RARROW T_Prod  */
+  case 12: /* ASTRule: T_Prod _LT T_Prod _RARROW T_Prod  */
 #line 119 "LSystem.y"
-                                                { (yyval.astrule_) = new ASTLBothRule((yyvsp[-6]._string), (yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1329 "Parser.C"
+                                     { (yyval.astrule_) = new ASTLLeftRule((yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
+#line 1322 "Parser.C"
     break;
 
-  case 14: /* ASTRules: ListASTRule  */
+  case 13: /* ASTRule: T_Prod _GT T_Prod _RARROW T_Prod  */
+#line 120 "LSystem.y"
+                                     { (yyval.astrule_) = new ASTLRightRule((yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
+#line 1328 "Parser.C"
+    break;
+
+  case 14: /* ASTRule: T_Prod _LT T_Prod _GT T_Prod _RARROW T_Prod  */
 #line 121 "LSystem.y"
-                       { std::reverse((yyvsp[0].listastrule_)->begin(),(yyvsp[0].listastrule_)->end()) ;(yyval.astrules_) = new ASTLRules((yyvsp[0].listastrule_)); }
-#line 1335 "Parser.C"
+                                                { (yyval.astrule_) = new ASTLBothRule((yyvsp[-6]._string), (yyvsp[-4]._string), (yyvsp[-2]._string), (yyvsp[0]._string)); }
+#line 1334 "Parser.C"
     break;
 
-  case 15: /* ListASTRule: ASTRule  */
+  case 15: /* ASTRules: ListASTRule  */
 #line 123 "LSystem.y"
+                       { std::reverse((yyvsp[0].listastrule_)->begin(),(yyvsp[0].listastrule_)->end()) ;(yyval.astrules_) = new ASTLRules((yyvsp[0].listastrule_)); }
+#line 1340 "Parser.C"
+    break;
+
+  case 16: /* ListASTRule: ASTRule  */
+#line 125 "LSystem.y"
                       { (yyval.listastrule_) = new ListASTRule(); (yyval.listastrule_)->push_back((yyvsp[0].astrule_)); }
-#line 1341 "Parser.C"
+#line 1346 "Parser.C"
     break;
 
-  case 16: /* ListASTRule: ASTRule ListASTRule  */
-#line 124 "LSystem.y"
+  case 17: /* ListASTRule: ASTRule ListASTRule  */
+#line 126 "LSystem.y"
                         { (yyvsp[0].listastrule_)->push_back((yyvsp[-1].astrule_)); (yyval.listastrule_) = (yyvsp[0].listastrule_); }
-#line 1347 "Parser.C"
+#line 1352 "Parser.C"
     break;
 
 
-#line 1351 "Parser.C"
+#line 1356 "Parser.C"
 
       default: break;
     }
@@ -1545,7 +1550,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 127 "LSystem.y"
+#line 129 "LSystem.y"
 
 
 

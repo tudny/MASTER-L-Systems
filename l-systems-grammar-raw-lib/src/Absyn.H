@@ -33,6 +33,7 @@ class ASTLSectionSeparator;
 class ASTLProgram;
 class ASTLIProperty;
 class ASTLDProperty;
+class ASTIgnore;
 class ASTLProperties;
 class ASTLAxiom;
 class ASTLRule;
@@ -60,6 +61,7 @@ public:
   virtual void visitASTLProgram(ASTLProgram *p) = 0;
   virtual void visitASTLIProperty(ASTLIProperty *p) = 0;
   virtual void visitASTLDProperty(ASTLDProperty *p) = 0;
+  virtual void visitASTIgnore(ASTIgnore *p) = 0;
   virtual void visitASTLProperties(ASTLProperties *p) = 0;
   virtual void visitASTLAxiom(ASTLAxiom *p) = 0;
   virtual void visitASTLRule(ASTLRule *p) = 0;
@@ -201,6 +203,20 @@ public:
   virtual void accept(Visitor *v);
   virtual ASTLDProperty *clone() const;
   void swap(ASTLDProperty &);
+};
+
+class ASTIgnore : public ASTProperty
+{
+public:
+  Prod prod_;
+
+  ASTIgnore(const ASTIgnore &);
+  ASTIgnore &operator=(const ASTIgnore &);
+  ASTIgnore(Prod p1);
+  ~ASTIgnore();
+  virtual void accept(Visitor *v);
+  virtual ASTIgnore *clone() const;
+  void swap(ASTIgnore &);
 };
 
 class ASTLProperties : public ASTProperties

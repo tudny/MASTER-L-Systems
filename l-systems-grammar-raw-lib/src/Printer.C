@@ -192,6 +192,18 @@ void PrintAbsyn::visitASTLDProperty(ASTLDProperty *p)
   _i_ = oldi;
 }
 
+void PrintAbsyn::visitASTIgnore(ASTIgnore *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+  render("#ignore");
+  visitProd(p->prod_);
+
+  if (oldi > 0) render(_R_PAREN);
+  _i_ = oldi;
+}
+
 void PrintAbsyn::visitASTProperties(ASTProperties *p) {} //abstract class
 
 void PrintAbsyn::visitASTLProperties(ASTLProperties *p)
@@ -437,6 +449,14 @@ void ShowAbsyn::visitASTLDProperty(ASTLDProperty *p)
   visitProd(p->prod_);
   bufAppend(' ');
   visitDouble(p->double_);
+  bufAppend(')');
+}
+void ShowAbsyn::visitASTIgnore(ASTIgnore *p)
+{
+  bufAppend('(');
+  bufAppend("ASTIgnore");
+  bufAppend(' ');
+  visitProd(p->prod_);
   bufAppend(')');
 }
 void ShowAbsyn::visitASTProperties(ASTProperties *p) {} //abstract class
