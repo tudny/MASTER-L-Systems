@@ -38,18 +38,19 @@ layout(std430, binding = 8) buffer OutputLookBackBuffer {
     int outputLookBackBuffer[];
 };
 
+layout(std430, binding = 9) readonly buffer ProductionIndexInputBuffer {
+    int productionIndexInput[];
+};
+
 void main() {
     // my invocation id
     int index = int(gl_GlobalInvocationID.x);
     // letter to transform
     int letter = inputBuffer[index];
+    // production to apply
+    int productionIndex = productionIndexInput[index];
 
-    // size of the production
-    int productionSize = sizes[letter];
-    // where to look to a production in productions
-    int productionOffset = offsets[letter];
-
-    if (productionSize < 0 || productionOffset < 0) {
+    if (productionIndex < 0) {
         // if the production size is negative, it means that the letter transforms to itself
         // inputOffsetBuffer[index] - 1 because inputOffsetBuffer[index] points to the end of our result space
         int resultIdx = inputOffsetBuffer[index] - 1;
@@ -66,6 +67,11 @@ void main() {
         }
         return;
     }
+
+    // size of the production
+    int productionSize = sizes[productionIndex];
+    // where to look to a production in productions
+    int productionOffset = offsets[productionIndex];
 
     // where to start my result
     int resultIdx = inputOffsetBuffer[index] - productionSize;

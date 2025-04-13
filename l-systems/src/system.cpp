@@ -98,21 +98,26 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-//        std::vector<glm::mat4> instances = {
-//                glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 10.0f)), glm::vec3(5.0f)),
-//                glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 5.0f, -10.0f)),
-//            glm::mat4(1.0f),
-//        };
-
-//        std::vector<glm::mat4> instances = TempSpace::sample_instances();
-//        std::vector<glm::mat4> instances = TempSpace::grammar_instances(grammar);
-//
-//        instance_translations_count = instances.size();
-
-
         glEnableVertexAttribArray(0);
 
-        prepare_productions_ssbo();
+        prepare_new_productions_ssbo();
+
+        glGenBuffers(1, &ssbo_previous_result_buffer);
+        glGenBuffers(1, &ssbo_offset_buffer);
+        glGenBuffers(1, &ssbo_production_index_buffer);
+        glGenBuffers(1, &ssbo_next_result_buffer);
+        glGenBuffers(1, &ssbo_previous_look_back_buffer);
+        glGenBuffers(1, &ssbo_next_look_back_buffer);
+        glGenBuffers(1, &transformations_input_ssbo);
+        glGenBuffers(1, &transformations_output_ssbo);
+        glGenBuffers(1, &ssbo_input_jumps);
+        glGenBuffers(1, &ssbo_output_jumps);
+        glGenBuffers(1, &ssbo_translations);
+        glGenBuffers(1, &ssbo_is_a_leaf_output);
+        glGenBuffers(1, &ssbo_leaf_edge_counter);
+        glGenBuffers(1, &ssbo_leaf_begin_counter);
+        glGenBuffers(1, &ssbo_leaf_positions_vec4);
+        glGenBuffers(1, &ssbo_leaf_index_array);
     }
 
     void draw() override {
@@ -192,13 +197,6 @@ private:
         }
         this_prefix_sum_shader_program = prefix_sum_shader_program;
 
-        if (!size_shader_program) {
-            size_shader_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
-                    Shader{SHADER_PATH("productions/size.comp"), GL_COMPUTE_SHADER}
-            });
-        }
-        this_size_shader_program = size_shader_program;
-
         if (!instance_detector_program) {
             instance_detector_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
                     Shader{SHADER_PATH("productions/instance_detector.comp"), GL_COMPUTE_SHADER}
@@ -270,75 +268,42 @@ private:
         }
 
         this_leaf_program = leaf_program;
+
+        if (!find_production_and_size_program) {
+            find_production_and_size_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("productions/find_production_and_size.comp"), GL_COMPUTE_SHADER}
+            });
+        }
+
+        this_find_production_and_size_program = find_production_and_size_program;
     }
 
-    void prepare_productions_ssbo() {
-        using SIZE = int32_t;
-        SIZE required_ascii_size = 128;
-        std::vector<SIZE> productions_offsets(required_ascii_size, -1);
-        std::vector<SIZE> productions_sizes(required_ascii_size, -1);
+    void prepare_new_productions_ssbo() {
+        auto productions_gl_data = grammar->get_opengl_ready_productions();
+        std::vector<std::pair<GLuint*, OpenGLReadyProductionDataType>> mappings = {
+                {&ssbo_new_productions__predecessors, productions_gl_data.predecessors},
+                {&ssbo_new_productions__look_back, productions_gl_data.look_back},
+                {&ssbo_new_productions__successors_sizes, productions_gl_data.successors_sizes},
+                {&ssbo_new_productions__successors_offsets, productions_gl_data.successors_offsets},
+                {&ssbo_new_productions__successors_data, productions_gl_data.successors_data},
+                {&ssbo_new_productions__left_context_sizes, productions_gl_data.left_context_sizes},
+                {&ssbo_new_productions__left_context_offsets, productions_gl_data.left_context_offsets},
+                {&ssbo_new_productions__left_context_data, productions_gl_data.left_context_data},
+                {&ssbo_new_productions__right_context_sizes, productions_gl_data.right_context_sizes},
+                {&ssbo_new_productions__right_context_offsets, productions_gl_data.right_context_offsets},
+                {&ssbo_new_productions__right_context_data, productions_gl_data.right_context_data},
+        };
 
-        SIZE length_so_far = 0;
-        for (const auto &[from, to_and_lookback]: *grammar->get_productions()) {
-            auto &[to, _] = to_and_lookback;
-            productions_offsets[from] = length_so_far;
-            productions_sizes[from] = to.size();
-            length_so_far += to.size();
+        this->productions_count = grammar->get_raw_productions().size();
+
+        for (const auto &[buffer, data]: mappings) {
+            glGenBuffers(1, buffer);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, *buffer);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, data->size() * sizeof(int32_t),
+                         data->data(), GL_STATIC_DRAW);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, *buffer);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
-
-        std::vector<SIZE> productions(length_so_far);
-        std::vector<SIZE> look_backs(length_so_far);
-        for (const auto &[from, to_and_lookback]: *grammar->get_productions()) {
-            auto &[to, lookback] = to_and_lookback;
-            std::copy(to.begin(), to.end(), productions.begin() + productions_offsets[from]);
-            std::copy(lookback.begin(), lookback.end(), look_backs.begin() + productions_offsets[from]);
-        }
-
-        glGenBuffers(1, &ssbo_productions_offsets);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_productions_offsets);
-        glBufferData(GL_SHADER_STORAGE_BUFFER,
-                     productions_offsets.size() * sizeof(decltype(productions_offsets)::value_type),
-                     productions_offsets.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_productions_offsets);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-        glGenBuffers(1, &ssbo_productions_sizes);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_productions_sizes);
-        glBufferData(GL_SHADER_STORAGE_BUFFER,
-                     productions_sizes.size() * sizeof(decltype(productions_sizes)::value_type),
-                     productions_sizes.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_productions_sizes);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-        glGenBuffers(1, &ssbo_productions);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_productions);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, productions.size() * sizeof(decltype(productions)::value_type),
-                     productions.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_productions);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-        glGenBuffers(1, &ssbo_productions_look_backs);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_productions_look_backs);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, look_backs.size() * sizeof(decltype(look_backs)::value_type),
-                     look_backs.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_productions_look_backs);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-        glGenBuffers(1, &ssbo_previous_result_buffer);
-        glGenBuffers(1, &ssbo_offset_buffer);
-        glGenBuffers(1, &ssbo_next_result_buffer);
-        glGenBuffers(1, &ssbo_previous_look_back_buffer);
-        glGenBuffers(1, &ssbo_next_look_back_buffer);
-        glGenBuffers(1, &transformations_input_ssbo);
-        glGenBuffers(1, &transformations_output_ssbo);
-        glGenBuffers(1, &ssbo_input_jumps);
-        glGenBuffers(1, &ssbo_output_jumps);
-        glGenBuffers(1, &ssbo_translations);
-        glGenBuffers(1, &ssbo_is_a_leaf_output);
-        glGenBuffers(1, &ssbo_leaf_edge_counter);
-        glGenBuffers(1, &ssbo_leaf_begin_counter);
-        glGenBuffers(1, &ssbo_leaf_positions_vec4);
-        glGenBuffers(1, &ssbo_leaf_index_array);
     }
 
     void run_compute() {
@@ -367,67 +332,50 @@ private:
         size_t epoch_num = grammar->get_property_size_t("depth");
 
         for (size_t epoch = 0; epoch < epoch_num; ++epoch) {
-//            std::cout << "===========================================================" << std::endl;
-//            std::cout << "Epoch: " << epoch << std::endl;
-
-            // print contents of ssbo_previous_result_buffer
-//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
-//            auto *data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//            for (size_t i = 0; i < result_buffer_size; i++) {
-//                std::cout << "prev[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
-//            }
-//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
-            // print prev lookback
-//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_look_back_buffer);
-//            auto prev_look_back_data = (int32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//            for (size_t i = 0; i < result_buffer_size; i++) {
-//                std::cout << "prev_lb[" << i << "] = " << prev_look_back_data[i] << std::endl;
-//            }
-//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
             // make a copy of ssbo_previous_result_buffer into ssbo_offset_buffer
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_offset_buffer);
             glBufferData(GL_SHADER_STORAGE_BUFFER, result_buffer_size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
             glCopyNamedBufferSubData(ssbo_previous_result_buffer, ssbo_offset_buffer, 0, 0,
                                      result_buffer_size * sizeof(uint32_t));
-//            std::cout << "New size of offset buffer: " << result_buffer_size << std::endl;
 
-            // map letters into production sizes in the copy
-            this_size_shader_program->use();
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_productions_offsets);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_productions_sizes);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_productions);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_offset_buffer);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_production_index_buffer);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, result_buffer_size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
+
+            // productionSizeOutput -> ssbo_offset_buffer
+            // productionNumberOutput -> ssbo_production_index_buffer
+            // uniform wholeInputSize -> result_buffer_size
+            // uniform numberOfProductions -> productions_count
+            // inputBuffer -> ssbo_previous_result_buffer
+
+            this_find_production_and_size_program->use();
+            this_find_production_and_size_program->setUniform("wholeInputSize", (int) result_buffer_size);
+            this_find_production_and_size_program->setUniform("numberOfProductions", (int) productions_count);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_new_productions__predecessors);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_new_productions__look_back);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_new_productions__successors_sizes);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_new_productions__successors_offsets);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_new_productions__successors_data);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo_new_productions__left_context_sizes);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, ssbo_new_productions__left_context_offsets);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, ssbo_new_productions__left_context_data);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, ssbo_new_productions__right_context_sizes);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 9, ssbo_new_productions__right_context_offsets);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, ssbo_new_productions__right_context_data);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 11, ssbo_previous_result_buffer);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 12, ssbo_production_index_buffer);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 13, ssbo_offset_buffer);
             glDispatchCompute(result_buffer_size, 1, 1);
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-            this_size_shader_program->unuse();
-
-            // print mapped sizes
-//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_offset_buffer);
-//            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//            for (size_t i = 0; i < result_buffer_size; i++) {
-//                std::cout << "size[" << i << "] = " << data[i] << std::endl;
-//            }
-//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+            this_find_production_and_size_program->unuse();
 
             // run prefix sum on the copy
             run_prefix_sum(ssbo_offset_buffer, result_buffer_size);
-
-            // print prefix sum
-//            auto ps_data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//            for (size_t i = 0; i < result_buffer_size; i++) {
-//                std::cout << "prefix_sum[" << i << "] = " << ps_data[i] << std::endl;
-//            }
-//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
             // get buffer element at the end that will be the size of the result buffer
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_offset_buffer);
             // here we change the stored value to the size of the result buffer
             glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, (result_buffer_size - 1) * sizeof(uint32_t), sizeof(uint32_t),
                                &result_buffer_size);
-
-//            std::cout << "Result buffer size: " << result_buffer_size << std::endl;
 
             // generate productions for each letter into next result buffer
             this_production_shader_program->use();
@@ -438,37 +386,21 @@ private:
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_look_back_buffer);
             glBufferData(GL_SHADER_STORAGE_BUFFER, result_buffer_size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
 
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_productions_offsets);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_productions_sizes);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_productions);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_new_productions__successors_offsets);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_new_productions__successors_sizes);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_new_productions__successors_data);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_previous_result_buffer);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_offset_buffer);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo_next_result_buffer);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, ssbo_productions_look_backs);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, ssbo_new_productions__look_back);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, ssbo_previous_look_back_buffer);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, ssbo_next_look_back_buffer);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 9, ssbo_production_index_buffer);
 
             glDispatchCompute(result_buffer_size, 1, 1);
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
             this_production_shader_program->unuse();
-
-            // print new result
-//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_result_buffer);
-//            auto next_data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//            for (size_t i = 0; i < result_buffer_size; i++) {
-//                std::cout << "next[" << i << "] = " << next_data[i] << "(" << (char) next_data[i] << ")" << std::endl;
-//            }
-//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
-            // print new lookback
-//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_next_look_back_buffer);
-//            auto look_back_data = (int32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//            for (size_t i = 0; i < result_buffer_size; i++) {
-//                std::cout << "look_back[" << i << "] = " << look_back_data[i] << std::endl;
-//            }
-//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
 
             // copy data from next result buffer to previous result buffer
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
@@ -481,39 +413,9 @@ private:
             glBufferData(GL_SHADER_STORAGE_BUFFER, result_buffer_size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
             glCopyNamedBufferSubData(ssbo_next_look_back_buffer, ssbo_previous_look_back_buffer, 0, 0,
                                      result_buffer_size * sizeof(uint32_t));
-
-//            // print ssbo_previous_result_buffer
-//            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
-//            data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//            for (size_t i = 0; i < result_buffer_size; i++) {
-//                std::cout << "prev[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
-//            }
-//            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
         }
 
         ssbo_word_length = result_buffer_size;
-
-        // check data
-//
-//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_result_buffer);
-//        auto *data = (uint32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//        std::cout << "\"";
-//        for (size_t i = 0; i < result_buffer_size; i++) {
-//            std::cout << (char) data[i];
-////            std::cout << "data[" << i << "] = " << data[i] << "(" << (char) data[i] << ")" << std::endl;
-//        }
-//        std::cout << "\"" << std::endl;
-//        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-//
-//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_previous_look_back_buffer);
-//        auto *look_back_data = (int32_t *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//        std::cout << "[";
-//        for (size_t i = 0; i < result_buffer_size; i++) {
-//            std::cout << look_back_data[i] << ", ";
-////            std::cout << "lb[" << i << "] = " << look_back_data[i] << std::endl;
-//        }
-//        std::cout << "]" << std::endl;
-//        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     }
 
     void run_instance_compute() {
@@ -694,19 +596,6 @@ private:
         }
         this_matrix_multiplier_program->unuse();
 
-        // check matrices in transformations_input_ssbo
-//         glBindBuffer(GL_SHADER_STORAGE_BUFFER, transformations_input_ssbo);
-//         auto matrices = (glm::mat4 *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//         for (size_t i = 0; i < size; i++) {
-//            std::cout << "Matrix[" << i << "]: " << std::endl;
-//            for (size_t j = 0; j < 4; j++) {
-//                for (size_t k = 0; k < 4; k++) {
-//                    std::cout << matrices[i][j][k] << " ";
-//                }
-//                std::cout << std::endl;
-//            }
-//        }
-//        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
         instance_translations_count = drawable_instances_count;
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
@@ -761,31 +650,6 @@ private:
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         this_leaf_position_placer_program->unuse();
-
-//        std::exit(1);
-
-//        std::cout << "Size of the string produced: " << size << std::endl;
-//        std::cout << "Number of instances: " << drawable_instances_count << std::endl;
-
-        // std::exit(1);
-
-        // TEST
-
-//        std::vector<glm::mat4> expected_instances = TempSpace::grammar_instances(grammar);
-//        std::cout << "Expected instances count: " << expected_instances.size() << std::endl;
-
-//        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
-//        auto *data = (glm::mat4 *) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-//        for (size_t i = 0; i < instance_translations_count; i++) {
-//            std::cout << "Instance[" << i << "]: " << std::endl;
-//            print_mat4(data[i]);
-//            std::cout << "Expected instance[" << i << "]: " << std::endl;
-//            print_mat4(expected_instances[i]);
-//        }
-
-//        std::exit(1);
-
-        // END test
     }
 
     void run_leaf_draw(const glm::mat4 &pvm, const glm::vec4 &eye_pos) {
@@ -824,16 +688,26 @@ private:
     float downset{};
 
     size_t ssbo_word_length{};
+    size_t productions_count{};
     int32_t leaf_edge_count{};
 
     GLuint vao_leaf{};
 
-    GLuint ssbo_productions_offsets{};
-    GLuint ssbo_productions_sizes{};
-    GLuint ssbo_productions_look_backs{};
-    GLuint ssbo_productions{};
+    GLuint ssbo_new_productions__predecessors{};
+    GLuint ssbo_new_productions__look_back{};
+    GLuint ssbo_new_productions__successors_sizes{};
+    GLuint ssbo_new_productions__successors_offsets{};
+    GLuint ssbo_new_productions__successors_data{};
+    GLuint ssbo_new_productions__left_context_sizes{};
+    GLuint ssbo_new_productions__left_context_offsets{};
+    GLuint ssbo_new_productions__left_context_data{};
+    GLuint ssbo_new_productions__right_context_sizes{};
+    GLuint ssbo_new_productions__right_context_offsets{};
+    GLuint ssbo_new_productions__right_context_data{};
+
     GLuint ssbo_previous_result_buffer{};
     GLuint ssbo_offset_buffer{};
+    GLuint ssbo_production_index_buffer{};
     GLuint ssbo_next_result_buffer{};
     GLuint ssbo_previous_look_back_buffer{};
     GLuint ssbo_next_look_back_buffer{};
@@ -849,7 +723,6 @@ private:
 
     std::shared_ptr<ShaderProgram> this_production_shader_program;
     std::shared_ptr<ShaderProgram> this_prefix_sum_shader_program;
-    std::shared_ptr<ShaderProgram> this_size_shader_program;
     std::shared_ptr<ShaderProgram> this_instance_detector_program;
     std::shared_ptr<ShaderProgram> this_matrix_filler_program;
     std::shared_ptr<ShaderProgram> this_matrix_multiplier_program;
@@ -859,11 +732,11 @@ private:
     std::shared_ptr<ShaderProgram> this_leaf_begin_detector_program;
     std::shared_ptr<ShaderProgram> this_leaf_position_placer_program;
     std::shared_ptr<ShaderProgram> this_leaf_program;
+    std::shared_ptr<ShaderProgram> this_find_production_and_size_program;
 
     static std::shared_ptr<ShaderProgram> system_shader_program;
     static std::shared_ptr<ShaderProgram> production_shader_program;
     static std::shared_ptr<ShaderProgram> prefix_sum_shader_program;
-    static std::shared_ptr<ShaderProgram> size_shader_program;
     static std::shared_ptr<ShaderProgram> instance_detector_program;
     static std::shared_ptr<ShaderProgram> matrix_filler_program;
     static std::shared_ptr<ShaderProgram> matrix_multiplier_program;
@@ -873,12 +746,12 @@ private:
     static std::shared_ptr<ShaderProgram> leaf_begin_detector_program;
     static std::shared_ptr<ShaderProgram> leaf_position_placer_program;
     static std::shared_ptr<ShaderProgram> leaf_program;
+    static std::shared_ptr<ShaderProgram> find_production_and_size_program;
 };
 
 std::shared_ptr<ShaderProgram> SystemDrawable::system_shader_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::production_shader_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::prefix_sum_shader_program = nullptr;
-std::shared_ptr<ShaderProgram> SystemDrawable::size_shader_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::instance_detector_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::matrix_filler_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::matrix_multiplier_program = nullptr;
@@ -888,6 +761,7 @@ std::shared_ptr<ShaderProgram> SystemDrawable::leaf_edge_detector_program = null
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_begin_detector_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_position_placer_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::find_production_and_size_program = nullptr;
 
 void register_system(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {
