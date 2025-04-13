@@ -1,0 +1,4 @@
+namespace test_asset {
+#define FIXTURES_DIR "@CMAKE_CURRENT_SOURCE_DIR@/tests"
+#define FIXTURE_PATH(X) (FIXTURES_DIR "/" X)
+}

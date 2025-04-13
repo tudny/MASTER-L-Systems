@@ -95,10 +95,12 @@ target_link_libraries(
 include(GoogleTest)
 gtest_discover_tests(${TEST_EXEC_NAME})
 
-# Copy static files to the build directory
-file(GLOB_RECURSE TEST_STATIC_FILES CONFIGURE_DEPENDS ${TEST_PATH}/resources/*)
-foreach (file ${TEST_STATIC_FILES})
-    get_filename_component(file_name ${file} NAME)
-    file(COPY ${file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources)
-    message(STATUS "Copying static file: ${file} to ${CMAKE_CURRENT_BINARY_DIR}/resources/${file_name}")
-endforeach ()
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_properties.hpp.in
+        ${CMAKE_CURRENT_BINARY_DIR}/tests/test_properties.hpp
+)
+
+include_directories(${PROJECT_NAME}
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests
+        ${CMAKE_CURRENT_BINARY_DIR}/tests
+)
