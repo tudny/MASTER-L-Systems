@@ -116,4 +116,6 @@ using GrammarPtr = std::shared_ptr<Grammar>;
 
 GrammarPtr load_grammar(const std::string &path);
 
+std::vector<int32_t> compute_look_back(const std::string &successor);
+
 #endif //LSYSTEMS_GRAMMAR_H

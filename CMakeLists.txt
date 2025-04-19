@@ -90,6 +90,10 @@ target_link_libraries(
         L-Systems-lib
         L-Systems-grammar-lib
         L-Systems-grammar-raw-lib
+        glfw
+        libglew_static
+        glm
+        args
 )
 
 include(GoogleTest)

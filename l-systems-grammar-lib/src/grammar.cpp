@@ -41,40 +41,6 @@ constexpr bool is_closing_bracket(const char bracket) {
     return bracket == STACK_CLOSING_BRACKET || bracket == LEAF_CLOSING_BRACKET;
 }
 
-/*
- * We define look_back table as the look-up for the tree nodes in the generated L-system word
- * For now we limit the size of the produced words to 2^31 - 1
- * Negative look_back indicates that the opening bracket is n steps before us
- * Positive look_back indicates that the closing bracket is n steps ahead of us
- * */
-static std::vector<int32_t> compute_look_back(const std::string &successor) {
-    std::vector<int32_t> look_back(successor.size(), 0);
-    std::stack<std::pair<int32_t, char>> stack;
-
-    for (int32_t i = 0; i < static_cast<int32_t>(successor.size()); i++) {
-        if (is_opening_bracket(successor[i])) {
-            stack.emplace(i, matching_bracket(successor[i]));
-        } else if (is_closing_bracket(successor[i])) {
-            if (stack.empty()) {
-                throw std::runtime_error("Unbalanced brackets in successor: " + successor);
-            }
-            auto [bracket_index, expected_bracket] = stack.top();
-            if (successor[i] != expected_bracket) {
-                throw std::runtime_error("Unbalanced brackets in successor: " + successor);
-            }
-            stack.pop();
-            look_back[i] = bracket_index - i;
-            look_back[bracket_index] = i - bracket_index;
-        }
-    }
-
-    if (!stack.empty()) {
-        throw std::runtime_error("Unbalanced brackets in successor: " + successor);
-    }
-
-    return look_back;
-}
-
 class GrammarBuilder {
 public:
     GrammarBuilder() = default;
@@ -116,6 +82,40 @@ private:
     Axiom axiom;
     std::vector<Production> productions;
 };
+
+/*
+ * We define look_back table as the look-up for the tree nodes in the generated L-system word
+ * For now we limit the size of the produced words to 2^31 - 1
+ * Negative look_back indicates that the opening bracket is n steps before us
+ * Positive look_back indicates that the closing bracket is n steps ahead of us
+ * */
+std::vector<int32_t> compute_look_back(const std::string &successor) {
+    std::vector<int32_t> look_back(successor.size(), 0);
+    std::stack<std::pair<int32_t, char>> stack;
+
+    for (int32_t i = 0; i < static_cast<int32_t>(successor.size()); i++) {
+        if (is_opening_bracket(successor[i])) {
+            stack.emplace(i, matching_bracket(successor[i]));
+        } else if (is_closing_bracket(successor[i])) {
+            if (stack.empty()) {
+                throw std::runtime_error("Unbalanced brackets in successor: " + successor);
+            }
+            auto [bracket_index, expected_bracket] = stack.top();
+            if (successor[i] != expected_bracket) {
+                throw std::runtime_error("Unbalanced brackets in successor: " + successor);
+            }
+            stack.pop();
+            look_back[i] = bracket_index - i;
+            look_back[bracket_index] = i - bracket_index;
+        }
+    }
+
+    if (!stack.empty()) {
+        throw std::runtime_error("Unbalanced brackets in successor: " + successor);
+    }
+
+    return look_back;
+}
 
 class GrammarVisitor : public Skeleton {
 public:
