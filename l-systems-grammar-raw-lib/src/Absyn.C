@@ -195,6 +195,93 @@ ASTIgnore *ASTIgnore::clone() const
 
 
 
+/********************   ASTColor    ********************/
+ASTColor::ASTColor(ListColor *p1)
+{
+  listcolor_ = p1;
+
+}
+
+ASTColor::ASTColor(const ASTColor & other)
+{
+  listcolor_ = other.listcolor_->clone();
+
+}
+
+ASTColor &ASTColor::operator=(const ASTColor & other)
+{
+  ASTColor tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void ASTColor::swap(ASTColor & other)
+{
+  std::swap(listcolor_, other.listcolor_);
+
+}
+
+ASTColor::~ASTColor()
+{
+  delete(listcolor_);
+
+}
+
+void ASTColor::accept(Visitor *v)
+{
+  v->visitASTColor(this);
+}
+
+ASTColor *ASTColor::clone() const
+{
+  return new ASTColor(*this);
+}
+
+
+
+/********************   AColor    ********************/
+AColor::AColor(Prod p1)
+{
+  prod_ = p1;
+
+}
+
+AColor::AColor(const AColor & other)
+{
+  prod_ = other.prod_;
+
+}
+
+AColor &AColor::operator=(const AColor & other)
+{
+  AColor tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void AColor::swap(AColor & other)
+{
+  std::swap(prod_, other.prod_);
+
+}
+
+AColor::~AColor()
+{
+
+}
+
+void AColor::accept(Visitor *v)
+{
+  v->visitAColor(this);
+}
+
+AColor *AColor::clone() const
+{
+  return new AColor(*this);
+}
+
+
+
 /********************   ASTLProperties    ********************/
 ASTLProperties::ASTLProperties(ListASTProperty *p1)
 {
@@ -521,6 +608,24 @@ ASTLRules *ASTLRules::clone() const
 }
 
 
+
+
+/********************   ListColor    ********************/
+
+void ListColor::accept(Visitor *v)
+{
+  v->visitListColor(this);
+}
+
+ListColor *ListColor::clone() const
+{
+  return new ListColor(*this);
+}
+
+ListColor* consListColor(Color* x, ListColor* xs) {
+  xs->insert(xs->begin(), x);
+  return xs;
+}
 
 
 /********************   ListASTProperty    ********************/

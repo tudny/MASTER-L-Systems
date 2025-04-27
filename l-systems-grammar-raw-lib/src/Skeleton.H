@@ -13,6 +13,7 @@ public:
   void visitASTSectionSeparator(ASTSectionSeparator *p);
   void visitASTProgram(ASTProgram *p);
   void visitASTProperty(ASTProperty *p);
+  void visitColor(Color *p);
   void visitASTProperties(ASTProperties *p);
   void visitASTAxiom(ASTAxiom *p);
   void visitASTRule(ASTRule *p);
@@ -21,6 +22,8 @@ public:
   void visitASTLProgram(ASTLProgram *p);
   void visitASTLProperty(ASTLProperty *p);
   void visitASTIgnore(ASTIgnore *p);
+  void visitASTColor(ASTColor *p);
+  void visitAColor(AColor *p);
   void visitASTLProperties(ASTLProperties *p);
   void visitASTLAxiom(ASTLAxiom *p);
   void visitASTLRule(ASTLRule *p);
@@ -28,6 +31,7 @@ public:
   void visitASTLRightRule(ASTLRightRule *p);
   void visitASTLBothRule(ASTLBothRule *p);
   void visitASTLRules(ASTLRules *p);
+  void visitListColor(ListColor *p);
   void visitListASTProperty(ListASTProperty *p);
   void visitListASTRule(ListASTRule *p);
 

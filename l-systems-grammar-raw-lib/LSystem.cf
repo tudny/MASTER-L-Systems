@@ -10,6 +10,9 @@ ASTLProgram.          ASTProgram ::= ASTProperties ASTSectionSeparator ASTAxiom 
 
 ASTLProperty.         ASTProperty ::= Prod ":=" Prod ;
 ASTIgnore.            ASTProperty ::= "#ignore" Prod ;
+ASTColor.             ASTProperty ::= "#color" [Color] ;
+AColor.               Color ::= Prod ;
+separator nonempty Color " " ;
 ASTLProperties.       ASTProperties ::= [ASTProperty] ;
 separator nonempty ASTProperty "\n" ;
 

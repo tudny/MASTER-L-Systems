@@ -64,6 +64,10 @@ public:
         productions.push_back({predecessor, successor, left_context, right_context, compute_look_back(successor)});
     }
 
+    void add_color(const ColorT &color) {
+        colors.push_back(color);
+    }
+
     GrammarPtr build() {
         for (const auto &prop: REQUIRED_PROPS) {
             if (std::find_if(properties.begin(), properties.end(), [&prop](const Property &p) {
@@ -73,7 +77,7 @@ public:
             }
         }
 
-        return std::make_shared<Grammar>(properties, ignored, axiom, productions);
+        return std::make_shared<Grammar>(properties, ignored, axiom, productions, colors);
     }
 
 private:
@@ -81,6 +85,7 @@ private:
     std::string ignored;
     Axiom axiom;
     std::vector<Production> productions;
+    std::vector<ColorT> colors;
 };
 
 /*
@@ -170,6 +175,26 @@ public:
         );
     }
 
+    void visitAColor(AColor *p) override {
+        auto value = p->prod_;
+        try {
+            // Value must have 6 hex digits
+            if (value.size() != 6) {
+                throw std::runtime_error("Color value must have 6 hex digits: " + value);
+            }
+            ColorT color;
+            for (size_t i = 0; i < 6; i += 2) {
+                std::string hex = value.substr(i, 2);
+                int32_t int_value = std::stoi(hex, nullptr, 16);
+                color[i / 2] = static_cast<float>(int_value);
+            }
+            color[3] = 1.0f; // Alpha channel
+            builder.add_color(color);
+        } catch (...) {
+            throw std::runtime_error("Invalid color value: " + value);
+        }
+    }
+
     void append_production(
             const std::string &predecessor,
             const std::string &successor,
@@ -247,6 +272,19 @@ void Grammar::print(std::ostream &os) {
     }
     os << sep(1) << "}" << std::endl;
 
+    os << sep(1) << "Colors{" << std::endl;
+    for (size_t i = 0; i < this->colors.size(); i++) {
+        os << sep(2) << "color[" << i << "] := ";
+        for (size_t j = 0; j < this->colors[i].size(); j++) {
+            os << this->colors[i][j];
+            if (j != this->colors[i].size() - 1) {
+                os << ", ";
+            }
+        }
+        os << std::endl;
+    }
+    os << sep(1) << "}" << std::endl;
+
     os << sep(1) << "Axiom{" << std::endl;
     os << sep(2) << "length := " << this->axiom->axiom.size() << std::endl;
     os << sep(2) << "axiom := " << this->axiom->axiom << std::endl;
@@ -288,11 +326,13 @@ Grammar::Grammar(
         const std::vector<Property> &properties,
         const std::string &ignored,
         Axiom axiom,
-        const std::vector<Production> &productions
+        const std::vector<Production> &productions,
+        const std::vector<ColorT> &colors
 ) : properties(make_properties(properties)),
     ignored(make_ignored(ignored)),
     axiom(std::make_shared<Axiom>(std::move(axiom))),
-    productions(productions) {}
+    productions(productions),
+    colors(colors) {}
 
 float Grammar::get_property_float(const std::string &name) {
     // Defaults to 0
@@ -423,6 +463,10 @@ const std::vector<Production> &Grammar::get_raw_productions() const {
 
 IgnoredPtr Grammar::get_ignored() {
     return this->ignored;
+}
+
+std::vector<ColorT> Grammar::get_colors() const {
+    return colors;
 }
 
 std::vector<int32_t> Axiom::get_as_opengl_data() const {

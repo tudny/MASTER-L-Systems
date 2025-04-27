@@ -13,6 +13,7 @@
 void Skeleton::visitASTSectionSeparator(ASTSectionSeparator *t) {} //abstract class
 void Skeleton::visitASTProgram(ASTProgram *t) {} //abstract class
 void Skeleton::visitASTProperty(ASTProperty *t) {} //abstract class
+void Skeleton::visitColor(Color *t) {} //abstract class
 void Skeleton::visitASTProperties(ASTProperties *t) {} //abstract class
 void Skeleton::visitASTAxiom(ASTAxiom *t) {} //abstract class
 void Skeleton::visitASTRule(ASTRule *t) {} //abstract class
@@ -51,6 +52,22 @@ void Skeleton::visitASTIgnore(ASTIgnore *ast_ignore)
   /* Code For ASTIgnore Goes Here */
 
   visitProd(ast_ignore->prod_);
+
+}
+
+void Skeleton::visitASTColor(ASTColor *ast_color)
+{
+  /* Code For ASTColor Goes Here */
+
+  if (ast_color->listcolor_) ast_color->listcolor_->accept(this);
+
+}
+
+void Skeleton::visitAColor(AColor *a_color)
+{
+  /* Code For AColor Goes Here */
+
+  visitProd(a_color->prod_);
 
 }
 
@@ -118,6 +135,14 @@ void Skeleton::visitASTLRules(ASTLRules *astl_rules)
 
 }
 
+
+void Skeleton::visitListColor(ListColor *list_color)
+{
+  for (ListColor::iterator i = list_color->begin() ; i != list_color->end() ; ++i)
+  {
+    (*i)->accept(this);
+  }
+}
 
 void Skeleton::visitListASTProperty(ListASTProperty *list_ast_property)
 {

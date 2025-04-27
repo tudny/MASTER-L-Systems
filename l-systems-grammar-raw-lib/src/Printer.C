@@ -191,6 +191,49 @@ void PrintAbsyn::visitASTIgnore(ASTIgnore *p)
   _i_ = oldi;
 }
 
+void PrintAbsyn::visitASTColor(ASTColor *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+  render("#color");
+  _i_ = 0; visitListColor(p->listcolor_);
+
+  if (oldi > 0) render(_R_PAREN);
+  _i_ = oldi;
+}
+
+void PrintAbsyn::visitColor(Color *p) {} //abstract class
+
+void PrintAbsyn::visitAColor(AColor *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+  visitProd(p->prod_);
+
+  if (oldi > 0) render(_R_PAREN);
+  _i_ = oldi;
+}
+
+void PrintAbsyn::visitListColor(ListColor *listcolor)
+{
+  iterListColor(listcolor->begin(), listcolor->end());
+}
+
+void PrintAbsyn::iterListColor(ListColor::const_iterator i, ListColor::const_iterator j)
+{
+  if (i == j) return;
+  if (i == j-1)
+  { /* last */
+    (*i)->accept(this); render(' ');
+  }
+  else
+  { /* cons */
+    (*i)->accept(this); render(' '); iterListColor(i+1, j);
+  }
+}
+
 void PrintAbsyn::visitASTProperties(ASTProperties *p) {} //abstract class
 
 void PrintAbsyn::visitASTLProperties(ASTLProperties *p)
@@ -436,6 +479,35 @@ void ShowAbsyn::visitASTIgnore(ASTIgnore *p)
   visitProd(p->prod_);
   bufAppend(')');
 }
+void ShowAbsyn::visitASTColor(ASTColor *p)
+{
+  bufAppend('(');
+  bufAppend("ASTColor");
+  bufAppend(' ');
+  bufAppend('[');
+  if (p->listcolor_)  p->listcolor_->accept(this);
+  bufAppend(']');
+  bufAppend(')');
+}
+void ShowAbsyn::visitColor(Color *p) {} //abstract class
+
+void ShowAbsyn::visitAColor(AColor *p)
+{
+  bufAppend('(');
+  bufAppend("AColor");
+  bufAppend(' ');
+  visitProd(p->prod_);
+  bufAppend(')');
+}
+void ShowAbsyn::visitListColor(ListColor *listcolor)
+{
+  for (ListColor::const_iterator i = listcolor->begin() ; i != listcolor->end() ; ++i)
+  {
+    (*i)->accept(this);
+    if (i != listcolor->end() - 1) bufAppend(", ");
+  }
+}
+
 void ShowAbsyn::visitASTProperties(ASTProperties *p) {} //abstract class
 
 void ShowAbsyn::visitASTLProperties(ASTLProperties *p)

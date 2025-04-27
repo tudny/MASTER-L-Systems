@@ -55,13 +55,14 @@ extern int l_system_debug;
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
     _ERROR_ = 258,                 /* _ERROR_  */
-    _SYMB_2 = 259,                 /* _SYMB_2  */
-    _DMINUS = 260,                 /* _DMINUS  */
-    _RARROW = 261,                 /* _RARROW  */
-    _COLONEQ = 262,                /* _COLONEQ  */
-    _LT = 263,                     /* _LT  */
-    _GT = 264,                     /* _GT  */
-    T_Prod = 265                   /* T_Prod  */
+    _SYMB_3 = 259,                 /* _SYMB_3  */
+    _SYMB_2 = 260,                 /* _SYMB_2  */
+    _DMINUS = 261,                 /* _DMINUS  */
+    _RARROW = 262,                 /* _RARROW  */
+    _COLONEQ = 263,                /* _COLONEQ  */
+    _LT = 264,                     /* _LT  */
+    _GT = 265,                     /* _GT  */
+    T_Prod = 266                   /* T_Prod  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -79,6 +80,8 @@ union YYSTYPE
   ASTSectionSeparator* astsectionseparator_;
   ASTProgram* astprogram_;
   ASTProperty* astproperty_;
+  Color* color_;
+  ListColor* listcolor_;
   ASTProperties* astproperties_;
   ListASTProperty* listastproperty_;
   ASTAxiom* astaxiom_;
@@ -86,7 +89,7 @@ union YYSTYPE
   ASTRules* astrules_;
   ListASTRule* listastrule_;
 
-#line 90 "Bison.H"
+#line 93 "Bison.H"
 
 };
 typedef union YYSTYPE YYSTYPE;

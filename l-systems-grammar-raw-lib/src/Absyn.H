@@ -25,6 +25,7 @@ typedef std::string Prod;
 class ASTSectionSeparator;
 class ASTProgram;
 class ASTProperty;
+class Color;
 class ASTProperties;
 class ASTAxiom;
 class ASTRule;
@@ -33,6 +34,8 @@ class ASTLSectionSeparator;
 class ASTLProgram;
 class ASTLProperty;
 class ASTIgnore;
+class ASTColor;
+class AColor;
 class ASTLProperties;
 class ASTLAxiom;
 class ASTLRule;
@@ -40,6 +43,7 @@ class ASTLLeftRule;
 class ASTLRightRule;
 class ASTLBothRule;
 class ASTLRules;
+class ListColor;
 class ListASTProperty;
 class ListASTRule;
 
@@ -52,6 +56,7 @@ public:
   virtual void visitASTSectionSeparator(ASTSectionSeparator *p) = 0;
   virtual void visitASTProgram(ASTProgram *p) = 0;
   virtual void visitASTProperty(ASTProperty *p) = 0;
+  virtual void visitColor(Color *p) = 0;
   virtual void visitASTProperties(ASTProperties *p) = 0;
   virtual void visitASTAxiom(ASTAxiom *p) = 0;
   virtual void visitASTRule(ASTRule *p) = 0;
@@ -60,6 +65,8 @@ public:
   virtual void visitASTLProgram(ASTLProgram *p) = 0;
   virtual void visitASTLProperty(ASTLProperty *p) = 0;
   virtual void visitASTIgnore(ASTIgnore *p) = 0;
+  virtual void visitASTColor(ASTColor *p) = 0;
+  virtual void visitAColor(AColor *p) = 0;
   virtual void visitASTLProperties(ASTLProperties *p) = 0;
   virtual void visitASTLAxiom(ASTLAxiom *p) = 0;
   virtual void visitASTLRule(ASTLRule *p) = 0;
@@ -67,6 +74,7 @@ public:
   virtual void visitASTLRightRule(ASTLRightRule *p) = 0;
   virtual void visitASTLBothRule(ASTLBothRule *p) = 0;
   virtual void visitASTLRules(ASTLRules *p) = 0;
+  virtual void visitListColor(ListColor *p) = 0;
   virtual void visitListASTProperty(ListASTProperty *p) = 0;
   virtual void visitListASTRule(ListASTRule *p) = 0;
 
@@ -109,6 +117,13 @@ class ASTProperty : public Visitable
 {
 public:
   virtual ASTProperty *clone() const = 0;
+
+};
+
+class Color : public Visitable
+{
+public:
+  virtual Color *clone() const = 0;
 
 };
 
@@ -200,6 +215,34 @@ public:
   virtual void accept(Visitor *v);
   virtual ASTIgnore *clone() const;
   void swap(ASTIgnore &);
+};
+
+class ASTColor : public ASTProperty
+{
+public:
+  ListColor *listcolor_;
+
+  ASTColor(const ASTColor &);
+  ASTColor &operator=(const ASTColor &);
+  ASTColor(ListColor *p1);
+  ~ASTColor();
+  virtual void accept(Visitor *v);
+  virtual ASTColor *clone() const;
+  void swap(ASTColor &);
+};
+
+class AColor : public Color
+{
+public:
+  Prod prod_;
+
+  AColor(const AColor &);
+  AColor &operator=(const AColor &);
+  AColor(Prod p1);
+  ~AColor();
+  virtual void accept(Visitor *v);
+  virtual AColor *clone() const;
+  void swap(AColor &);
 };
 
 class ASTLProperties : public ASTProperties
@@ -309,6 +352,15 @@ public:
 };
 
 
+
+class ListColor : public Visitable, public std::vector<Color*>
+{
+public:
+  virtual void accept(Visitor *v);
+  virtual ListColor *clone() const;
+};
+
+ListColor* consListColor(Color* x, ListColor* xs);
 
 class ListASTProperty : public Visitable, public std::vector<ASTProperty*>
 {

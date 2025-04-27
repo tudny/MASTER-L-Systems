@@ -80,6 +80,8 @@ public:
     OpenGLReadyProductionDataType ignored;
 };
 
+using ColorT = std::array<float, 4>;
+
 class Grammar {
 public:
     PropertiesPtr get_properties();
@@ -98,11 +100,14 @@ public:
 
     [[nodiscard]] OpenGLReadyProductions get_opengl_ready_productions() const;
 
+    [[nodiscard]] std::vector<ColorT> get_colors() const;
+
     Grammar(
             const std::vector<Property> &properties,
             const std::string &ignored,
             Axiom axiom,
-            const std::vector<Production> &productions
+            const std::vector<Production> &productions,
+            const std::vector<ColorT> &colors
     );
 
 private:
@@ -110,6 +115,7 @@ private:
     IgnoredPtr ignored;
     AxiomPtr axiom;
     std::vector<Production> productions;
+    std::vector<ColorT> colors;
 };
 
 using GrammarPtr = std::shared_ptr<Grammar>;

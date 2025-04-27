@@ -42,6 +42,11 @@ class PrintAbsyn : public Visitor
   void visitASTProperty(ASTProperty *p); /* abstract class */
   void visitASTLProperty(ASTLProperty *p);
   void visitASTIgnore(ASTIgnore *p);
+  void visitASTColor(ASTColor *p);
+  void visitColor(Color *p); /* abstract class */
+  void visitAColor(AColor *p);
+  void visitListColor(ListColor *p);
+  void iterListColor(ListColor::const_iterator i, ListColor::const_iterator j);
   void visitASTProperties(ASTProperties *p); /* abstract class */
   void visitASTLProperties(ASTLProperties *p);
   void visitListASTProperty(ListASTProperty *p);
@@ -159,6 +164,11 @@ class ShowAbsyn : public Visitor
   void visitASTProperty(ASTProperty *p); /* abstract class */
   void visitASTLProperty(ASTLProperty *p);
   void visitASTIgnore(ASTIgnore *p);
+  void visitASTColor(ASTColor *p);
+  void visitColor(Color *p); /* abstract class */
+  void visitAColor(AColor *p);
+  void visitListColor(ListColor *p);
+  void iterListColor(ListColor::const_iterator i, ListColor::const_iterator j);
   void visitASTProperties(ASTProperties *p); /* abstract class */
   void visitASTLProperties(ASTLProperties *p);
   void visitListASTProperty(ListASTProperty *p);
