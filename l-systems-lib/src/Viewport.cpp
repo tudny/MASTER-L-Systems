@@ -53,7 +53,7 @@ float Viewport::get_aspect_ratio() const {
 
 glm::mat4 Viewport::make_3d_projection() const {
     return glm::perspective(
-            glm::radians(90.0f),
+            glm::radians(50.0f),
             this->get_aspect_ratio(),
             0.1f, 1000.f
     );

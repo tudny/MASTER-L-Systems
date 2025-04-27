@@ -155,7 +155,7 @@ public:
         program->setUniform("ls_ambient", glm::vec3(0.1, 0.1, 0.1));
         program->setUniform("ls_position", glm::vec4(2, 2, 2, 1.0));
         program->setUniform("ls_attenuation", glm::vec3(0.2f, 0.2f, 0.2f));
-        program->setUniform("ls_direct", glm::vec3(0.0, 3.0, 0.0));
+        program->setUniform("ls_direct", glm::vec3(1.0, 1.0, 1.0));
     }
 
     void move_down() {
