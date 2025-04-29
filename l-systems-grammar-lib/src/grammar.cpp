@@ -186,7 +186,7 @@ public:
             for (size_t i = 0; i < 6; i += 2) {
                 std::string hex = value.substr(i, 2);
                 int32_t int_value = std::stoi(hex, nullptr, 16);
-                color[i / 2] = static_cast<float>(int_value);
+                color[i / 2] = static_cast<float>(int_value) / 255.0;
             }
             color[3] = 1.0f; // Alpha channel
             builder.add_color(color);

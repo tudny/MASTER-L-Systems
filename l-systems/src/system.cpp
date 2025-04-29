@@ -52,29 +52,6 @@ public:
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
         shader_program->setAttribute("position", 3, 0, 0);
 
-        float colors[] = {
-                1.0f, 0.0f, 0.0f,
-                1.0f, 1.0f, 0.0f,
-                1.0f, 1.0f, 1.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 1.0f,
-                1.0f, 0.0f, 1.0f,
-                0.0f, 1.0f, 1.0f,
-                0.0f, 0.0f, 0.0f,
-        };
-
-//        // set color to brown
-        for (int i = 0; i < 8; i++) {
-            colors[i * 3] = 0.5f;
-            colors[i * 3 + 1] = 0.35f;
-            colors[i * 3 + 2] = 0.05f;
-        }
-
-        glGenBuffers(1, &vbo_color);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
-        shader_program->setAttribute("color", 3, 0, 0);
-
         GLuint indices[] = {
                 0, 1, 2,
                 0, 2, 3,
@@ -114,6 +91,7 @@ public:
         glGenBuffers(1, &ssbo_leaf_begin_counter);
         glGenBuffers(1, &ssbo_leaf_positions_vec4);
         glGenBuffers(1, &ssbo_leaf_index_array);
+        glGenBuffers(1, &ssbo_colors__index);
     }
 
     void draw() override {
@@ -137,6 +115,8 @@ public:
         // rebind ssbo to the same binding point after compute shader
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_translations);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_translations);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_colors__values);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_colors__index);
 
         set_light_and_pv(this->shader_program, pvm, eye_pos);
 
@@ -311,6 +291,13 @@ private:
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, *buffer);
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
+
+        glGenBuffers(1, &ssbo_colors__values);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_colors__values);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, grammar->get_colors().size() * sizeof(ColorT),
+                     grammar->get_colors().data(), GL_STATIC_DRAW);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_colors__values);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
     void run_compute() {
@@ -572,8 +559,6 @@ private:
 
         this_matrix_filler_program->unuse();
 
-        // Color and
-
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, transformations_output_ssbo);
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
 
@@ -667,6 +652,8 @@ private:
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         this_leaf_position_placer_program->unuse();
+
+        // ssbo_colors__index
     }
 
     void run_leaf_draw(const glm::mat4 &pvm, const glm::vec4 &eye_pos) {
@@ -697,9 +684,10 @@ private:
 
     GLuint vao{};
     GLuint vbo_point{};
-    GLuint vbo_color{};
     GLuint ibo{};
     GLuint ssbo_translations{};
+    GLuint ssbo_colors__values{};
+    GLuint ssbo_colors__index{};
     GLuint instance_translations_count = -1;
 
     float downset{};
