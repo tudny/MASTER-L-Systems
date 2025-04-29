@@ -334,11 +334,10 @@ Grammar::Grammar(
     productions(productions),
     colors(colors) {}
 
-float Grammar::get_property_float(const std::string &name) {
-    // Defaults to 0
+float Grammar::get_property_float(const std::string &name, float default_value) {
     auto it = get_properties()->find(name);
     if (it == get_properties()->end()) {
-        return 0;
+        return default_value;
     }
     return it->second;
 }

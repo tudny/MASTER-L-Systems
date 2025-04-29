@@ -92,6 +92,11 @@ public:
         glGenBuffers(1, &ssbo_leaf_positions_vec4);
         glGenBuffers(1, &ssbo_leaf_index_array);
         glGenBuffers(1, &ssbo_colors__index);
+
+        glGenBuffers(1, &ssbo_color_buffer_input);
+        glGenBuffers(1, &ssbo_color_buffer_output);
+        glGenBuffers(1, &ssbo_length_buffer_input);
+        glGenBuffers(1, &ssbo_length_buffer_output);
     }
 
     void draw() override {
@@ -542,6 +547,59 @@ private:
 
 //        std::cout << "Drawable instances count: " << drawable_instances_count << std::endl;
 
+        // BEGIN: color and length update
+        prefix_job_on_tree_program->use();
+
+        // init input jumps to be LookBack table
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_input_jumps);
+        // copy ssbo_previous_look_back_buffer into ssbo_input_jumps
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(int32_t), nullptr, GL_STATIC_DRAW);
+        glCopyNamedBufferSubData(ssbo_previous_look_back_buffer, ssbo_input_jumps, 0, 0, size * sizeof(int32_t));
+
+        // init output jumps to be LookBack table
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_output_jumps);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(int32_t), nullptr, GL_STATIC_DRAW);
+
+        // copy contents of ssbo to ssbo_colors_buffer_input (ssbo_colors_buffer_input holds ints)
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_color_buffer_input);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(int32_t), nullptr, GL_STATIC_DRAW);
+        glCopyNamedBufferSubData(ssbo, ssbo_color_buffer_input, 0, 0, size * sizeof(int32_t));
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_color_buffer_output);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(int32_t), nullptr, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_length_buffer_input);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(float), nullptr, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_length_buffer_output);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(float), nullptr, GL_STATIC_DRAW);
+
+        prefix_job_on_tree_program->setUniform("number_of_colors", (int) grammar->get_colors().size());
+        prefix_job_on_tree_program->setUniform("factor", grammar->get_property_float("factor", 0.8f));
+
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_color_buffer_input);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_length_buffer_input);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_input_jumps);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_color_buffer_output);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_length_buffer_output);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo_output_jumps);
+
+        auto epochs = (size_t) ceil(log2((double) size));
+        for (size_t epoch = 0; epoch <= epochs; ++epoch) {
+            prefix_job_on_tree_program->setUniform("epoch", (int) epoch);
+            glDispatchCompute(size, 1, 1);
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+            glCopyNamedBufferSubData(ssbo_output_jumps, ssbo_input_jumps, 0, 0, size * sizeof(int32_t));
+            glCopyNamedBufferSubData(ssbo_color_buffer_output, ssbo_color_buffer_input, 0, 0,
+                                     size * sizeof(int32_t));
+            glCopyNamedBufferSubData(ssbo_length_buffer_output, ssbo_length_buffer_input, 0, 0,
+                                     size * sizeof(float));
+        }
+
+        prefix_job_on_tree_program->unuse();
+        // END: color and length update
+
         this_matrix_filler_program->use();
         auto step = grammar->get_property_float("step");
         auto delta_in_angles = grammar->get_property_float("delta");
@@ -553,6 +611,7 @@ private:
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, transformations_input_ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_length_buffer_input);
 
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -583,7 +642,7 @@ private:
 
         // overestimate epochs to be ceil of log2 of size
         // no more epochs needed than all nodes in the tree
-        auto epochs = (size_t) ceil(log2((double) size));
+//        auto epochs = (size_t) ceil(log2((double) size));
         for (size_t epoch = 0; epoch <= epochs; ++epoch) {
 
             // run the compute
@@ -609,6 +668,7 @@ private:
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, transformations_input_ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_translations);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_next_result_buffer);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_length_buffer_input);
 
         glm::mat4 common_turtle_matrix = glm::transpose(glm::mat4{
                 0, 1, 0, 0,
@@ -618,12 +678,12 @@ private:
         });
 
         auto move_down = glm::translate(glm::mat4(1.0), glm::vec3(-0.5f, 0.0, 0.0f));
-        auto scale_y_by_step = glm::scale(glm::mat4(1.0), glm::vec3(-step, 1.0f, 1.0f));
         auto move_back_up = glm::translate(glm::mat4(1.0), glm::vec3(0.5f, 0.0f, 0.0f));
-        auto translation = move_down * scale_y_by_step * move_back_up;
 
         this_instance_placer_program->setUniform("common_turtle_matrix", common_turtle_matrix);
-        this_instance_placer_program->setUniform("common_cube_matrix", translation);
+        this_instance_placer_program->setUniform("common_cube_matrix_a", move_down);
+        this_instance_placer_program->setUniform("common_cube_matrix_c", move_back_up);
+        this_instance_placer_program->setUniform("step", step);
 
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -689,6 +749,11 @@ private:
     GLuint ssbo_colors__values{};
     GLuint ssbo_colors__index{};
     GLuint instance_translations_count = -1;
+
+    GLuint ssbo_color_buffer_input{};
+    GLuint ssbo_color_buffer_output{};
+    GLuint ssbo_length_buffer_input{};
+    GLuint ssbo_length_buffer_output{};
 
     float downset{};
 

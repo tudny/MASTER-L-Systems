@@ -92,7 +92,7 @@ public:
 
     [[nodiscard]] const std::vector<Production> &get_raw_productions() const;
 
-    float get_property_float(const std::string &name);
+    float get_property_float(const std::string &name, float default_value = 0.0f);
 
     size_t get_property_size_t(const std::string &name);
 

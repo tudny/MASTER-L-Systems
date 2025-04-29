@@ -15,9 +15,13 @@ layout(std430, binding = 1) buffer Output {
     mat4 result[];
 };
 
-mat4 move_forward() {
+layout(std430, binding = 2) readonly buffer StepInputBuffer {
+    float stepInputBuffer[];
+};
+
+mat4 move_forward(int instanceId) {
     return mat4(
-    vec4(1.0, 0.0, 0.0, step),
+    vec4(1.0, 0.0, 0.0, step * stepInputBuffer[instanceId]),
     vec4(0.0, 1.0, 0.0, 0.0),
     vec4(0.0, 0.0, 1.0, 0.0),
     vec4(0.0, 0.0, 0.0, 1.0)
@@ -60,11 +64,11 @@ mat4 identity() {
     );
 }
 
-mat4 giveTransformationMatrix(int letter) {
+mat4 giveTransformationMatrix(int instanceId, int letter) {
     switch (letter) {
         case 70:// F
         case 102:// f
-        return move_forward();
+        return move_forward(instanceId);
         case 43:// +
         return rotate_over_up(delta);
         case 45:// -
@@ -87,5 +91,5 @@ mat4 giveTransformationMatrix(int letter) {
 void main() {
     int index = int(gl_GlobalInvocationID.x);
     int letter = inputBuffer[index];
-    result[index] = giveTransformationMatrix(letter);
+    result[index] = giveTransformationMatrix(index, letter);
 }

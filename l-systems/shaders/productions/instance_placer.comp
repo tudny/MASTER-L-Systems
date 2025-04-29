@@ -17,8 +17,28 @@ layout(std430, binding = 2) readonly buffer OffsetsInput {
     int offsetsInput[];
 };
 
+layout(std430, binding = 3) readonly buffer InstanceStepInput {
+    float instanceStepInput[];
+};
+
 uniform mat4 common_turtle_matrix;
-uniform mat4 common_cube_matrix;
+uniform mat4 common_cube_matrix_a;
+uniform mat4 common_cube_matrix_c;
+uniform float step;
+
+mat4 common_cube_matrix_b(int instanceId) {
+    float myStep = instanceStepInput[instanceId];
+    return mat4(
+        vec4(-step * myStep, 0.0, 0.0, 0.0),
+        vec4(0.0, 1.0, 0.0, 0.0),
+        vec4(0.0, 0.0, 1.0, 0.0),
+        vec4(0.0, 0.0, 0.0, 1.0)
+    );
+}
+
+mat4 common_cube_matrix(int instanceId) {
+    return common_cube_matrix_a * common_cube_matrix_b(instanceId) * common_cube_matrix_c;
+}
 
 int mySumFactor(int index) {
     if (index == 0) {
@@ -37,5 +57,5 @@ void main() {
     // only if I'm F
     int hoManyInstancesBeforeMe = offsetsInput[index] - 1;
     // rewrite from input to output
-    outputTransformations[hoManyInstancesBeforeMe] = transpose(inputTransformations[index] * common_turtle_matrix) * common_cube_matrix;
+    outputTransformations[hoManyInstancesBeforeMe] = transpose(inputTransformations[index] * common_turtle_matrix) * common_cube_matrix(index);
 }
