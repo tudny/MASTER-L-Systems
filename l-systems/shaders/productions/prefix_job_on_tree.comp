@@ -1,0 +1,97 @@
+#version 430
+
+#define CLOSING_BRACKET 93  /* ] */
+#define TICK 39             /* ' */
+#define EXCLAMATION 33      /* ! */
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+layout(std430, binding = 0) readonly buffer InputData1 {
+    int inputData1[];
+};
+
+layout(std430, binding = 1) readonly buffer InputData2 {
+    float inputData2[];
+};
+
+layout(std430, binding = 2) readonly buffer InputJumps {
+    int inputJumps[];
+};
+
+layout(std430, binding = 3) buffer OutputData1 {
+    int outputData1[];
+};
+
+layout(std430, binding = 4) buffer OutputData2 {
+    float outputData2[];
+};
+
+layout(std430, binding = 5) buffer OutputJumps {
+    int outputJumps[];
+};
+
+uniform int epoch;
+uniform int number_of_colors;
+uniform float factor;
+
+void init_jumps(int index) {
+    if (inputJumps[index] >= 0 && inputData1[index] != CLOSING_BRACKET) {
+        // if the LookBack table was zero or positive, it means that we are not ]
+        // for index=0 it will be -1 which is expected
+        outputJumps[index] = index - 1;
+    } else {
+        // if the LookBack table was negative, it means that we are ] and we should jump back
+        outputJumps[index] = index + inputJumps[index];
+    }
+}
+
+void init_data(int index) {
+    // We are doing a sum of 1's for each ' (color change)
+    if (inputData1[index] == TICK) {
+        outputData1[index] = 1;
+    } else {
+        outputData1[index] = 0;
+    }
+
+    // We are doing a multiplication of 'factor' for each '!'
+    if (inputData1[index] == EXCLAMATION) {
+        outputData2[index] = factor;
+    } else {
+        outputData2[index] = 1;
+    }
+}
+
+void run_job(int index, int previousIndex) {
+    int myData1 = inputData1[index];
+    int previousData1 = inputData1[previousIndex];
+    outputData1[index] = (myData1 + previousData1) % number_of_colors;
+
+    float myData2 = inputData2[index];
+    float previousData2 = inputData2[previousIndex];
+    outputData2[index] = myData2 * previousData2;
+}
+
+void update_jumps(int index, int previousIndex) {
+    // Father of my father is my father's father (grandfather)
+    outputJumps[index] = inputJumps[previousIndex];
+}
+
+void main() {
+    int index = int(gl_GlobalInvocationID.x);
+
+    if (epoch == 0) {
+        // rewrite Look Back into the output with adjustments
+        init_jumps(index);
+        init_data(index);
+    } else {
+        // run multiplication
+        int previousIndex = inputJumps[index];
+        if (previousIndex < 0) {
+            // if the jump was negative, it means we already hit the root of the tree
+            return;
+        }
+
+        run_job(index, previousIndex);
+        update_jumps(index, previousIndex);
+    }
+}

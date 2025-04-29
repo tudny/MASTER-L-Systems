@@ -273,6 +273,14 @@ private:
         }
 
         this_find_production_and_size_program = find_production_and_size_program;
+
+        if (!prefix_job_on_tree_program) {
+            prefix_job_on_tree_program = std::make_shared<ShaderProgram>(std::initializer_list<Shader>{
+                    Shader{SHADER_PATH("productions/prefix_job_on_tree.comp"), GL_COMPUTE_SHADER}
+            });
+        }
+
+        this_prefix_job_on_tree_program = prefix_job_on_tree_program;
     }
 
     void prepare_new_productions_ssbo() {
@@ -564,6 +572,8 @@ private:
 
         this_matrix_filler_program->unuse();
 
+        // Color and
+
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, transformations_output_ssbo);
         glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
 
@@ -742,6 +752,7 @@ private:
     std::shared_ptr<ShaderProgram> this_leaf_position_placer_program;
     std::shared_ptr<ShaderProgram> this_leaf_program;
     std::shared_ptr<ShaderProgram> this_find_production_and_size_program;
+    std::shared_ptr<ShaderProgram> this_prefix_job_on_tree_program;
 
     static std::shared_ptr<ShaderProgram> system_shader_program;
     static std::shared_ptr<ShaderProgram> production_shader_program;
@@ -756,6 +767,7 @@ private:
     static std::shared_ptr<ShaderProgram> leaf_position_placer_program;
     static std::shared_ptr<ShaderProgram> leaf_program;
     static std::shared_ptr<ShaderProgram> find_production_and_size_program;
+    static std::shared_ptr<ShaderProgram> prefix_job_on_tree_program;
 };
 
 std::shared_ptr<ShaderProgram> SystemDrawable::system_shader_program = nullptr;
@@ -771,6 +783,7 @@ std::shared_ptr<ShaderProgram> SystemDrawable::leaf_begin_detector_program = nul
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_position_placer_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::leaf_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::find_production_and_size_program = nullptr;
+std::shared_ptr<ShaderProgram> SystemDrawable::prefix_job_on_tree_program = nullptr;
 
 void register_system(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {
