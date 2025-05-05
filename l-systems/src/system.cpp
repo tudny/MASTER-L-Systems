@@ -663,12 +663,18 @@ private:
         glBufferData(GL_SHADER_STORAGE_BUFFER, instance_translations_count * sizeof(glm::mat4),
                      nullptr, GL_STATIC_DRAW);
 
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_colors__index);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, instance_translations_count * sizeof(uint32_t),
+                     nullptr, GL_STATIC_DRAW);
+
         // place instances
         this_instance_placer_program->use();
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, transformations_input_ssbo);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_translations);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_next_result_buffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_length_buffer_input);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_color_buffer_input);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo_colors__index);
 
         glm::mat4 common_turtle_matrix = glm::transpose(glm::mat4{
                 0, 1, 0, 0,
@@ -688,7 +694,6 @@ private:
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         this_instance_placer_program->unuse();
-
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_positions_vec4);
         glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_edge_count * sizeof(glm::vec4), nullptr, GL_DYNAMIC_DRAW);

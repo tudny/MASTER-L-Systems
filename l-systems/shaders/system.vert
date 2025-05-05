@@ -10,6 +10,10 @@ layout(std430, binding = 1) readonly buffer Colors {
     vec4 colors[];
 };
 
+layout(std430, binding = 2) readonly buffer ColorIndex {
+    int colorIndex[];
+};
+
 uniform mat4 pvm;
 
 out Vertex {
@@ -19,7 +23,7 @@ out Vertex {
 
 void main() {
     mat4 model = translations[gl_InstanceID];
-    vec4 my_color = colors[0];
+    vec4 my_color = colors[colorIndex[gl_InstanceID]];
     vec4 pos = model * vec4(position, 1.0);
 
     gl_Position = pvm * pos;

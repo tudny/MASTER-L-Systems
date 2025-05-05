@@ -21,6 +21,14 @@ layout(std430, binding = 3) readonly buffer InstanceStepInput {
     float instanceStepInput[];
 };
 
+layout(std430, binding = 4) readonly buffer InputColorIndex {
+    int inputColorIndex[];
+};
+
+layout(std430, binding = 5) buffer OutputColorIndex {
+    int outputColorIndex[];
+};
+
 uniform mat4 common_turtle_matrix;
 uniform mat4 common_cube_matrix_a;
 uniform mat4 common_cube_matrix_c;
@@ -58,4 +66,6 @@ void main() {
     int hoManyInstancesBeforeMe = offsetsInput[index] - 1;
     // rewrite from input to output
     outputTransformations[hoManyInstancesBeforeMe] = transpose(inputTransformations[index] * common_turtle_matrix) * common_cube_matrix(index);
+    // rewrite from input to output
+    outputColorIndex[hoManyInstancesBeforeMe] = inputColorIndex[index];
 }
