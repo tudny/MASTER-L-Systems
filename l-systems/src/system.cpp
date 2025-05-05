@@ -138,8 +138,8 @@ public:
     set_light_and_pv(const std::shared_ptr<ShaderProgram> &program, const glm::mat4 &pvm, const glm::vec4 &eye_pos) {
         program->setUniform("pvm", pvm);
         program->setUniform("eyepos", eye_pos);
-        program->setUniform("ls_ambient", glm::vec3(0.1, 0.1, 0.1));
-        program->setUniform("ls_position", glm::vec4(2, 2, 2, 1.0));
+        program->setUniform("ls_ambient", glm::vec3(0.6, 0.6, 0.6));
+        program->setUniform("ls_position", glm::vec4(2, 2, 2, .1));
         program->setUniform("ls_attenuation", glm::vec3(0.2f, 0.2f, 0.2f));
         program->setUniform("ls_direct", glm::vec3(1.0, 1.0, 1.0));
     }
