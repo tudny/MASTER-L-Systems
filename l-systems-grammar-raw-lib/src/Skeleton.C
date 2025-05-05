@@ -63,6 +63,16 @@ void Skeleton::visitASTColor(ASTColor *ast_color)
 
 }
 
+void Skeleton::visitASTColorSpace(ASTColorSpace *ast_color_space)
+{
+  /* Code For ASTColorSpace Goes Here */
+
+  if (ast_color_space->color_1) ast_color_space->color_1->accept(this);
+  if (ast_color_space->color_2) ast_color_space->color_2->accept(this);
+  visitProd(ast_color_space->prod_);
+
+}
+
 void Skeleton::visitAColor(AColor *a_color)
 {
   /* Code For AColor Goes Here */

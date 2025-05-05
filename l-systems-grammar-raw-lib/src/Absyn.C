@@ -239,6 +239,57 @@ ASTColor *ASTColor::clone() const
 
 
 
+/********************   ASTColorSpace    ********************/
+ASTColorSpace::ASTColorSpace(Color *p1, Color *p2, Prod p3)
+{
+  color_1 = p1;
+  color_2 = p2;
+  prod_ = p3;
+
+}
+
+ASTColorSpace::ASTColorSpace(const ASTColorSpace & other)
+{
+  color_1 = other.color_1->clone();
+  color_2 = other.color_2->clone();
+  prod_ = other.prod_;
+
+}
+
+ASTColorSpace &ASTColorSpace::operator=(const ASTColorSpace & other)
+{
+  ASTColorSpace tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void ASTColorSpace::swap(ASTColorSpace & other)
+{
+  std::swap(color_1, other.color_1);
+  std::swap(color_2, other.color_2);
+  std::swap(prod_, other.prod_);
+
+}
+
+ASTColorSpace::~ASTColorSpace()
+{
+  delete(color_1);
+  delete(color_2);
+
+}
+
+void ASTColorSpace::accept(Visitor *v)
+{
+  v->visitASTColorSpace(this);
+}
+
+ASTColorSpace *ASTColorSpace::clone() const
+{
+  return new ASTColorSpace(*this);
+}
+
+
+
 /********************   AColor    ********************/
 AColor::AColor(Prod p1)
 {

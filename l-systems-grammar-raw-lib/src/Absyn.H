@@ -35,6 +35,7 @@ class ASTLProgram;
 class ASTLProperty;
 class ASTIgnore;
 class ASTColor;
+class ASTColorSpace;
 class AColor;
 class ASTLProperties;
 class ASTLAxiom;
@@ -66,6 +67,7 @@ public:
   virtual void visitASTLProperty(ASTLProperty *p) = 0;
   virtual void visitASTIgnore(ASTIgnore *p) = 0;
   virtual void visitASTColor(ASTColor *p) = 0;
+  virtual void visitASTColorSpace(ASTColorSpace *p) = 0;
   virtual void visitAColor(AColor *p) = 0;
   virtual void visitASTLProperties(ASTLProperties *p) = 0;
   virtual void visitASTLAxiom(ASTLAxiom *p) = 0;
@@ -229,6 +231,22 @@ public:
   virtual void accept(Visitor *v);
   virtual ASTColor *clone() const;
   void swap(ASTColor &);
+};
+
+class ASTColorSpace : public ASTProperty
+{
+public:
+  Color *color_1;
+  Color *color_2;
+  Prod prod_;
+
+  ASTColorSpace(const ASTColorSpace &);
+  ASTColorSpace &operator=(const ASTColorSpace &);
+  ASTColorSpace(Color *p1, Color *p2, Prod p3);
+  ~ASTColorSpace();
+  virtual void accept(Visitor *v);
+  virtual ASTColorSpace *clone() const;
+  void swap(ASTColorSpace &);
 };
 
 class AColor : public Color

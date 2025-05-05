@@ -64,7 +64,10 @@ void init_data(int index) {
 void run_job(int index, int previousIndex) {
     int myData1 = inputData1[index];
     int previousData1 = inputData1[previousIndex];
-    outputData1[index] = (myData1 + previousData1) % number_of_colors;
+    outputData1[index] = (myData1 + previousData1);
+    if (outputData1[index] >= number_of_colors) {
+        outputData1[index] = number_of_colors - 1;
+    }
 
     float myData2 = inputData2[index];
     float previousData2 = inputData2[previousIndex];

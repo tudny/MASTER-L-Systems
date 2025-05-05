@@ -57,12 +57,15 @@ extern int l_system_debug;
     _ERROR_ = 258,                 /* _ERROR_  */
     _SYMB_3 = 259,                 /* _SYMB_3  */
     _SYMB_2 = 260,                 /* _SYMB_2  */
-    _DMINUS = 261,                 /* _DMINUS  */
-    _RARROW = 262,                 /* _RARROW  */
-    _COLONEQ = 263,                /* _COLONEQ  */
-    _LT = 264,                     /* _LT  */
-    _GT = 265,                     /* _GT  */
-    T_Prod = 266                   /* T_Prod  */
+    _RPAREN = 261,                 /* _RPAREN  */
+    _COMMA = 262,                  /* _COMMA  */
+    _DMINUS = 263,                 /* _DMINUS  */
+    _RARROW = 264,                 /* _RARROW  */
+    _COLONEQ = 265,                /* _COLONEQ  */
+    _LT = 266,                     /* _LT  */
+    _GT = 267,                     /* _GT  */
+    _SYMB_4 = 268,                 /* _SYMB_4  */
+    T_Prod = 269                   /* T_Prod  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -89,7 +92,7 @@ union YYSTYPE
   ASTRules* astrules_;
   ListASTRule* listastrule_;
 
-#line 93 "Bison.H"
+#line 96 "Bison.H"
 
 };
 typedef union YYSTYPE YYSTYPE;

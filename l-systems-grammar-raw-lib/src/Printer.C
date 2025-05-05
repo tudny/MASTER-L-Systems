@@ -203,6 +203,24 @@ void PrintAbsyn::visitASTColor(ASTColor *p)
   _i_ = oldi;
 }
 
+void PrintAbsyn::visitASTColorSpace(ASTColorSpace *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+  render("#color");
+  render("lin(");
+  _i_ = 0; p->color_1->accept(this);
+  render(',');
+  _i_ = 0; p->color_2->accept(this);
+  render(',');
+  visitProd(p->prod_);
+  render(')');
+
+  if (oldi > 0) render(_R_PAREN);
+  _i_ = oldi;
+}
+
 void PrintAbsyn::visitColor(Color *p) {} //abstract class
 
 void PrintAbsyn::visitAColor(AColor *p)
@@ -487,6 +505,19 @@ void ShowAbsyn::visitASTColor(ASTColor *p)
   bufAppend('[');
   if (p->listcolor_)  p->listcolor_->accept(this);
   bufAppend(']');
+  bufAppend(')');
+}
+void ShowAbsyn::visitASTColorSpace(ASTColorSpace *p)
+{
+  bufAppend('(');
+  bufAppend("ASTColorSpace");
+  bufAppend(' ');
+  p->color_1->accept(this);
+  bufAppend(' ');
+  p->color_2->accept(this);
+  bufAppend(' ');
+  visitProd(p->prod_);
+  bufAppend(' ');
   bufAppend(')');
 }
 void ShowAbsyn::visitColor(Color *p) {} //abstract class

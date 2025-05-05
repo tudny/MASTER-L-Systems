@@ -23,6 +23,7 @@ public:
   void visitASTLProperty(ASTLProperty *p);
   void visitASTIgnore(ASTIgnore *p);
   void visitASTColor(ASTColor *p);
+  void visitASTColorSpace(ASTColorSpace *p);
   void visitAColor(AColor *p);
   void visitASTLProperties(ASTLProperties *p);
   void visitASTLAxiom(ASTLAxiom *p);

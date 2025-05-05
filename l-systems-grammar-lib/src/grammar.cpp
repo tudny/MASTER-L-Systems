@@ -41,6 +41,29 @@ constexpr bool is_closing_bracket(const char bracket) {
     return bracket == STACK_CLOSING_BRACKET || bracket == LEAF_CLOSING_BRACKET;
 }
 
+static std::vector<ColorT> make_linspace(std::vector<ColorT> colors, uint32_t number_of_colors) {
+    if (colors.size() != 2) {
+        throw std::runtime_error("Linspace colors must be set with exactly two colors");
+    }
+    if (number_of_colors < 2) {
+        throw std::runtime_error("Number of colors must be at least 2");
+    }
+    auto start = colors[0];
+    auto end = colors[1];
+    std::vector<ColorT> linspace_colors;
+    linspace_colors.reserve(number_of_colors);
+    for (uint32_t i = 0; i < number_of_colors; ++i) {
+        float t = static_cast<float>(i) / (number_of_colors - 1);
+        ColorT color;
+        for (size_t j = 0; j < 3; ++j) {
+            color[j] = start[j] + t * (end[j] - start[j]);
+        }
+        color[3] = 1.0f; // Alpha channel
+        linspace_colors.push_back(color);
+    }
+    return linspace_colors;
+}
+
 class GrammarBuilder {
 public:
     GrammarBuilder() = default;
@@ -122,6 +145,43 @@ std::vector<int32_t> compute_look_back(const std::string &successor) {
     return look_back;
 }
 
+static ColorT prod_to_color(Prod &value) {
+    // Value must have 6 hex digits
+    if (value.size() != 6) {
+        throw std::runtime_error("Color value must have 6 hex digits: " + value);
+    }
+    ColorT color;
+    for (size_t i = 0; i < 6; i += 2) {
+        std::string hex = value.substr(i, 2);
+        int32_t int_value = std::stoi(hex, nullptr, 16);
+        color[i / 2] = static_cast<float>(int_value) / 255.0;
+    }
+    color[3] = 1.0f; // Alpha channel
+    return color;
+}
+
+class ColorVisitor : public Skeleton {
+public:
+    void visitAColor(AColor *p) override {
+        colors.push_back(prod_to_color(p->prod_));
+    }
+
+    void visitProd(Prod _number_of_colors) override {
+        this->number_of_colors = std::stoi(_number_of_colors);
+    }
+
+    void produce_colors(GrammarBuilder &builder) {
+        auto linspace_colors = make_linspace(colors, number_of_colors);
+        for (const auto &color: linspace_colors) {
+            builder.add_color(color);
+        }
+    }
+
+private:
+    std::vector<ColorT> colors;
+    uint32_t number_of_colors;
+};
+
 class GrammarVisitor : public Skeleton {
 public:
     void visitASTLProperty(ASTLProperty *p) override {
@@ -178,21 +238,17 @@ public:
     void visitAColor(AColor *p) override {
         auto value = p->prod_;
         try {
-            // Value must have 6 hex digits
-            if (value.size() != 6) {
-                throw std::runtime_error("Color value must have 6 hex digits: " + value);
-            }
-            ColorT color;
-            for (size_t i = 0; i < 6; i += 2) {
-                std::string hex = value.substr(i, 2);
-                int32_t int_value = std::stoi(hex, nullptr, 16);
-                color[i / 2] = static_cast<float>(int_value) / 255.0;
-            }
-            color[3] = 1.0f; // Alpha channel
+            auto color = prod_to_color(value);
             builder.add_color(color);
         } catch (...) {
             throw std::runtime_error("Invalid color value: " + value);
         }
+    }
+
+    void visitASTColorSpace(ASTColorSpace *p) override {
+        ColorVisitor color_visitor;
+        p->accept(&color_visitor);
+        color_visitor.produce_colors(builder);
     }
 
     void append_production(
