@@ -1,14 +1,12 @@
 step:=10
-depth:=5
-delta:=18.0
-#color 8B4513 00FF00 FFFF00 FF69B4
+depth:=7
+delta:=22.5
+#color lin(A0522D, 8B4513, 3)
+#color lin(006400, 00FF00, 5)
 --
-P
+A
 --
-P -> i+[P+L]--//[--l]i[++l]-[PL]++PL
-i -> Fs[//&&l][//^^l]Fs
-s -> sFs
-l ->['{+f-ff-f+|+f-ff-f}]
-L -> [&&&p'/w////w////w////w////w]
-p -> FF
-w -> ['^F][''{&&&&--f++f|--f++f}]
+A -> [&FL!A]/////'[&FL!A]///////'[&FL!A]
+F -> S/////F
+S -> FL
+L -> ['''^^{-f+f+f-|-f+f+f}]

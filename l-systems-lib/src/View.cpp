@@ -23,7 +23,7 @@ glm::vec4 RotateView::get_eye_pos() {
     auto current_time = static_cast<float>(glfwGetTime());
     float delta_time = current_time - this->last_update;
     if (this->enabled) {
-        this->rotation_state += this->speed * static_cast<float>(as_integer(this->direction)) * delta_time;
+        add_to_state(this->speed * static_cast<float>(as_integer(this->direction)) * delta_time);
         this->last_update = current_time;
     }
 
@@ -52,4 +52,17 @@ void RotateView::zoom(float offset) {
 
 void RotateView::up_and_down(float offset) {
     this->height += offset * UP_AND_DOWN_FACTOR;
+}
+
+void RotateView::add_to_state(float offset) {
+    this->rotation_state += offset;
+    if (this->rotation_state > 2 * M_PI) {
+        this->rotation_state -= 2 * M_PI;
+    } else if (this->rotation_state < 0) {
+        this->rotation_state += 2 * M_PI;
+    }
+}
+
+void RotateView::left_and_right(float offset) {
+    this->add_to_state(offset * LEFT_RIGHT_FACTOR);
 }

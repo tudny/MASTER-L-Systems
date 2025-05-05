@@ -24,6 +24,7 @@ class RotateView : public View {
 public:
     static constexpr float ZOOM_FACTOR = 0.5f;
     static constexpr float UP_AND_DOWN_FACTOR = 10.f;
+    static constexpr float LEFT_RIGHT_FACTOR = 0.1f;
 
     enum Direction {
         CLOCKWISE = -1,
@@ -44,7 +45,11 @@ public:
 
     void up_and_down(float);
 
+    void left_and_right(float);
+
 private:
+    void add_to_state(float);
+
     Direction direction;
     float speed;
     float distance;

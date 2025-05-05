@@ -936,6 +936,14 @@ void register_system(Application &application, ContextPtr &context) {
                         [&rotation_view] {
                             rotation_view->up_and_down(-1.);
                         }},
+                {GLFW_KEY_A,
+                        [&rotation_view] {
+                            rotation_view->left_and_right(-1.);
+                        }},
+                {GLFW_KEY_D,
+                        [&rotation_view] {
+                            rotation_view->left_and_right(1.);
+                        }},
         };
 
         for (auto &key_state: key_states) {
