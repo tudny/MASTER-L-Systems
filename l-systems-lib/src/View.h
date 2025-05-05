@@ -6,9 +6,9 @@
 
 class View {
 public:
-    [[nodiscard]] virtual glm::mat4 get_view_matrix() const = 0;
+    [[nodiscard]] virtual glm::mat4 get_view_matrix() = 0;
 
-    [[nodiscard]] virtual glm::vec4 get_eye_pos() const = 0;
+    [[nodiscard]] virtual glm::vec4 get_eye_pos() = 0;
 
     virtual ~View() = default;
 };
@@ -31,13 +31,9 @@ public:
 
     RotateView(Direction direction, float speed, float distance, float height);
 
-    [[nodiscard]] glm::mat4 get_view_matrix() const override;
+    [[nodiscard]] glm::mat4 get_view_matrix() override;
 
-    [[nodiscard]] glm::vec4 get_eye_pos() const override;
-
-    void enable();
-
-    void disable();
+    [[nodiscard]] glm::vec4 get_eye_pos() override;
 
     void switch_on_off();
 
@@ -51,6 +47,9 @@ private:
     float distance;
     float height;
     bool enabled = true;
+
+    float rotation_state = .0;
+    float last_update = .0;
 };
 
 #endif //LSYSTEMS_VIEW_H
