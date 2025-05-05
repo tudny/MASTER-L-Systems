@@ -186,10 +186,19 @@ void ShaderProgram::setAttribute(
 ) {
     GLint loc = get_attribute(name);
     glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(
-            loc, size, type, normalize, stride,
-            reinterpret_cast<void *>(offset)
-    );
+    if (type == GL_INT || type == GL_UNSIGNED_INT) {
+        // Use glVertexAttribIPointer for integer attributes
+        glVertexAttribIPointer(
+                loc, size, type, stride,
+                reinterpret_cast<void *>(offset)
+        );
+    } else {
+        // Use glVertexAttribPointer for floating-point attributes
+        glVertexAttribPointer(
+                loc, size, type, normalize, stride,
+                reinterpret_cast<void *>(offset)
+        );
+    }
     GL_CHECK_ERROR();
 }
 

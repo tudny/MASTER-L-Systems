@@ -1,7 +1,7 @@
 step:=10
 depth:=7
 delta:=22.5
-#color 964B00 a14B15 a14B15 a14B15
+#color FF0000 00FF00 0000FF
 --
 A
 --

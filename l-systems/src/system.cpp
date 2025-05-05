@@ -90,6 +90,7 @@ public:
         glGenBuffers(1, &ssbo_leaf_edge_counter);
         glGenBuffers(1, &ssbo_leaf_begin_counter);
         glGenBuffers(1, &ssbo_leaf_positions_vec4);
+        glGenBuffers(1, &ssbo_leaf_color_int);
         glGenBuffers(1, &ssbo_leaf_index_array);
         glGenBuffers(1, &ssbo_colors__index);
 
@@ -697,6 +698,8 @@ private:
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_positions_vec4);
         glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_edge_count * sizeof(glm::vec4), nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_color_int);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_edge_count * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_leaf_index_array);
         glBufferData(GL_SHADER_STORAGE_BUFFER, leaf_edge_count * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
 
@@ -713,6 +716,8 @@ private:
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_leaf_positions_vec4);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo_leaf_index_array);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo_is_a_leaf_output);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, ssbo_leaf_color_int);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, ssbo_color_buffer_input);
 
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -732,6 +737,10 @@ private:
         glBindVertexArray(vao_leaf);
         glBindBuffer(GL_ARRAY_BUFFER, ssbo_leaf_positions_vec4);
         this_leaf_program->setAttribute("position", 4, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, ssbo_leaf_color_int);
+        this_leaf_program->setAttribute("colorId", 1, 0, 0, GL_FALSE, GL_INT);
+
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_colors__values);
 
         set_light_and_pv(this_leaf_program, pvm, eye_pos);
 
@@ -796,6 +805,7 @@ private:
     GLuint ssbo_leaf_edge_counter{};
     GLuint ssbo_leaf_begin_counter{};
     GLuint ssbo_leaf_positions_vec4{};
+    GLuint ssbo_leaf_color_int{};
     GLuint ssbo_leaf_index_array{};
 
     std::shared_ptr<ShaderProgram> this_production_shader_program;
