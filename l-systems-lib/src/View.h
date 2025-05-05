@@ -23,6 +23,7 @@ public:
 class RotateView : public View {
 public:
     static constexpr float ZOOM_FACTOR = 0.5f;
+    static constexpr float UP_AND_DOWN_FACTOR = 10.f;
 
     enum Direction {
         CLOCKWISE = -1,
@@ -40,6 +41,8 @@ public:
     ~RotateView() override = default;
 
     void zoom(float);
+
+    void up_and_down(float);
 
 private:
     Direction direction;

@@ -853,6 +853,33 @@ std::shared_ptr<ShaderProgram> SystemDrawable::leaf_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::find_production_and_size_program = nullptr;
 std::shared_ptr<ShaderProgram> SystemDrawable::prefix_job_on_tree_program = nullptr;
 
+
+struct KeyState {
+public:
+    KeyState(int key, const std::function<void()> &keyAction) : key(key), key_action(keyAction) {}
+
+    void update_key_actions(int _key, int action) {
+        if (key == _key) {
+            if (action == GLFW_PRESS) {
+                is_pressed = true;
+            } else if (action == GLFW_RELEASE) {
+                is_pressed = false;
+            }
+        }
+
+        if (is_pressed) {
+            key_action();
+        }
+    }
+
+private:
+    int key{};
+    std::function<void()> key_action;
+
+    bool is_pressed = false;
+};
+
+
 void register_system(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {
         return Viewport{
@@ -892,31 +919,27 @@ void register_system(Application &application, ContextPtr &context) {
             rotation_view->switch_on_off();
         }
 
-        static bool is_up_pressed = false;
-        static bool is_down_pressed = false;
+        static std::vector<KeyState> key_states{
+                {GLFW_KEY_UP,
+                        [&the_system]() {
+                            the_system->move_up();
+                        }},
+                {GLFW_KEY_DOWN,
+                        [&the_system]() {
+                            the_system->move_down();
+                        }},
+                {GLFW_KEY_W,
+                        [&rotation_view] {
+                            rotation_view->up_and_down(1.);
+                        }},
+                {GLFW_KEY_S,
+                        [&rotation_view] {
+                            rotation_view->up_and_down(-1.);
+                        }},
+        };
 
-        if (key == GLFW_KEY_UP) {
-            if (action == GLFW_PRESS) {
-                is_up_pressed = true;
-            } else if (action == GLFW_RELEASE) {
-                is_up_pressed = false;
-            }
-        }
-
-        if (is_up_pressed) {
-            the_system->move_up();
-        }
-
-        if (key == GLFW_KEY_DOWN) {
-            if (action == GLFW_PRESS) {
-                is_down_pressed = true;
-            } else if (action == GLFW_RELEASE) {
-                is_down_pressed = false;
-            }
-        }
-
-        if (is_down_pressed) {
-            the_system->move_down();
+        for (auto &key_state: key_states) {
+            key_state.update_key_actions(key, action);
         }
     });
 

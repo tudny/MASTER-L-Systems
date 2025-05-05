@@ -49,3 +49,7 @@ void RotateView::switch_on_off() {
 void RotateView::zoom(float offset) {
     this->distance += offset * ZOOM_FACTOR;
 }
+
+void RotateView::up_and_down(float offset) {
+    this->height += offset * UP_AND_DOWN_FACTOR;
+}
