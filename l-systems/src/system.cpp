@@ -1,9 +1,10 @@
 #include "system.hpp"
 #include "properties.hpp"
 #include "grammar.h"
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 #include "args.hpp"
 #include "debug.hpp"
+#include "GL/glew.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <utility>
@@ -854,32 +855,6 @@ std::shared_ptr<ShaderProgram> SystemDrawable::find_production_and_size_program 
 std::shared_ptr<ShaderProgram> SystemDrawable::prefix_job_on_tree_program = nullptr;
 
 
-struct KeyState {
-public:
-    KeyState(int key, const std::function<void()> &keyAction) : key(key), key_action(keyAction) {}
-
-    void update_key_actions(int _key, int action) {
-        if (key == _key) {
-            if (action == GLFW_PRESS) {
-                is_pressed = true;
-            } else if (action == GLFW_RELEASE) {
-                is_pressed = false;
-            }
-        }
-
-        if (is_pressed) {
-            key_action();
-        }
-    }
-
-private:
-    int key{};
-    std::function<void()> key_action;
-
-    bool is_pressed = false;
-};
-
-
 void register_system(Application &application, ContextPtr &context) {
     auto viewport_function = [](Application &application) -> Viewport {
         return Viewport{
@@ -910,45 +885,36 @@ void register_system(Application &application, ContextPtr &context) {
             viewport_function
     );
 
-    application.get_window().set_key_callback([&application, rotation_view, the_system](int key, int, int action, int) {
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-            glfwSetWindowShouldClose(application.get_window().get_window(), GLFW_TRUE);
-        }
+    application.register_on_key_click(GLFW_KEY_ESCAPE, [&application]() {
+        glfwSetWindowShouldClose(application.get_window().get_window(), GLFW_TRUE);
+    });
 
-        if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
-            rotation_view->switch_on_off();
-        }
+    application.register_on_key_click(GLFW_KEY_SPACE, [rotation_view]() {
+        rotation_view->switch_on_off();
+    });
 
-        static std::vector<KeyState> key_states{
-                {GLFW_KEY_UP,
-                        [&the_system]() {
-                            the_system->move_up();
-                        }},
-                {GLFW_KEY_DOWN,
-                        [&the_system]() {
-                            the_system->move_down();
-                        }},
-                {GLFW_KEY_W,
-                        [&rotation_view] {
-                            rotation_view->up_and_down(1.);
-                        }},
-                {GLFW_KEY_S,
-                        [&rotation_view] {
-                            rotation_view->up_and_down(-1.);
-                        }},
-                {GLFW_KEY_A,
-                        [&rotation_view] {
-                            rotation_view->left_and_right(-1.);
-                        }},
-                {GLFW_KEY_D,
-                        [&rotation_view] {
-                            rotation_view->left_and_right(1.);
-                        }},
-        };
+    application.register_on_key_pressed(GLFW_KEY_UP, [the_system]() {
+        the_system->move_up();
+    });
 
-        for (auto &key_state: key_states) {
-            key_state.update_key_actions(key, action);
-        }
+    application.register_on_key_pressed(GLFW_KEY_DOWN, [the_system]() {
+        the_system->move_down();
+    });
+
+    application.register_on_key_pressed(GLFW_KEY_W, [rotation_view]() {
+        rotation_view->up_and_down(1.);
+    });
+
+    application.register_on_key_pressed(GLFW_KEY_S, [rotation_view]() {
+        rotation_view->up_and_down(-1.);
+    });
+
+    application.register_on_key_pressed(GLFW_KEY_A, [rotation_view]() {
+        rotation_view->left_and_right(-1.);
+    });
+
+    application.register_on_key_pressed(GLFW_KEY_D, [rotation_view]() {
+        rotation_view->left_and_right(1.);
     });
 
     application.get_window().set_scroll_callback([rotation_view](double, double y) {

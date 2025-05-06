@@ -24,7 +24,8 @@ void Application::run() {
     });
 }
 
-void Application::add_component(std::shared_ptr<Drawable> drawable, std::function<Viewport(Application &)> viewport_function) {
+void Application::add_component(std::shared_ptr<Drawable> drawable,
+                                std::function<Viewport(Application &)> viewport_function) {
     if (running) {
         throw std::runtime_error("Cannot add component while application is running");
     }
@@ -53,4 +54,26 @@ void Application::setup_components() {
             component->on_cursor_position(x, y);
         }
     });
+
+    window.set_key_callback([this](int key, int, int action, int) {
+        for (auto &key_state: this->key_states) {
+            key_state.update_key_actions(key, action);
+        }
+    });
+}
+
+void Application::register_on_key_click(int key, const std::function<void()> &keyAction) {
+    this->key_states.emplace_back(
+            key,
+            keyAction,
+            KeyState::ON_CLICK
+    );
+}
+
+void Application::register_on_key_pressed(int key, const std::function<void()> &keyAction) {
+    this->key_states.emplace_back(
+            key,
+            keyAction,
+            KeyState::WHEN_PRESSED
+    );
 }
