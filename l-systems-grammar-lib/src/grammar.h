@@ -94,7 +94,7 @@ public:
 
     float get_property_float(const std::string &name, float default_value = 0.0f);
 
-    size_t get_property_size_t(const std::string &name);
+    size_t get_property_size_t(const std::string &name, size_t default_value = 0);
 
     void print(std::ostream &os = std::cout);
 

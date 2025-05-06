@@ -398,8 +398,8 @@ float Grammar::get_property_float(const std::string &name, float default_value) 
     return it->second;
 }
 
-size_t Grammar::get_property_size_t(const std::string &name) {
-    return static_cast<size_t>(get_property_float(name));
+size_t Grammar::get_property_size_t(const std::string &name, size_t default_value) {
+    return static_cast<size_t>(get_property_float(name, static_cast<float>(default_value)));
 }
 
 static int32_t collect_size(const std::vector<Production> &productions, std::function<int32_t(Production)> sizer) {

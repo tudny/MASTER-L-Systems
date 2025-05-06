@@ -37,40 +37,7 @@ public:
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
-        float vertices[] = {
-                -0.5f, -0.5f, 0.5f,
-                0.5f, -0.5f, 0.5f,
-                0.5f, 0.5f, 0.5f,
-                -0.5f, 0.5f, 0.5f,
-                -0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, -0.5f,
-                0.5f, 0.5f, -0.5f,
-                -0.5f, 0.5f, -0.5f,
-        };
-
-        glGenBuffers(1, &vbo_point);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_point);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        shader_program->setAttribute("position", 3, 0, 0);
-
-        GLuint indices[] = {
-                0, 1, 2,
-                0, 2, 3,
-                3, 2, 6,
-                3, 6, 7,
-                5, 7, 6,
-                4, 7, 5,
-                1, 4, 5,
-                0, 4, 1,
-                3, 7, 4,
-                0, 3, 4,
-                1, 5, 6,
-                1, 6, 2,
-        };
-
-        glGenBuffers(1, &ibo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        generate_branch_vertices(grammar->get_property_size_t("segments", 4));
 
         glEnableVertexAttribArray(0);
 
@@ -126,7 +93,13 @@ public:
         set_light_and_pv(this->shader_program, pvm, eye_pos);
 
         glBindVertexArray(vao);
-        glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr, instance_translations_count);
+//        glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr, instance_translations_count);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_fan_up);
+        glDrawElementsInstanced(GL_TRIANGLE_FAN, number_of_branch_segments, GL_UNSIGNED_INT, nullptr, instance_translations_count);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_fan_down);
+        glDrawElementsInstanced(GL_TRIANGLE_FAN, number_of_branch_segments, GL_UNSIGNED_INT, nullptr, instance_translations_count);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_middle_triangle_strip);
+        glDrawElementsInstanced(GL_TRIANGLE_STRIP, number_of_branch_segments * 2, GL_UNSIGNED_INT, nullptr, instance_translations_count);
 
         this->shader_program->unuse();
 
@@ -266,6 +239,62 @@ private:
         }
 
         this_prefix_job_on_tree_program = prefix_job_on_tree_program;
+    }
+
+    void generate_branch_vertices(size_t number_of_segments) {
+        number_of_branch_segments = number_of_segments;
+        std::vector<glm::vec3> vertices;
+        vertices.resize(number_of_segments * 2);
+
+        float theta_half = glm::pi<float>() / (float) number_of_segments;
+
+        for (uint32_t k = 0; k < number_of_segments; ++k) {
+            float angle = theta_half * (float) k * 2.0f;
+            float r = 0.5f / cosf(theta_half);
+            float x = r * cosf(angle);
+            float z = r * sinf(angle);
+            vertices[k] = {0.5f, x, z};
+            vertices[k + number_of_segments] = {-0.5f, x, z};
+        }
+
+        glGenBuffers(1, &vbo_point);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_point);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+        shader_program->setAttribute("position", 3, 0, 0);
+
+        std::vector<GLuint> fan_up_indices;
+        fan_up_indices.reserve(number_of_segments);
+        for (uint32_t i = 0; i < number_of_segments; ++i) {
+            fan_up_indices.push_back(i);
+        }
+
+        std::vector<GLuint> fan_down_indices;
+        fan_down_indices.reserve(number_of_segments);
+        for (uint32_t i = number_of_segments; i < number_of_segments * 2; ++i) {
+            fan_down_indices.push_back(i);
+        }
+
+        std::vector<GLuint> middle_triangle_strip_indices;
+        middle_triangle_strip_indices.reserve(number_of_segments * 2);
+        for (uint32_t i = 0; i < number_of_segments; ++i) {
+            middle_triangle_strip_indices.push_back(i);
+            middle_triangle_strip_indices.push_back(i + number_of_segments);
+        }
+
+        glGenBuffers(1, &ibo_fan_up);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_fan_up);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, fan_up_indices.size() * sizeof(GLuint), fan_up_indices.data(),
+                     GL_STATIC_DRAW);
+
+        glGenBuffers(1, &ibo_fan_down);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_fan_down);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, fan_down_indices.size() * sizeof(GLuint), fan_down_indices.data(),
+                     GL_STATIC_DRAW);
+
+        glGenBuffers(1, &ibo_middle_triangle_strip);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_middle_triangle_strip);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, middle_triangle_strip_indices.size() * sizeof(GLuint),
+                     middle_triangle_strip_indices.data(), GL_STATIC_DRAW);
     }
 
     void prepare_new_productions_ssbo() {
@@ -757,7 +786,10 @@ private:
 
     GLuint vao{};
     GLuint vbo_point{};
-    GLuint ibo{};
+    GLuint ibo_fan_up{};
+    GLuint ibo_fan_down{};
+    GLuint ibo_middle_triangle_strip{};
+    size_t number_of_branch_segments;
     GLuint ssbo_translations{};
     GLuint ssbo_colors__values{};
     GLuint ssbo_colors__index{};
