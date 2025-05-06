@@ -108,13 +108,11 @@ public:
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
 
-        double time = glfwGetTime();
         glm::vec4 eye_pos = this->get_view()->get_eye_pos();
         glm::mat4 projection = viewport.make_3d_projection();
         glm::mat4 view = this->get_view()->get_view_matrix();
         // move up and down as sin(time)
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, sin(time * 10), 0.0f));
-        model = glm::mat4(1.0f);
+        auto model = glm::mat4(1.0f);
         auto pvm = projection * view * model;
 
         this->shader_program->use();
@@ -135,7 +133,7 @@ public:
         run_leaf_draw(pvm, eye_pos);
     }
 
-    void
+    static void
     set_light_and_pv(const std::shared_ptr<ShaderProgram> &program, const glm::mat4 &pvm, const glm::vec4 &eye_pos) {
         program->setUniform("pvm", pvm);
         program->setUniform("eyepos", eye_pos);
@@ -763,7 +761,7 @@ private:
     GLuint ssbo_translations{};
     GLuint ssbo_colors__values{};
     GLuint ssbo_colors__index{};
-    GLuint instance_translations_count = -1;
+    GLint instance_translations_count = -1;
 
     GLuint ssbo_color_buffer_input{};
     GLuint ssbo_color_buffer_output{};
