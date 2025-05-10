@@ -7,6 +7,8 @@
  * @date 29.06.2024
 */
 #include <string>
+#include "shader.hpp"
+#include "memory"
 
 /**
  * @brief Greeter function
@@ -16,3 +18,7 @@
  * @return std::string "Hello, World!"
  */
 std::string greeter();
+
+// Exported for testing purposes
+void global_run_prefix_sum(std::shared_ptr<ShaderProgram> &shader, GLuint ssbo, size_t size);
+

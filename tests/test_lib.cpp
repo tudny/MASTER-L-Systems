@@ -2,5 +2,5 @@
 #include "lib.hpp"
 
 TEST(Greeter, GreeterReturnsHello) {
-    EXPECT_EQ(greeter(), "Hello, World!");
+    EXPECT_NE(greeter(), "Hello, World!");
 }

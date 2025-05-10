@@ -3,6 +3,7 @@
 #include "grammar.h"
 #include <GLFW/glfw3.h>
 #include "args.hpp"
+#include "lib.hpp"
 #include "debug.hpp"
 #include "GL/glew.h"
 #include <glm/glm.hpp>
@@ -15,7 +16,6 @@ constexpr float ROTATION_DISTANCE = 50.0f;
 constexpr float ROTATION_HEIGHT = 1.0f;
 constexpr float DOWNSET_FACTOR = 10.0f;
 constexpr bool MARK_LEAF = false;
-
 
 class SystemDrawable : public Drawable {
 public:
@@ -95,11 +95,14 @@ public:
         glBindVertexArray(vao);
 //        glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr, instance_translations_count);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_fan_up);
-        glDrawElementsInstanced(GL_TRIANGLE_FAN, number_of_branch_segments, GL_UNSIGNED_INT, nullptr, instance_translations_count);
+        glDrawElementsInstanced(GL_TRIANGLE_FAN, number_of_branch_segments, GL_UNSIGNED_INT, nullptr,
+                                instance_translations_count);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_fan_down);
-        glDrawElementsInstanced(GL_TRIANGLE_FAN, number_of_branch_segments, GL_UNSIGNED_INT, nullptr, instance_translations_count);
+        glDrawElementsInstanced(GL_TRIANGLE_FAN, number_of_branch_segments, GL_UNSIGNED_INT, nullptr,
+                                instance_translations_count);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_middle_triangle_strip);
-        glDrawElementsInstanced(GL_TRIANGLE_STRIP, number_of_branch_segments * 2 + 2, GL_UNSIGNED_INT, nullptr, instance_translations_count);
+        glDrawElementsInstanced(GL_TRIANGLE_STRIP, number_of_branch_segments * 2 + 2, GL_UNSIGNED_INT, nullptr,
+                                instance_translations_count);
 
         this->shader_program->unuse();
 
@@ -462,34 +465,7 @@ private:
     }
 
     void run_prefix_sum(GLuint ssbo, size_t size) {
-        this_prefix_sum_shader_program->use();
-
-        GLuint ssbo_output;
-        glGenBuffers(1, &ssbo_output);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_output);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
-
-        auto steps = (size_t) ceil(log2((double) size));
-//        std::cout << "Running prefix sum with " << steps << " steps" << std::endl;
-
-        for (size_t step = 1; step <= steps; ++step) {
-
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_output);
-
-//            std::cout << "Step: " << step << std::endl;
-            this_prefix_sum_shader_program->setUniform("step", (int) step);
-            glDispatchCompute(size, 1, 1);
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-            // put output back into input
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-            glCopyNamedBufferSubData(ssbo_output, ssbo, 0, 0, size * sizeof(uint32_t));
-        }
-
-        glDeleteBuffers(1, &ssbo_output);
-
-        this_prefix_sum_shader_program->unuse();
+        global_run_prefix_sum(this_prefix_sum_shader_program, ssbo, size);
     }
 
     template<typename T>
