@@ -10,6 +10,8 @@ std::string greeter() {
 }
 
 void global_run_prefix_sum(std::shared_ptr<ShaderProgram> &shader, GLuint ssbo, size_t size) {
+    GLuint original_ssbo = ssbo;
+
     shader->use();
 
     GLuint ssbo_output;
@@ -18,20 +20,22 @@ void global_run_prefix_sum(std::shared_ptr<ShaderProgram> &shader, GLuint ssbo, 
     glBufferData(GL_SHADER_STORAGE_BUFFER, size * sizeof(uint32_t), nullptr, GL_STATIC_DRAW);
 
     auto steps = (size_t) ceil(log2((double) size));
-//        std::cout << "Running prefix sum with " << steps << " steps" << std::endl;
+
+    GLuint ssbo1 = ssbo;
+    GLuint ssbo2 = ssbo_output;
 
     for (size_t step = 1; step <= steps; ++step) {
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo1);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo2);
 
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_output);
-
-//            std::cout << "Step: " << step << std::endl;
         shader->setUniform("step", (int) step);
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        std::swap(ssbo1, ssbo2);
+    }
 
-        // put output back into input
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    if (ssbo1 != original_ssbo) {
+        // Copy the result back to the original ssbo
         glCopyNamedBufferSubData(ssbo_output, ssbo, 0, 0, size * sizeof(uint32_t));
     }
 
