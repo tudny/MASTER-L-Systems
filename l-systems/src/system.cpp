@@ -99,7 +99,7 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_fan_down);
         glDrawElementsInstanced(GL_TRIANGLE_FAN, number_of_branch_segments, GL_UNSIGNED_INT, nullptr, instance_translations_count);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_middle_triangle_strip);
-        glDrawElementsInstanced(GL_TRIANGLE_STRIP, number_of_branch_segments * 2, GL_UNSIGNED_INT, nullptr, instance_translations_count);
+        glDrawElementsInstanced(GL_TRIANGLE_STRIP, number_of_branch_segments * 2 + 2, GL_UNSIGNED_INT, nullptr, instance_translations_count);
 
         this->shader_program->unuse();
 
@@ -275,11 +275,14 @@ private:
         }
 
         std::vector<GLuint> middle_triangle_strip_indices;
-        middle_triangle_strip_indices.reserve(number_of_segments * 2);
+        middle_triangle_strip_indices.reserve(number_of_segments * 2 + 2);
         for (uint32_t i = 0; i < number_of_segments; ++i) {
             middle_triangle_strip_indices.push_back(i);
             middle_triangle_strip_indices.push_back(i + number_of_segments);
         }
+        // close the strip
+        middle_triangle_strip_indices.push_back(0);
+        middle_triangle_strip_indices.push_back(number_of_segments);
 
         glGenBuffers(1, &ibo_fan_up);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_fan_up);
