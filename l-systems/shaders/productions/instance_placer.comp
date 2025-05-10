@@ -33,13 +33,19 @@ uniform mat4 common_turtle_matrix;
 uniform mat4 common_cube_matrix_a;
 uniform mat4 common_cube_matrix_c;
 uniform float step;
+uniform int scale_branch;
 
 mat4 common_cube_matrix_b(int instanceId) {
     float myStep = instanceStepInput[instanceId];
+    float myScale = 1.0;
+    if (scale_branch > 0) {
+        myScale = myStep;
+    }
+
     return mat4(
         vec4(-step * myStep, 0.0, 0.0, 0.0),
-        vec4(0.0, 1.0, 0.0, 0.0),
-        vec4(0.0, 0.0, 1.0, 0.0),
+        vec4(0.0, myScale, 0.0, 0.0),
+        vec4(0.0, 0.0, myScale, 0.0),
         vec4(0.0, 0.0, 0.0, 1.0)
     );
 }

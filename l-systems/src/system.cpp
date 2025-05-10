@@ -90,7 +90,9 @@ public:
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_colors__values);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_colors__index);
 
-        set_light_and_pv(this->shader_program, pvm, eye_pos);
+        float light_height = grammar->get_property_float("lightheight", 100.0f);
+
+        set_light_and_pv(this->shader_program, pvm, eye_pos, light_height);
 
         glBindVertexArray(vao);
 //        glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr, instance_translations_count);
@@ -106,17 +108,17 @@ public:
 
         this->shader_program->unuse();
 
-        run_leaf_draw(pvm, eye_pos);
+        run_leaf_draw(pvm, eye_pos, light_height);
     }
 
     static void
-    set_light_and_pv(const std::shared_ptr<ShaderProgram> &program, const glm::mat4 &pvm, const glm::vec4 &eye_pos) {
+    set_light_and_pv(const std::shared_ptr<ShaderProgram> &program, const glm::mat4 &pvm, const glm::vec4 &eye_pos, float light_height) {
         program->setUniform("pvm", pvm);
         program->setUniform("eyepos", eye_pos);
-        program->setUniform("ls_ambient", glm::vec3(0.6, 0.6, 0.6));
-        program->setUniform("ls_position", glm::vec4(2, 2, 2, .1));
-        program->setUniform("ls_attenuation", glm::vec3(0.2f, 0.2f, 0.2f));
-        program->setUniform("ls_direct", glm::vec3(1.0, 1.0, 1.0));
+        program->setUniform("ls_ambient", glm::vec3(0.1, 0.1, 0.1));
+        program->setUniform("ls_position", glm::vec4(0, light_height, 0, 1.0));
+        program->setUniform("ls_attenuation", glm::vec3(0.8f, 0.8f, 0.8f));
+        program->setUniform("ls_direct", glm::vec3(255.0, 255.0, 255.0));
     }
 
     void move_down() {
@@ -698,6 +700,7 @@ private:
         this_instance_placer_program->setUniform("common_cube_matrix_a", move_down);
         this_instance_placer_program->setUniform("common_cube_matrix_c", move_back_up);
         this_instance_placer_program->setUniform("step", step);
+        this_instance_placer_program->setUniform("scale_branch", (int) grammar->get_property_size_t("scalebranch", 0));
 
         glDispatchCompute(size, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -733,7 +736,7 @@ private:
         // ssbo_colors__index
     }
 
-    void run_leaf_draw(const glm::mat4 &pvm, const glm::vec4 &eye_pos) {
+    void run_leaf_draw(const glm::mat4 &pvm, const glm::vec4 &eye_pos, float light_height) {
         // draw GL_TRIANGLE_FAN for vertices in ssbo_leaf_positions_vec4, and indecision in ssbo_leaf_index_array with reset index enabled
 
         this_leaf_program->use();
@@ -749,7 +752,7 @@ private:
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_colors__values);
 
-        set_light_and_pv(this_leaf_program, pvm, eye_pos);
+        set_light_and_pv(this_leaf_program, pvm, eye_pos, light_height);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ssbo_leaf_index_array);
         glDrawElements(GL_TRIANGLE_FAN, leaf_edge_count, GL_UNSIGNED_INT, nullptr);
