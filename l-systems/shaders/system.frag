@@ -39,14 +39,14 @@ vec3 LambertLighting() {
     if (dot (vv, normal) > 0.0) {
         if (d > 0.0) {
             if (ls_position.w != 0.0)
-            d *= attFactor (ls_attenuation, dist);
+                d *= attFactor (ls_attenuation, dist);
             color += (d * ls_direct) * In.color;
         }
     }
     else {
         if (d < 0.0) {
             if (ls_position.w != 0.0)
-            d *= attFactor (ls_attenuation, dist);
+                d *= attFactor (ls_attenuation, dist);
             color -= (d * ls_direct) * In.color;
         }
     }
@@ -56,6 +56,6 @@ vec3 LambertLighting() {
 #define AGamma(colour) pow(colour, vec3(256.0 / 563.0))
 
 void main() {
-//    out_color = vec4(In.color, 1.0);
+    //    out_color = vec4(In.color, 1.0);
     out_color = vec4(AGamma(LambertLighting()), 1.0);
 }
