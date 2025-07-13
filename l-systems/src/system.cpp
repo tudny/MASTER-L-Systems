@@ -6,6 +6,7 @@
 #include "lib.hpp"
 #include "debug.hpp"
 #include "GL/glew.h"
+#include "errors.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <utility>
@@ -72,6 +73,8 @@ public:
 
         run_compute();
 
+        drawing_measure.init([&]() {
+
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
 
@@ -109,6 +112,9 @@ public:
         this->shader_program->unuse();
 
         run_leaf_draw(pvm, eye_pos, light_height);
+
+        });
+        drawing_measure.print();
     }
 
     static void
@@ -343,8 +349,11 @@ private:
     }
 
     void run_compute() {
-        run_str_compute();
-        run_instance_compute();
+        derivation_measure.init([&]() {run_str_compute();});
+        derivation_measure.print();
+
+        prefix_mult_measure.init([&]() {run_instance_compute();});
+        prefix_mult_measure.print();
     }
 
     void run_str_compute() {
@@ -457,6 +466,7 @@ private:
         }
 
         ssbo_word_length = result_buffer_size;
+        std::cout << "The length of the word is " << result_buffer_size << std::endl;
     }
 
     void run_instance_compute() {
@@ -790,6 +800,10 @@ private:
     int32_t leaf_edge_count{};
 
     GLuint vao_leaf{};
+
+    Measure derivation_measure{"Derivation"};
+    Measure prefix_mult_measure{"Multiplication"};
+    Measure drawing_measure{"Drawing"};
 
     GLuint ssbo_new_productions__predecessors{};
     GLuint ssbo_new_productions__look_back{};
