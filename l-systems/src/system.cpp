@@ -933,3 +933,14 @@ void register_system(Application &application, ContextPtr &context) {
         rotation_view->zoom(static_cast<float>(-y));
     });
 }
+
+void check_buffers_compatibility(int required_number_of_buffers) {
+    GLint max_shader_storage_buffer_bindings;
+    glGetIntegerv(GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS, &max_shader_storage_buffer_bindings);
+    if (max_shader_storage_buffer_bindings < required_number_of_buffers) {
+        std::cerr << "Error: OpenGL does not support enough shader storage buffers. "
+                  << "Required: " << required_number_of_buffers
+                  << ", Available: " << max_shader_storage_buffer_bindings << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}

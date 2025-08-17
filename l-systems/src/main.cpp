@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
                 OPENGL_MINOR_VERSION
         };
         register_system(application, context);
+        check_buffers_compatibility(REQUIRED_NUMBER_OF_BUFFERS);
         application.run();
     } catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;

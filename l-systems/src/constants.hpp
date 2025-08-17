@@ -26,4 +26,6 @@ constexpr int OPENGL_MAJOR_VERSION = 3;
 /// OpenGL version minor
 constexpr int OPENGL_MINOR_VERSION = 2;
 
+constexpr int REQUIRED_NUMBER_OF_BUFFERS = 16;
+
 #endif //LSYSTEMS_CONSTANTS_HPP
