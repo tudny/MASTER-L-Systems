@@ -8,6 +8,7 @@ build-ninja/
 # IDE project files
 .idea/
 .vscode/
+.zed/
 
 # Static libraries
 /static

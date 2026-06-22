@@ -3,8 +3,8 @@ project(LSystems)
 
 # Default to Release build if not specified
 if (NOT CMAKE_BUILD_TYPE)
-    message(STATUS "No build type selected, default to Release")
-    set(CMAKE_BUILD_TYPE "Release")
+  message(STATUS "No build type selected, default to Release")
+  set(CMAKE_BUILD_TYPE "Release")
 endif ()
 
 # Compilation setup
@@ -14,6 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Setup OpenGL dependencies
 add_definitions(-DGLEW_STATIC)
@@ -25,8 +27,8 @@ add_subdirectory(lib/args EXCLUDE_FROM_ALL)
 # Doxygen setup
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile @ONLY)
-    add_custom_target(doc
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile @ONLY)
+  add_custom_target(doc
             ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             COMMENT "Generating API documentation with Doxygen"
@@ -46,20 +48,20 @@ SET(
         ""
 )
 FOREACH (submodule ${LOCAL_SUBMODULES})
-    message(STATUS "Adding submodule: ${submodule}")
-    add_subdirectory(${submodule})
-    list(APPEND ALL_SOURCES ${submodule}/src)
-    # If ends with _lib, add to include directories
-    STRING(REGEX MATCH ".*lib$" is_lib ${submodule})
-    IF (is_lib)
-        message(STATUS "  Detected library: ${submodule}")
-        include_directories(${PROJECT_SOURCE_DIR}/${submodule}/src)
-    ENDIF ()
+  message(STATUS "Adding submodule: ${submodule}")
+  add_subdirectory(${submodule})
+  list(APPEND ALL_SOURCES ${submodule}/src)
+  # If ends with _lib, add to include directories
+  STRING(REGEX MATCH ".*lib$" is_lib ${submodule})
+  IF (is_lib)
+    message(STATUS "  Detected library: ${submodule}")
+    include_directories(${PROJECT_SOURCE_DIR}/${submodule}/src)
+  ENDIF ()
 ENDFOREACH ()
 
 # Add GTest
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
-    cmake_policy(SET CMP0135 NEW)
+  cmake_policy(SET CMP0135 NEW)
 endif ()
 
 include(FetchContent)
